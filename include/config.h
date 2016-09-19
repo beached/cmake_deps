@@ -35,6 +35,12 @@ namespace daw {
 			bool m_require_ssl;
 			std::string m_install_prefix;
 
+			void make_links( ) {
+				link_array( "repositories", m_repositories );
+				link_boolean( "require_ssl", m_require_ssl );
+				link_string( "install_prefix", m_install_prefix );
+			}
+
 		public:
 			cmake_deps_config( std::vector<std::string> repositories, bool require_ssl, std::string install_prefix ):
 					daw::json::JsonLink<cmake_deps_config>{ },
@@ -42,13 +48,17 @@ namespace daw {
 					m_require_ssl{ require_ssl },
 					m_install_prefix{ std::move( m_install_prefix ) } {
 
-				link_array( "repositories", m_repositories );
-				link_boolean( "require_ssl", m_require_ssl );
-				link_string( "install_prefix", m_install_prefix );
+				make_links( );
 			}
 
 			cmake_deps_config( ):
-				cmake_deps_config{ {"https://blah.com/cmake_deps.json"}, true, "/usr/local" } { }
+					daw::json::JsonLink<cmake_deps_config>{ },
+					m_repositories{ { u8"https://blah.com/cmake_deps.json" } },
+					m_require_ssl{ true },
+					m_install_prefix{ u8"/usr/local" } {
+				
+				make_links( );	
+			}
 
 		};	// cmake_deps_config
 	}	// namespace cmake_deps

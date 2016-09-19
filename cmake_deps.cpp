@@ -30,9 +30,15 @@
 auto get_config( ) {
 	auto env_var = std::getenv( "CMAKE_DEPS_CONFIG" );
 	std::string config_file = env_var ? env_var : "~/.cmake_deps.config";
-
-	auto config = daw::json::from_file<daw::cmake_deps::cmake_deps_config>( config_file, true );
-	return config;
+	daw::cmake_deps::cmake_deps_config result;
+	try {
+		result = daw::json::from_file<daw::cmake_deps::cmake_deps_config>( config_file, true );
+		result.to_file( config_file );
+	} catch( std::exception const & ex ) {
+		std::cerr << "Error reading/saving config file '" << config_file << "'" << std::endl;
+		std::cerr << "Exception: " << ex.what( ) << std::endl;
+	}
+	return result;
 }
 
 int main( int, char** ) {
