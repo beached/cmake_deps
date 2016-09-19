@@ -69,6 +69,7 @@ set( HEADER_FILES
 
 set( SOURCE_FILES
 	cmake_deps.cpp
+	config.cpp
 )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
