@@ -27,16 +27,37 @@
 
 #include "config.h"
 
+auto get_home( ) {
+	auto home = std::getenv( "HOME" );
+	if( !home ) {
+		home = std::getenv( "USERPROFILE" );
+		if( !home ) {
+			throw std::runtime_error( "Could not determine home folder" );
+		}
+	}
+	std::string result;
+	result = home;
+	return result;
+}
+
 auto get_config( ) {
 	auto env_var = std::getenv( "CMAKE_DEPS_CONFIG" );
-	std::string config_file = env_var ? env_var : "~/.cmake_deps.config";
+	std::string config_file = env_var ? env_var : get_home( ) + "/.cmake_deps.config";
 	daw::cmake_deps::cmake_deps_config result;
+	bool is_new_file = false;
 	try {
-		result = daw::json::from_file<daw::cmake_deps::cmake_deps_config>( config_file, true );
-		result.to_file( config_file );
-	} catch( std::exception const & ex ) {
-		std::cerr << "Error reading/saving config file '" << config_file << "'" << std::endl;
-		std::cerr << "Exception: " << ex.what( ) << std::endl;
+		result = daw::json::from_file<daw::cmake_deps::cmake_deps_config>( config_file, false );
+	} catch( std::exception const & ) {
+		is_new_file = true;
+	}
+
+	if( is_new_file ) {
+		try {
+			result.to_file( config_file );
+		} catch( std::exception const & ex ) {
+			std::cerr << "Error writing config file '" << config_file << "'" << std::endl;
+			std::cerr << "Exception: " << ex.what( ) << std::endl;
+		}
 	}
 	return result;
 }

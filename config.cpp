@@ -20,11 +20,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <iostream>
+
 #include "config.h"
 
 namespace daw {
 	namespace cmake_deps {
+		void cmake_deps_config::make_links( ) {
+			link_array( "repositories", m_repositories );
+			link_boolean( "require_ssl", m_require_ssl );
+			link_string( "install_prefix", m_install_prefix );
+		}
 
-	}
+		cmake_deps_config::cmake_deps_config( std::vector<std::string> repositories, bool require_ssl, std::string install_prefix ):
+				daw::json::JsonLink<cmake_deps_config>{ },
+				m_repositories{ std::move( repositories ) },
+				m_require_ssl{ require_ssl },
+				m_install_prefix{ std::move( install_prefix ) } {
+
+			make_links( );
+		}
+
+		cmake_deps_config::~cmake_deps_config( ) { }
+
+		cmake_deps_config::cmake_deps_config( ):
+				cmake_deps_config( std::vector<std::string>{ "https://blah.com/cmake_deps.json" }, true, "/usr/local" ) { }
+
+	}	// namespace cmake_deps
 }    // namespace daw
 
