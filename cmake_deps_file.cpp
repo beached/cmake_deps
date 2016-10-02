@@ -31,7 +31,7 @@
 namespace daw {
 	namespace cmake_deps {
 		std::string to_string( item_types t ) {
-			static std::array<std::string, 3> const result = { "none", "git", "custom" };
+			static std::array<std::string, 3> const result = { { "none", "git", "custom" } };
 			return result[static_cast<uint8_t>( t )];
 		}
 
@@ -48,7 +48,7 @@ namespace daw {
 		}
 
 		
-		cmake_deps_item::cmake_deps_item( item_types Type, daw::optional<std::string> Uri, daw::optional<std::string> Branch, daw::optional<std::string> DecompressCommand, daw::optional<std::string> BuildCommand, daw::optional<std::string> InstallCommand ):
+		cmake_deps_item::cmake_deps_item( item_types Type, boost::optional<std::string> Uri, boost::optional<std::string> Branch, boost::optional<std::string> DecompressCommand, boost::optional<std::string> BuildCommand, boost::optional<std::string> InstallCommand ):
 				type{ Type },
 				uri( std::move( Uri ) ),
 				branch( std::move( Branch ) ),

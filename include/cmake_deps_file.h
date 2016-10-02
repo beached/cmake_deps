@@ -23,12 +23,12 @@
 
 #pragma once
 
+#include <boost/optional.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
 
 #include <daw/json/daw_json_link.h>
-#include <daw/daw_optional.h>
 
 namespace daw {
 	namespace cmake_deps {
@@ -39,13 +39,13 @@ namespace daw {
 
 		struct cmake_deps_item: public daw::json::JsonLink<cmake_deps_item> {
 			item_types type;
-			std::string uri;
-			daw::optional<std::string> branch;
-			daw::optional<std::string> decompress_command;
-			daw::optional<std::string> build_command;
-			daw::optional<std::string> install_command;
-			using str_opt = daw::optional<std::string>;
-			cmake_deps_item( item_types Type, daw::optional<std::string> Uri = str_opt{ }, daw::optional<std::string> Branch = str_opt{ }, daw::optional<std::string> DecompressCommand = str_opt{ }, daw::optional<std::string> BuildCommand = str_opt{ }, daw::optional<std::string> InstallCommand = str_opt{ } );
+			boost::optional<std::string> uri;
+			boost::optional<std::string> branch;
+			boost::optional<std::string> decompress_command;
+			boost::optional<std::string> build_command;
+			boost::optional<std::string> install_command;
+			using str_opt = boost::optional<std::string>;
+			cmake_deps_item( item_types Type, boost::optional<std::string> Uri = str_opt{ }, boost::optional<std::string> Branch = str_opt{ }, boost::optional<std::string> DecompressCommand = str_opt{ }, boost::optional<std::string> BuildCommand = str_opt{ }, boost::optional<std::string> InstallCommand = str_opt{ } );
 			cmake_deps_item( );
 			~cmake_deps_item( );
 
