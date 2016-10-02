@@ -4,22 +4,22 @@ project( cmake_deps_prj )
 
 include( ExternalProject )
 
-find_package( Boost 1.58.0 COMPONENTS system iostreams filesystem regex unit_test_framework REQUIRED )
+find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 
-IF( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
+if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 ) 
-ELSE( )
+else( )
 	find_package( Threads REQUIRED )
 	if( THREADS_HAVE_PTHREAD_ARG )
-	set( COMPILER_SPECIFIC_LIBS, "-lpthread" )
-	endif()
+		set( COMPILER_SPECIFIC_LIBS, "-lpthread" )
+	endif( )
 
-	IF( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
-	add_compile_options(-std=c++14 -Weverything -Wno-c++98-compat -g -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
-	ELSEIF( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
-	add_compile_options(-std=c++14 -g -Wall -Wno-deprecated-declarations)
-	ENDIF()
-ENDIF()
+	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
+		add_compile_options(-std=c++14 -Weverything -Wno-c++98-compat -g -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
+	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
+		add_compile_options(-std=c++14 -g -Wall -Wno-deprecated-declarations)
+	endif( )
+endif( )
 
 externalproject_add(
     header_libraries_prj
@@ -57,6 +57,9 @@ externalproject_add(
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
 )
 
+include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
+link_directories( ${Boost_LIBRARY_DIRS} )
+
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
 include_directories( "./include" )
@@ -65,10 +68,14 @@ set( HEADER_FOLDER "include" )
 
 set( HEADER_FILES
 	${HEADER_FOLDER}/config.h
+	${HEADER_FOLDER}/cmake_deps_file.h
+	${HEADER_FOLDER}/cmake_deps_impl.h
 )
 
 set( SOURCE_FILES
 	cmake_deps.cpp
+	cmake_deps_file.cpp
+	cmake_deps_impl.cpp
 	config.cpp
 )
 

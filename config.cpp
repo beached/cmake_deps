@@ -26,25 +26,20 @@
 
 namespace daw {
 	namespace cmake_deps {
-		void cmake_deps_config::make_links( ) {
-			link_array( "repositories", m_repositories );
-			link_boolean( "require_ssl", m_require_ssl );
-			link_string( "install_prefix", m_install_prefix );
-		}
-
-		cmake_deps_config::cmake_deps_config( std::vector<std::string> repositories, bool require_ssl, std::string install_prefix ):
+		cmake_deps_config::cmake_deps_config( std::string InstallPrefix, std::string CacheFolder ):
 				daw::json::JsonLink<cmake_deps_config>{ },
-				m_repositories{ std::move( repositories ) },
-				m_require_ssl{ require_ssl },
-				m_install_prefix{ std::move( install_prefix ) } {
+				install_prefix{ std::move( InstallPrefix ) },
+				cache_folder{ std::move( CacheFolder ) } { 
 
-			make_links( );
+			link_string( "install_prefix", install_prefix );
+			link_string( "cache_folder", cache_folder );
 		}
+
+		cmake_deps_config::cmake_deps_config( ):
+				cmake_deps_config{ "/usr/local", "~/.cmake_deps_cache" } { }
 
 		cmake_deps_config::~cmake_deps_config( ) { }
 
-		cmake_deps_config::cmake_deps_config( ):
-				cmake_deps_config( std::vector<std::string>{ "https://blah.com/cmake_deps.json" }, true, "/usr/local" ) { }
 
 	}	// namespace cmake_deps
 }    // namespace daw

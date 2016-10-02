@@ -23,27 +23,11 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include <daw/json/daw_json_link.h>
+#include "cmake_deps_file.h"
 
 namespace daw {
 	namespace cmake_deps {
-		struct cmake_deps_config: public daw::json::JsonLink<cmake_deps_config> {
-			std::string install_prefix;
-			std::string cache_folder; 
-
-		public:
-			cmake_deps_config( std::string InstallPrefix, std::string CacheFolder );
-			cmake_deps_config( );
-			~cmake_deps_config( );
-			cmake_deps_config( cmake_deps_config const & ) = default;
-			cmake_deps_config( cmake_deps_config && ) = default;
-			cmake_deps_config & operator=( cmake_deps_config const & ) = default;
-			cmake_deps_config & operator=( cmake_deps_config && ) = default;
-
-		};	// cmake_deps_config
+		void process_file( cmake_deps_file const & depend_file );
 	}	// namespace cmake_deps
 }    // namespace daw
 

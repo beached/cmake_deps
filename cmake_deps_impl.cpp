@@ -21,29 +21,59 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include <boost/utility/string_ref.hpp>
+#include <exception>
+#include <ostream>
 
-#include <string>
-#include <vector>
-
-#include <daw/json/daw_json_link.h>
+#include "cmake_deps_impl.h"
 
 namespace daw {
 	namespace cmake_deps {
-		struct cmake_deps_config: public daw::json::JsonLink<cmake_deps_config> {
-			std::string install_prefix;
-			std::string cache_folder; 
+		namespace {
+			struct cmake_deps_exception: public std::runtime_error {
+				cmake_deps_exception( boost::string_ref msg ):
+					std::runtime_error{ msg.data( ) } { }
+			};	// cmake_deps_exception
 
-		public:
-			cmake_deps_config( std::string InstallPrefix, std::string CacheFolder );
-			cmake_deps_config( );
-			~cmake_deps_config( );
-			cmake_deps_config( cmake_deps_config const & ) = default;
-			cmake_deps_config( cmake_deps_config && ) = default;
-			cmake_deps_config & operator=( cmake_deps_config const & ) = default;
-			cmake_deps_config & operator=( cmake_deps_config && ) = default;
+			std::ostream & operator<<( std::ostream & os, cmake_deps_item const & item ) {
+				return (os << item.to_string( ));
+			}
+			
+			bool is_update_needed( cmake_deps_item const & item ) {
+				return true;
+			}
 
-		};	// cmake_deps_config
+			void clone( cmake_deps_item const & item ) {
+
+			}
+
+			void build( cmake_deps_item const & item ) {
+
+			}
+
+			void install( cmake_deps_item const & item ) {
+
+			}
+
+			void process_item( cmake_deps_item const & item ) {
+				if( is_update_needed( item ) ) {
+					clone( item );
+					build( item );
+					install( item );
+				}
+			}
+		}
+
+		void process_file( cmake_deps_file const & depend_file ) {
+			for( auto const & dependency : depend_file.dependencies ) {
+				std::cout << "Processing: " << dependency << '\n';
+				try {
+					process_item( dependency );
+				} catch( cmake_deps_exception const & ex ) {
+					std::cerr << "Error processing: " << dependency << ":\n" << ex.what( ) << std::endl;
+				}
+			}
+		}
 	}	// namespace cmake_deps
 }    // namespace daw
 
