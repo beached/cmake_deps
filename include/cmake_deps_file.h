@@ -28,8 +28,6 @@
 #include <string>
 #include <vector>
 
-#include <daw/json/daw_json_link.h>
-
 namespace daw {
 	namespace cmake_deps {
 		enum class item_types: uint8_t { none, git, custom };
@@ -37,15 +35,22 @@ namespace daw {
 		std::ostream & operator<<( std::ostream & os, item_types const & item );
 		std::istream & operator>>( std::istream & is, item_types & item );
 
-		struct cmake_deps_item: public daw::json::JsonLink<cmake_deps_item> {
+		struct cmake_deps_item {
 			item_types type;
+			std::string project_name;
 			boost::optional<std::string> uri;
 			boost::optional<std::string> branch;
 			boost::optional<std::string> decompress_command;
 			boost::optional<std::string> build_command;
 			boost::optional<std::string> install_command;
 			using str_opt = boost::optional<std::string>;
-			cmake_deps_item( item_types Type, boost::optional<std::string> Uri = str_opt{ }, boost::optional<std::string> Branch = str_opt{ }, boost::optional<std::string> DecompressCommand = str_opt{ }, boost::optional<std::string> BuildCommand = str_opt{ }, boost::optional<std::string> InstallCommand = str_opt{ } );
+			cmake_deps_item( item_types Type,
+							 std::string ProjectName = "",
+							 boost::optional<std::string> Uri = str_opt{ },
+							 boost::optional<std::string> Branch = str_opt{ },
+							 boost::optional<std::string> DecompressCommand = str_opt{ },
+							 boost::optional<std::string> BuildCommand = str_opt{ },
+							 boost::optional<std::string> InstallCommand = str_opt{ } );
 			cmake_deps_item( );
 			~cmake_deps_item( );
 
@@ -55,7 +60,7 @@ namespace daw {
 			cmake_deps_item & operator=( cmake_deps_item && ) = default;
 		};	// cmake_deps_item
 
-		struct cmake_deps_file: public daw::json::JsonLink<cmake_deps_file> {
+		struct cmake_deps_file {
 			std::vector<cmake_deps_item> dependencies;
 
 			cmake_deps_file( );

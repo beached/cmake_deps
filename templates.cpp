@@ -1,4 +1,3 @@
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2016 Darrell Wright
@@ -21,29 +20,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-
 #include <string>
+#include <sstream>
 
-#include <daw/json/daw_json_link.h>
+#include "templates.h"
 
 namespace daw {
 	namespace cmake_deps {
-		struct cmake_deps_config: daw::json::JsonLink<cmake_deps_config> {
-			std::string cache_folder; 
-
-		public:
-			cmake_deps_config( std::string CacheFolder );
-			cmake_deps_config( );
-			~cmake_deps_config( );
-			cmake_deps_config( cmake_deps_config const & ) = default;
-			cmake_deps_config( cmake_deps_config && ) = default;
-			cmake_deps_config & operator=( cmake_deps_config const & ) = default;
-			cmake_deps_config & operator=( cmake_deps_config && ) = default;
-
-		};	// cmake_deps_config
-
-		cmake_deps_config get_config( );
-	}	// namespace cmake_deps
+		namespace impl {
+			std::string get_git_template( ) {
+				std::stringstream ss;
+				ss << "cmake_minimum_required( VERSION 2.8.12 )\n";
+				ss << "project( <%=\"project_name\"%>_parent )\n";
+				ss << "include( ExternalProject )\n";
+			   	ss << "externalproject_add(\n";
+				ss << "	<%=\"project_name\"%>\n";
+				ss << " GIT_REPOSITORY \"<%=\"git_repo\"%>\"\n";
+				ss << " SOURCE_DIR \"<%=\"source_directory\"%>\"\n";
+				ss << " GIT_TAG \"<%=\"git_tag\"%>\"\n";
+				ss << " INSTALL_DIR \"<%=\"install_directory\"%>\"\n";
+				ss << "	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<%=\"install_directory\"%>\n";
+				ss << ")\n";
+				return ss.str( );
+			}
+		}
+	}
 }    // namespace daw
 

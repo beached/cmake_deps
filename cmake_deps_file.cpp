@@ -1,4 +1,3 @@
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2016 Darrell Wright
@@ -22,9 +21,8 @@
 // SOFTWARE.
 
 #include <string>
+#include <unordered_map>
 #include <vector>
-
-#include <daw/json/daw_json_link.h>
 
 #include "cmake_deps_file.h"
 
@@ -47,22 +45,20 @@ namespace daw {
 			return is;
 		}
 
-		
-		cmake_deps_item::cmake_deps_item( item_types Type, boost::optional<std::string> Uri, boost::optional<std::string> Branch, boost::optional<std::string> DecompressCommand, boost::optional<std::string> BuildCommand, boost::optional<std::string> InstallCommand ):
+		cmake_deps_item::cmake_deps_item( item_types Type,
+										  std::string ProjectName,
+										  boost::optional<std::string> Uri,
+										  boost::optional<std::string> Branch,
+										  boost::optional<std::string> DecompressCommand,
+										  boost::optional<std::string> BuildCommand,
+										  boost::optional<std::string> InstallCommand ):
 				type{ Type },
+				project_name{ std::move( ProjectName ) },
 				uri( std::move( Uri ) ),
 				branch( std::move( Branch ) ),
 				decompress_command( std::move( DecompressCommand ) ),
 				build_command( std::move( BuildCommand ) ),
-				install_command( std::move( InstallCommand ) ) {
-	
-			link_streamable( "type", type );
-			link_string( "uri", uri );
-			link_string( "branch", branch );
-			link_string( "decompress_command", decompress_command );
-			link_string( "build_command", build_command );
-			link_string( "install_command", install_command );
-		}
+				install_command( std::move( InstallCommand ) ) { }
 
 		cmake_deps_item::cmake_deps_item( ):
 				cmake_deps_item( item_types::none ) { }
@@ -70,11 +66,7 @@ namespace daw {
 		cmake_deps_item::~cmake_deps_item( ) { }
 
 		cmake_deps_file::cmake_deps_file( ):
-				daw::json::JsonLink<cmake_deps_file>{ },
-				dependencies{ } {
-
-			link_array( "dependencies", dependencies );
-		}
+				dependencies{ } { }
 
 		cmake_deps_file::~cmake_deps_file( ) { }
 

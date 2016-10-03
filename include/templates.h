@@ -1,4 +1,3 @@
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2016 Darrell Wright
@@ -25,25 +24,11 @@
 
 #include <string>
 
-#include <daw/json/daw_json_link.h>
-
 namespace daw {
 	namespace cmake_deps {
-		struct cmake_deps_config: daw::json::JsonLink<cmake_deps_config> {
-			std::string cache_folder; 
-
-		public:
-			cmake_deps_config( std::string CacheFolder );
-			cmake_deps_config( );
-			~cmake_deps_config( );
-			cmake_deps_config( cmake_deps_config const & ) = default;
-			cmake_deps_config( cmake_deps_config && ) = default;
-			cmake_deps_config & operator=( cmake_deps_config const & ) = default;
-			cmake_deps_config & operator=( cmake_deps_config && ) = default;
-
-		};	// cmake_deps_config
-
-		cmake_deps_config get_config( );
-	}	// namespace cmake_deps
+		namespace impl {
+			std::string get_git_template( );
+		}
+	}
 }    // namespace daw
 

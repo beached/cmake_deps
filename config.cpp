@@ -20,23 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <iostream>
-
 #include "config.h"
 
 namespace daw {
 	namespace cmake_deps {
-		cmake_deps_config::cmake_deps_config( std::string InstallPrefix, std::string CacheFolder ):
-				daw::json::JsonLink<cmake_deps_config>{ },
-				install_prefix{ std::move( InstallPrefix ) },
-				cache_folder{ std::move( CacheFolder ) } { 
-
-			link_string( "install_prefix", install_prefix );
-			link_string( "cache_folder", cache_folder );
+		namespace {
+			auto get_home( ) {
+				auto home = std::getenv( "HOME" );
+				if( !home ) {
+					home = std::getenv( "USERPROFILE" );
+					if( !home ) {
+						throw std::runtime_error( "Could not determine home folder" );
+					}
+				}
+				std::string result;
+				result = home;
+				return result;
+			}
 		}
 
+		cmake_deps_config get_config( ) {
+			auto env_var = std::getenv( "CMAKE_DEPS_CONFIG" );
+			std::string config_file = env_var ? env_var : get_home( ) + "/.cmake_deps.config";
+			daw::cmake_deps::cmake_deps_config result;
+			bool is_new_file = false;
+			try {
+				result = daw::json::from_file<daw::cmake_deps::cmake_deps_config>( config_file, false );
+			} catch( std::exception const & ) {
+				is_new_file = true;
+			}
+
+			if( is_new_file ) {
+				try {
+					result.to_file( config_file );
+				} catch( std::exception const & ex ) {
+					std::cerr << "Error writing config file '" << config_file << "'" << std::endl;
+					std::cerr << "Exception: " << ex.what( ) << std::endl;
+				}
+			}
+			return result;
+		}
+
+
+		cmake_deps_config::cmake_deps_config( std::string CacheFolder ):
+				daw::json::JsonLink<cmake_deps_config>{ },
+				cache_folder{ std::move( CacheFolder ) } { }
+
 		cmake_deps_config::cmake_deps_config( ):
-				cmake_deps_config{ "/usr/local", "~/.cmake_deps_cache" } { }
+				cmake_deps_config{ get_home( ) + "/.cmake_deps_cache" } { }
 
 		cmake_deps_config::~cmake_deps_config( ) { }
 

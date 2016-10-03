@@ -26,52 +26,26 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
+#include <cmake_deps_impl.h>
 
 #include "config.h"
-
-auto get_home( ) {
-	auto home = std::getenv( "HOME" );
-	if( !home ) {
-		home = std::getenv( "USERPROFILE" );
-		if( !home ) {
-			throw std::runtime_error( "Could not determine home folder" );
-		}
-	}
-	std::string result;
-	result = home;
-	return result;
-}
-
-auto get_config( ) {
-	auto env_var = std::getenv( "CMAKE_DEPS_CONFIG" );
-	std::string config_file = env_var ? env_var : get_home( ) + "/.cmake_deps.config";
-	daw::cmake_deps::cmake_deps_config result;
-	bool is_new_file = false;
-	try {
-		result = daw::json::from_file<daw::cmake_deps::cmake_deps_config>( config_file, false );
-	} catch( std::exception const & ) {
-		is_new_file = true;
-	}
-
-	if( is_new_file ) {
-		try {
-			result.to_file( config_file );
-		} catch( std::exception const & ex ) {
-			std::cerr << "Error writing config file '" << config_file << "'" << std::endl;
-			std::cerr << "Exception: " << ex.what( ) << std::endl;
-		}
-	}
-	return result;
-}
+#include "cmake_deps_file.h"
 
 int main( int argc, char** argv ) {
-	auto config = get_config( );
-	
+	auto config = daw::cmake_deps::get_config( );
+	boost::filesystem::path cache_root{ config.cache_folder };
+	if( !exists( cache_root ) ) {
+		create_directory( cache_root );
+	}
+	if( !exists( cache_root ) || !is_directory( cache_root ) ) {
+		std::stringstream ss;
+		ss << "Cache root (" << config.cache_folder << ") does not exist or is not a directory";
+		throw daw::cmake_deps::cmake_deps_exception( ss.str( ) );
+	}
 	boost::program_options::options_description desc{ "Options" };
 	desc.add_options( )
 		( "help", "print option descriptions" )
-		( "prefix", boost::program_options::value<boost::filesystem::path>( )->default_value( config.install_prefix ), "installation prefix folder" )
-		( "cache_folder", boost::program_options::value<boost::filesystem::path>( )->default_value( config.cache_folder ), "installation cache folder" )
+		( "prefix", boost::program_options::value<std::string>( ), "installation prefix folder" )
 		( "deps_file", boost::program_options::value<boost::filesystem::path>( )->default_value( "./cmake_deps.config" ), "dependencies file" );
 
 	boost::program_options::variables_map vm;
@@ -88,17 +62,34 @@ int main( int argc, char** argv ) {
 		std::cerr << desc << std::endl;
 		return EXIT_FAILURE;
 	}
-	auto prefix = vm[ "prefix" ].as<boost::filesystem::path>( ); 
-	auto deps_file = vm[ "deps_file" ].as<boost::filesystem::path>( );
 
+	auto deps_file = vm["deps_file"].as<boost::filesystem::path>( );
+	
 	if( !exists( deps_file ) ) {
 		std::cerr << "Dependency file (" << deps_file << ") does not exist\n";
 		return EXIT_FAILURE;
-	} else if( !exists( prefix ) || !is_directory( prefix ) ) {
-		std::cerr << "Prefix folder (" << prefix << ") must exist and be a directory\n";
+	} else if( !is_regular_file( deps_file ) ) {
+		std::cerr << "Dependency file (" << deps_file << ") is not a regular file\n";
 		return EXIT_FAILURE;
 	}
-	std::cout << (config.to_string( )) << std::endl;
+
+	auto prefix = [&]( ) -> boost::filesystem::path {		
+		if( vm.count( "prefix" ) ) {
+			return vm["prefix"].as<boost::filesystem::path>( ); 
+		} else {
+			return deps_file.parent_path( ) /= "cmake_deps";
+		}
+	}( );
+
+	if( exists( prefix ) ) {
+		if( !is_directory( prefix ) ) {
+			std::cerr << "Prefix folder (" << prefix << ") is not a directory\n";
+			return EXIT_FAILURE;
+		}
+	} else {
+		boost::filesystem::create_directory( prefix );
+	}
+	daw::cmake_deps::process_file( deps_file, prefix, cache_root );
 
 	return EXIT_SUCCESS;
 }

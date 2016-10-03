@@ -1,4 +1,3 @@
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2016 Darrell Wright
@@ -23,11 +22,17 @@
 
 #pragma once
 
-#include "cmake_deps_file.h"
+#include <boost/utility/string_ref.hpp>
+#include <boost/filesystem/path.hpp>
+#include <exception>
 
 namespace daw {
 	namespace cmake_deps {
-		void process_file( cmake_deps_file const & depend_file );
+		struct cmake_deps_exception: public std::runtime_error {
+			cmake_deps_exception( boost::string_ref msg );
+		};	// cmake_deps_exception
+
+		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root );
 	}	// namespace cmake_deps
 }    // namespace daw
 

@@ -1,4 +1,3 @@
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2016 Darrell Wright
@@ -23,27 +22,15 @@
 
 #pragma once
 
+#include <boost/filesystem.hpp>
 #include <string>
 
-#include <daw/json/daw_json_link.h>
+#include "cmake_deps_file.h"
 
 namespace daw {
 	namespace cmake_deps {
-		struct cmake_deps_config: daw::json::JsonLink<cmake_deps_config> {
-			std::string cache_folder; 
-
-		public:
-			cmake_deps_config( std::string CacheFolder );
-			cmake_deps_config( );
-			~cmake_deps_config( );
-			cmake_deps_config( cmake_deps_config const & ) = default;
-			cmake_deps_config( cmake_deps_config && ) = default;
-			cmake_deps_config & operator=( cmake_deps_config const & ) = default;
-			cmake_deps_config & operator=( cmake_deps_config && ) = default;
-
-		};	// cmake_deps_config
-
-		cmake_deps_config get_config( );
+		cmake_deps_file parse_cmakes_deps( boost::filesystem::path const & deps_file );		
+		cmake_deps_file parse_cmakes_deps( std::string const & deps_file );		
 	}	// namespace cmake_deps
 }    // namespace daw
 
