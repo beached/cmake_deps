@@ -33,16 +33,13 @@ namespace daw {
 			return result[static_cast<uint8_t>( t )];
 		}
 
-		std::ostream & operator<<( std::ostream & os, item_types const & item ) {
-			return (os << to_string( item ));
+		item_types items_type_from_string( std::string const & str ) {
+			static std::unordered_map<std::string, item_types> const result = { { "none", item_types::none }, { "git", item_types::git }, { "custom", item_types::custom } };
+			return result.at( str );
 		}
 
-		std::istream & operator>>( std::istream & is, item_types & item ) {
-			static std::unordered_map<std::string, item_types> const result = { { "none", item_types::none }, { "git", item_types::git }, { "custom", item_types::custom } };
-			std::string tmp;
-			is >> tmp;
-			item = result.at( tmp );
-			return is;
+		std::ostream & operator<<( std::ostream & os, item_types const & item ) {
+			return (os << to_string( item ));
 		}
 
 		cmake_deps_item::cmake_deps_item( item_types Type,

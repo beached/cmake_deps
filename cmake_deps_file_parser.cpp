@@ -38,9 +38,13 @@ namespace daw {
 		namespace {
 			auto split( std::string const & str, std::string const & on ) {
 				std::vector<size_t> results;
+				if( on.empty( ) || str.empty( ) ) {
+					return results;
+				}
 				size_t pos = 0;
 				while( (pos = str.find_first_of( on, pos )) != std::string::npos ) {
 					results.push_back( pos );
+					pos += on.size( );
 				}
 				return results;
 			}
@@ -61,13 +65,14 @@ namespace daw {
 				throw cmake_deps_exception( "Error on line, value isn't quoted properly" + line );
 			}
 			std::string value;
-			if( quotes[1] - quotes[0] > 1 ) {
-				value = line.substr( quotes[0] + 1, quotes[1] - 1 );
-			}
 			if( pos == 0 ) {
 				throw cmake_deps_exception( "Error on line, empty key name" + line );
 			}
-			auto key = boost::trim_copy( line.substr( pos, quotes[0] - pos ) );
+			auto key = boost::trim_copy( line.substr( 0, pos ) );
+			if( quotes[1] - quotes[0] > 1 ) {
+				value = boost::trim_copy( line.substr( pos + quotes[0] + 1, (quotes[1] - quotes[0]) - 1) );
+			}
+
 			if( key.empty() ) {
 				throw cmake_deps_exception( "Error on line, empty key name" + line );
 			}
@@ -82,6 +87,9 @@ namespace daw {
 			cmake_deps_item cur_item;
 			for( auto pos : lines ) {
 				auto const current_line =  boost::trim_copy( deps_file.substr( last_pos, pos - last_pos ) );
+				if( current_line.empty( ) ) {
+					continue;
+				}
 				last_pos = pos;
 				auto const kv = parse_line( current_line );
 				if( kv.first == "project_name" ) {
@@ -102,6 +110,8 @@ namespace daw {
 						cur_item.build_command = kv.second;
 					} else if( "install_command" == kv.first ) {
 						cur_item.install_command = kv.second;
+					} else if( "type" == kv.first ) {
+						cur_item.type = daw::cmake_deps::items_type_from_string( kv.second );
 					} else {
 						throw cmake_deps_exception( "Unknown key: " + current_line );
 					}
@@ -118,12 +128,13 @@ namespace daw {
 		cmake_deps_file parse_cmakes_deps( boost::filesystem::path const & deps_file ) {
 			assert( exists( deps_file ) && is_regular_file( deps_file ) );
 			std::ifstream in_file;
-			in_file.open( deps_file.native( ) );
+			in_file.open( deps_file.native( ), std::ios::binary );
 			if( !in_file ) {
 				std::stringstream ss;
 				ss << "Could not open dependency file (" << deps_file << ")";
 				throw cmake_deps_exception( ss.str( ) ); 
 			}
+			in_file >> std::noskipws;
 			std::string in_str;
 			std::copy( std::istream_iterator<char>( in_file ), std::istream_iterator<char>( ), std::back_inserter( in_str ) );
 			in_file.close( );

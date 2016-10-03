@@ -32,6 +32,8 @@ namespace daw {
 	namespace cmake_deps {
 		enum class item_types: uint8_t { none, git, custom };
 		std::string to_string( item_types t );
+		item_types items_type_from_string( std::string const & str );
+
 		std::ostream & operator<<( std::ostream & os, item_types const & item );
 		std::istream & operator>>( std::istream & is, item_types & item );
 

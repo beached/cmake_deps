@@ -56,7 +56,7 @@ namespace daw {
 
 			void verify_folder( boost::filesystem::path const & path ) {
 				if( !exists( path ) ) {
-					create_directory( path );
+					create_directories( path );
 				}
 				if( !exists( path ) || !is_directory( path ) ) {
 					std::stringstream ss;
@@ -122,7 +122,7 @@ namespace daw {
 					git_template.add_callback( "git_tag", []( ) -> std::string { return "master"; } );
 
 				}
-				git_template.add_callback( "install_directory", [&]( ) -> std::string { return prefix.native( ); } );
+				git_template.add_callback( "install_directory", [&]( ) -> std::string { return canonical( prefix ).native( ); } );
 				try {
 					std::ofstream out_file;
 					out_file.open( result.cmakelist_file.native( ), std::ios::out | std::ios::trunc );
@@ -160,7 +160,7 @@ namespace daw {
 				if( build( cml, item ) != EXIT_SUCCESS ) {
 					return;
 				}
-				install( cml, item );
+				//install( cml, item );
 			}
 		}
 

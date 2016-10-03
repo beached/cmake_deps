@@ -46,7 +46,7 @@ int main( int argc, char** argv ) {
 	desc.add_options( )
 		( "help", "print option descriptions" )
 		( "prefix", boost::program_options::value<std::string>( ), "installation prefix folder" )
-		( "deps_file", boost::program_options::value<boost::filesystem::path>( )->default_value( "./cmake_deps.config" ), "dependencies file" );
+		( "deps_file", boost::program_options::value<boost::filesystem::path>( )->default_value( "./cmake_deps.txt" ), "dependencies file" );
 
 	boost::program_options::variables_map vm;
 	try {
