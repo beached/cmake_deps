@@ -20,7 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <boost/filesystem.hpp>
+#include <sstream>
+
+#include <daw/kv_file.h>
+
 #include "config.h"
+#include "glean_impl.h"
 
 namespace daw {
 	namespace glean {
@@ -41,29 +47,51 @@ namespace daw {
 
 		glean_config get_config( ) {
 			auto env_var = std::getenv( "CMAKE_DEPS_CONFIG" );
-			std::string config_file = env_var ? env_var : get_home( ) + "/.glean.config";
-			daw::glean::glean_config result;
-			bool is_new_file = false;
-			try {
-				result = daw::json::from_file<daw::glean::glean_config>( config_file, false );
-			} catch( std::exception const & ) {
-				is_new_file = true;
-			}
-
-			if( is_new_file ) {
-				try {
-					result.to_file( config_file );
-				} catch( std::exception const & ex ) {
-					std::cerr << "Error writing config file '" << config_file << "'" << std::endl;
-					std::cerr << "Exception: " << ex.what( ) << std::endl;
+			auto const config_file = [&]( ) -> boost::filesystem::path {
+				if( env_var ) {
+					return boost::filesystem::path{ env_var };
+				} else {
+					boost::filesystem::path result{ get_home( ) };
+					result /= ".glean.config";
+					return result;
 				}
+			}( );
+			bool const is_new_file = exists( config_file );
+			assert( !is_new_file || is_regular_file( config_file ) );
+			if( is_new_file ) {
+				glean_config result;
+				daw::kv_file{ }.add( "cache_folder", result.cache_folder ).to_file( config_file.native( ) );
+
+				return result;
 			}
-			return result;
+			return glean_config{ config_file.native( ) };
 		}
 
+		namespace {
+			std::string cache_path_string( boost::filesystem::path file_path ) {
+				if( !exists( file_path ) || !is_regular_file( file_path ) ) {
+					std::stringstream ss;
+					ss << "File does not exist or is not a regular file (" << file_path << ')';
+					throw glean_exception( ss.str( ) );
+				}
+				daw::kv_file kv_pairs{ canonical( file_path ).native( ) };
+				auto const pos = std::find_if( kv_pairs.begin( ), kv_pairs.end( ), []( auto const & kv ) {
+					static const std::string s = "cache_folder";
+					return kv.key == s;
+				} );
+
+
+				if( pos == kv_pairs.end( ) ) {
+					throw glean_exception( "Config file does not have cache_path value" );
+				}
+				return pos->value;
+			}
+		}
+
+		glean_config::glean_config( boost::filesystem::path file_path ):
+				cache_folder{ cache_path_string( std::move( file_path ) ) } { }
 
 		glean_config::glean_config( std::string CacheFolder ):
-				daw::json::JsonLink<glean_config>{ },
 				cache_folder{ std::move( CacheFolder ) } { }
 
 		glean_config::glean_config( ):

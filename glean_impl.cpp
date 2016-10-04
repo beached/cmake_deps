@@ -24,10 +24,9 @@
 #include <boost/utility/string_ref.hpp>
 #include <cstdlib>
 #include <exception>
-#include <ostream>
+#include <fstream>
 #include <thread>
 
-#include <daw/json/daw_json_link.h>
 #include <daw/parse_template/daw_parse_template.h>
 
 #include "glean_impl.h"
@@ -39,6 +38,8 @@ namespace daw {
 	namespace glean {
 		glean_exception::glean_exception( boost::string_ref msg ):
 			std::runtime_error{ msg.data( ) } { }
+
+		glean_exception::~glean_exception( ) { }
 		namespace {
 			bool is_update_needed( glean_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_folder ) {
 				return true;

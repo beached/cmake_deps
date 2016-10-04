@@ -28,6 +28,7 @@
 
 #include <daw/daw_parser_helper.h>
 #include <daw/daw_parser_addons.h>
+#include <daw/kv_file.h>
 
 #include "glean_impl.h"
 #include "glean_file.h"
@@ -79,66 +80,42 @@ namespace daw {
 			return std::make_pair( key, value );
 		}
 
-		glean_file parse_cmakes_deps( std::string const & deps_file ) {
+		glean_file parse_cmakes_deps( boost::filesystem::path const & deps_file ) {
 			glean_file result;
-			auto const lines = split( deps_file, "\n" );
-			auto last_pos = 0;
-			bool in_item = false;
 			glean_item cur_item;
-			for( auto pos : lines ) {
-				auto const current_line =  boost::trim_copy( deps_file.substr( last_pos, pos - last_pos ) );
-				if( current_line.empty( ) ) {
-					continue;
-				}
-				last_pos = pos;
-				auto const kv = parse_line( current_line );
-				if( kv.first == "project_name" ) {
+			bool in_item = false;
+			for( auto const & kv: daw::kv_file{ deps_file.native( ) } ) {
+				if( kv.key == "project_name" ) {
 					if( in_item ) {
 						result.dependencies.push_back( cur_item );
 					}
 					in_item = true;
 					cur_item = glean_item{ };
-					cur_item.project_name = kv.second;
+					cur_item.project_name = kv.value;
 				} else if( in_item ) {
-					if( "uri" == kv.first ) {
-						cur_item.uri = kv.second;
-					} else if( "branch" == kv.first ) {
-						cur_item.branch = kv.second;
-					} else if( "decompress_command" == kv.first ) {
-						cur_item.decompress_command = kv.second;
-					} else if( "build_command" == kv.first ) {
-						cur_item.build_command = kv.second;
-					} else if( "install_command" == kv.first ) {
-						cur_item.install_command = kv.second;
-					} else if( "type" == kv.first ) {
-						cur_item.type = daw::glean::items_type_from_string( kv.second );
+					if( "uri" == kv.key ) {
+						cur_item.uri = kv.value;
+					} else if( "branch" == kv.key ) {
+						cur_item.branch = kv.value;
+					} else if( "decompress_command" == kv.key ) {
+						cur_item.decompress_command = kv.value;
+					} else if( "build_command" == kv.key ) {
+						cur_item.build_command = kv.value;
+					} else if( "install_command" == kv.key ) {
+						cur_item.install_command = kv.value;
+					} else if( "type" == kv.key ) {
+						cur_item.type = daw::glean::items_type_from_string( kv.value );
 					} else {
-						throw glean_exception( "Unknown key: " + current_line );
+						throw glean_exception( "Unknown key: '" + kv.key + "'" );
 					}
 				} else {
-					throw glean_exception( "Error in dependencies file key specified without a project_name line first: " + current_line );
+					throw glean_exception( "Error in dependencies file key specified without a project_name line first: '" + kv.key + "'" );
 				}
 			}
 			if( in_item && !cur_item.project_name.empty( ) ) {
 				result.dependencies.push_back( cur_item );
 			}
 			return result;
-		}
-
-		glean_file parse_cmakes_deps( boost::filesystem::path const & deps_file ) {
-			assert( exists( deps_file ) && is_regular_file( deps_file ) );
-			std::ifstream in_file;
-			in_file.open( deps_file.native( ), std::ios::binary );
-			if( !in_file ) {
-				std::stringstream ss;
-				ss << "Could not open dependency file (" << deps_file << ")";
-				throw glean_exception( ss.str( ) ); 
-			}
-			in_file >> std::noskipws;
-			std::string in_str;
-			std::copy( std::istream_iterator<char>( in_file ), std::istream_iterator<char>( ), std::back_inserter( in_str ) );
-			in_file.close( );
-			return parse_cmakes_deps( in_str );
 		}
 	}	// namespace glean
 }    // namespace daw

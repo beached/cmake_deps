@@ -23,17 +23,17 @@
 
 #pragma once
 
+#include <boost/filesystem/path.hpp>
 #include <string>
-
-#include <daw/json/daw_json_link.h>
 
 namespace daw {
 	namespace glean {
-		struct glean_config: daw::json::JsonLink<glean_config> {
+		struct glean_config {
 			std::string cache_folder; 
 
 		public:
 			glean_config( std::string CacheFolder );
+			glean_config( boost::filesystem::path file_path );
 			glean_config( );
 			~glean_config( );
 			glean_config( glean_config const & ) = default;

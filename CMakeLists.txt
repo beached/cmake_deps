@@ -28,18 +28,18 @@ externalproject_add(
 )
 
 externalproject_add(
-    char_range_prj
-    GIT_REPOSITORY "https://github.com/beached/char_range.git"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/char_range"
+    kv_file_prj
+    GIT_REPOSITORY "https://github.com/beached/kv_file.git"
+	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/kv_file"
     GIT_TAG "master"
     INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
 )
 
 externalproject_add(
-    parse_json_prj
-    GIT_REPOSITORY "https://github.com/beached/parse_json.git"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/parse_json"
+    char_range_prj
+    GIT_REPOSITORY "https://github.com/beached/char_range.git"
+    SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/char_range"
     GIT_TAG "master"
     INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
@@ -83,7 +83,7 @@ set( SOURCE_FILES
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj parse_json_prj )
-target_link_libraries( glean char_range parse_json parse_template ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj kv_file_prj )
+target_link_libraries( glean char_range parse_template kv_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
 install( TARGETS glean DESTINATION bin )
