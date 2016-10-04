@@ -22,11 +22,11 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/utility/string_ref.hpp>
+#include <cstdlib>
 #include <exception>
 #include <ostream>
 #include <thread>
 
-#include <libexecstream/exec_helper.h>
 #include <daw/json/daw_json_link.h>
 #include <daw/parse_template/daw_parse_template.h>
 
@@ -143,16 +143,16 @@ namespace daw {
 				change_directory chd{ proj.build };
 				{
 					int result;
-					if( EXIT_SUCCESS != (result = daw::display_output( "cmake", ".." )) ) {
+					if( EXIT_SUCCESS != (result = system( "cmake .." )) ) {
 						return result;
 					}
 				}
-				return daw::display_output( "make", "" );
+				return system( "make" );
 			}
 
 			int install( item_folders const & proj, cmake_deps_item const & item ) {
 				change_directory chd{ proj.build };
-				return daw::display_output( "make", "install" );
+				return system( "make install" );
 			}
 
 			void process_item( cmake_deps_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {

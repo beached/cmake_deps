@@ -54,16 +54,6 @@ externalproject_add(
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
 )
 
-externalproject_add(
-    libexecstream_prj
-    GIT_REPOSITORY "https://github.com/beached/libexecstream.git"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/libexecstream"
-    GIT_TAG "master"
-    INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
-)
-
-
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
@@ -93,6 +83,6 @@ set( SOURCE_FILES
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 
 add_executable( cmake_deps ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( cmake_deps header_libraries_prj char_range_prj parse_template_prj libexecstream_prj parse_json_prj )
-target_link_libraries( cmake_deps char_range parse_json parse_template execstream ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+add_dependencies( cmake_deps header_libraries_prj char_range_prj parse_template_prj parse_json_prj )
+target_link_libraries( cmake_deps char_range parse_json parse_template ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
