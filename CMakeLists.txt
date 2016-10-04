@@ -86,3 +86,4 @@ add_executable( cmake_deps ${HEADER_FILES} ${SOURCE_FILES} )
 add_dependencies( cmake_deps header_libraries_prj char_range_prj parse_template_prj parse_json_prj )
 target_link_libraries( cmake_deps char_range parse_json parse_template ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
+install( TARGETS cmake_deps DESTINATION bin )
