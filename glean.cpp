@@ -77,7 +77,7 @@ int main( int argc, char** argv ) {
 		if( vm.count( "prefix" ) ) {
 			return vm["prefix"].as<boost::filesystem::path>( ); 
 		} else {
-			return deps_file.parent_path( ) /= "glean";
+			return deps_file.parent_path( ) /= "glean_files";
 		}
 	}( );
 
