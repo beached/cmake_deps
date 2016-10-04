@@ -26,13 +26,13 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
-#include <cmake_deps_impl.h>
+#include <glean_impl.h>
 
 #include "config.h"
-#include "cmake_deps_file.h"
+#include "glean_file.h"
 
 int main( int argc, char** argv ) {
-	auto config = daw::cmake_deps::get_config( );
+	auto config = daw::glean::get_config( );
 	boost::filesystem::path cache_root{ config.cache_folder };
 	if( !exists( cache_root ) ) {
 		create_directory( cache_root );
@@ -40,13 +40,13 @@ int main( int argc, char** argv ) {
 	if( !exists( cache_root ) || !is_directory( cache_root ) ) {
 		std::stringstream ss;
 		ss << "Cache root (" << config.cache_folder << ") does not exist or is not a directory";
-		throw daw::cmake_deps::cmake_deps_exception( ss.str( ) );
+		throw daw::glean::glean_exception( ss.str( ) );
 	}
 	boost::program_options::options_description desc{ "Options" };
 	desc.add_options( )
 		( "help", "print option descriptions" )
 		( "prefix", boost::program_options::value<std::string>( ), "installation prefix folder" )
-		( "deps_file", boost::program_options::value<boost::filesystem::path>( )->default_value( "./cmake_deps.txt" ), "dependencies file" );
+		( "deps_file", boost::program_options::value<boost::filesystem::path>( )->default_value( "./glean.txt" ), "dependencies file" );
 
 	boost::program_options::variables_map vm;
 	try {
@@ -77,7 +77,7 @@ int main( int argc, char** argv ) {
 		if( vm.count( "prefix" ) ) {
 			return vm["prefix"].as<boost::filesystem::path>( ); 
 		} else {
-			return deps_file.parent_path( ) /= "cmake_deps";
+			return deps_file.parent_path( ) /= "glean";
 		}
 	}( );
 
@@ -89,7 +89,7 @@ int main( int argc, char** argv ) {
 	} else {
 		boost::filesystem::create_directory( prefix );
 	}
-	daw::cmake_deps::process_file( deps_file, prefix, cache_root );
+	daw::glean::process_file( deps_file, prefix, cache_root );
 
 	return EXIT_SUCCESS;
 }

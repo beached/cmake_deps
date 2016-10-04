@@ -25,12 +25,12 @@
 #include <boost/filesystem.hpp>
 #include <string>
 
-#include "cmake_deps_file.h"
+#include "glean_file.h"
 
 namespace daw {
-	namespace cmake_deps {
-		cmake_deps_file parse_cmakes_deps( boost::filesystem::path const & deps_file );		
-		cmake_deps_file parse_cmakes_deps( std::string const & deps_file );		
-	}	// namespace cmake_deps
+	namespace glean {
+		glean_file parse_cmakes_deps( boost::filesystem::path const & deps_file );		
+		glean_file parse_cmakes_deps( std::string const & deps_file );		
+	}	// namespace glean
 }    // namespace daw
 

@@ -25,7 +25,7 @@
 #include <string>
 
 namespace daw {
-	namespace cmake_deps {
+	namespace glean {
 		namespace impl {
 			std::string get_git_template( );
 		}

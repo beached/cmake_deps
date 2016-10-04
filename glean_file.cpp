@@ -24,10 +24,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cmake_deps_file.h"
+#include "glean_file.h"
 
 namespace daw {
-	namespace cmake_deps {
+	namespace glean {
 		std::string to_string( item_types t ) {
 			static std::array<std::string, 3> const result = { { "none", "git", "custom" } };
 			return result[static_cast<uint8_t>( t )];
@@ -42,7 +42,7 @@ namespace daw {
 			return (os << to_string( item ));
 		}
 
-		cmake_deps_item::cmake_deps_item( item_types Type,
+		glean_item::glean_item( item_types Type,
 										  std::string ProjectName,
 										  boost::optional<std::string> Uri,
 										  boost::optional<std::string> Branch,
@@ -57,16 +57,16 @@ namespace daw {
 				build_command( std::move( BuildCommand ) ),
 				install_command( std::move( InstallCommand ) ) { }
 
-		cmake_deps_item::cmake_deps_item( ):
-				cmake_deps_item( item_types::none ) { }
+		glean_item::glean_item( ):
+				glean_item( item_types::none ) { }
 
-		cmake_deps_item::~cmake_deps_item( ) { }
+		glean_item::~glean_item( ) { }
 
-		cmake_deps_file::cmake_deps_file( ):
+		glean_file::glean_file( ):
 				dependencies{ } { }
 
-		cmake_deps_file::~cmake_deps_file( ) { }
+		glean_file::~glean_file( ) { }
 
-	}	// namespace cmake_deps
+	}	// namespace glean
 }    // namespace daw
 

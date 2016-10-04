@@ -30,21 +30,21 @@
 #include <daw/json/daw_json_link.h>
 #include <daw/parse_template/daw_parse_template.h>
 
-#include "cmake_deps_impl.h"
-#include "cmake_deps_file.h"
-#include "cmake_deps_file_parser.h"
+#include "glean_impl.h"
+#include "glean_file.h"
+#include "glean_file_parser.h"
 #include "templates.h"
 
 namespace daw {
-	namespace cmake_deps {
-		cmake_deps_exception::cmake_deps_exception( boost::string_ref msg ):
-				std::runtime_error{ msg.data( ) } { }
+	namespace glean {
+		glean_exception::glean_exception( boost::string_ref msg ):
+			std::runtime_error{ msg.data( ) } { }
 		namespace {
-			bool is_update_needed( cmake_deps_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_folder ) {
+			bool is_update_needed( glean_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_folder ) {
 				return true;
 			}
 
-			boost::filesystem::path cache_path( cmake_deps_item const & item, boost::filesystem::path cache_root ) {
+			boost::filesystem::path cache_path( glean_item const & item, boost::filesystem::path cache_root ) {
 				assert( exists( cache_root ) && is_directory( cache_root ) );
 				assert( !item.project_name.empty( ) );
 				cache_root /= item.project_name;
@@ -61,7 +61,7 @@ namespace daw {
 				if( !exists( path ) || !is_directory( path ) ) {
 					std::stringstream ss;
 					ss << "Could not create folder (" << path << ") or is not a directory";
-					throw cmake_deps_exception( ss.str( ) );
+					throw glean_exception( ss.str( ) );
 				}
 			}
 
@@ -69,7 +69,7 @@ namespace daw {
 				if( exists( f ) && !is_regular_file( f ) ) {
 					std::stringstream ss;
 					ss << "File already exists but isn't a file (" << f << ")";
-					throw cmake_deps_exception( ss.str( ) );
+					throw glean_exception( ss.str( ) );
 
 				}
 			}
@@ -84,10 +84,10 @@ namespace daw {
 			struct change_directory {
 				boost::filesystem::path old_path;
 				change_directory( boost::filesystem::path const & new_path ):
-						old_path{ boost::filesystem::current_path( ) } {
+					old_path{ boost::filesystem::current_path( ) } {
 
-					boost::filesystem::current_path( new_path );
-				}
+						boost::filesystem::current_path( new_path );
+					}
 
 				~change_directory( ) {
 					if( exists( old_path) && is_directory( old_path ) ) {
@@ -101,7 +101,7 @@ namespace daw {
 				change_directory & operator=( change_directory const & ) = delete;
 			};	// change_directory
 
-			item_folders create_cmakelist( cmake_deps_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {
+			item_folders create_cmakelist( glean_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {
 				static auto const git_template_str = impl::get_git_template( );
 				item_folders result;
 				result.cache = cache_path( item, cache_root );
@@ -134,12 +134,12 @@ namespace daw {
 				} catch( std::exception const & ex ) {
 					std::stringstream ss;
 					ss << "Could not write cmake file (" << result.cmakelist_file << "): " << ex.what( );
-					throw cmake_deps_exception( ss.str( ) );
+					throw glean_exception( ss.str( ) );
 				}
 				return result;
 			}
 
-			int build( item_folders const & proj, cmake_deps_item const & item ) {
+			int build( item_folders const & proj, glean_item const & item ) {
 				change_directory chd{ proj.build };
 				{
 					int result;
@@ -150,12 +150,12 @@ namespace daw {
 				return system( "make" );
 			}
 
-			int install( item_folders const & proj, cmake_deps_item const & item ) {
+			int install( item_folders const & proj, glean_item const & item ) {
 				change_directory chd{ proj.build };
 				return system( "make install" );
 			}
 
-			void process_item( cmake_deps_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {
+			void process_item( glean_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {
 				auto cml = create_cmakelist( item, prefix, cache_root );
 				if( build( cml, item ) != EXIT_SUCCESS ) {
 					return;
@@ -170,11 +170,10 @@ namespace daw {
 				std::cout << "Processing: " << dependency.project_name << '\n';
 				try {
 					process_item( dependency, prefix, cache_root );
-				} catch( cmake_deps_exception const & ex ) {
+				} catch( glean_exception const & ex ) {
 					std::cerr << "Error processing: " << dependency.project_name << ":\n" << ex.what( ) << std::endl;
 				}
 			}
 		}
-	}	// namespace cmake_deps
+	}	// namespace glean
 }    // namespace daw
-

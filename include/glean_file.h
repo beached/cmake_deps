@@ -29,7 +29,7 @@
 #include <vector>
 
 namespace daw {
-	namespace cmake_deps {
+	namespace glean {
 		enum class item_types: uint8_t { none, git, custom };
 		std::string to_string( item_types t );
 		item_types items_type_from_string( std::string const & str );
@@ -37,7 +37,7 @@ namespace daw {
 		std::ostream & operator<<( std::ostream & os, item_types const & item );
 		std::istream & operator>>( std::istream & is, item_types & item );
 
-		struct cmake_deps_item {
+		struct glean_item {
 			item_types type;
 			std::string project_name;
 			boost::optional<std::string> uri;
@@ -46,34 +46,34 @@ namespace daw {
 			boost::optional<std::string> build_command;
 			boost::optional<std::string> install_command;
 			using str_opt = boost::optional<std::string>;
-			cmake_deps_item( item_types Type,
+			glean_item( item_types Type,
 							 std::string ProjectName = "",
 							 boost::optional<std::string> Uri = str_opt{ },
 							 boost::optional<std::string> Branch = str_opt{ },
 							 boost::optional<std::string> DecompressCommand = str_opt{ },
 							 boost::optional<std::string> BuildCommand = str_opt{ },
 							 boost::optional<std::string> InstallCommand = str_opt{ } );
-			cmake_deps_item( );
-			~cmake_deps_item( );
+			glean_item( );
+			~glean_item( );
 
-			cmake_deps_item( cmake_deps_item const & ) = default;
-			cmake_deps_item( cmake_deps_item && ) = default;
-			cmake_deps_item & operator=( cmake_deps_item const & ) = default;
-			cmake_deps_item & operator=( cmake_deps_item && ) = default;
-		};	// cmake_deps_item
+			glean_item( glean_item const & ) = default;
+			glean_item( glean_item && ) = default;
+			glean_item & operator=( glean_item const & ) = default;
+			glean_item & operator=( glean_item && ) = default;
+		};	// glean_item
 
-		struct cmake_deps_file {
-			std::vector<cmake_deps_item> dependencies;
+		struct glean_file {
+			std::vector<glean_item> dependencies;
 
-			cmake_deps_file( );
-			~cmake_deps_file( );
+			glean_file( );
+			~glean_file( );
 
-			cmake_deps_file( cmake_deps_file const & ) = default;
-			cmake_deps_file( cmake_deps_file && ) = default;
-			cmake_deps_file & operator=( cmake_deps_file const & ) = default;
-			cmake_deps_file & operator=( cmake_deps_file && ) = default;
-		};	// cmake_deps_file
+			glean_file( glean_file const & ) = default;
+			glean_file( glean_file && ) = default;
+			glean_file & operator=( glean_file const & ) = default;
+			glean_file & operator=( glean_file && ) = default;
+		};	// glean_file
 
-	}	// namespace cmake_deps
+	}	// namespace glean
 }    // namespace daw
 

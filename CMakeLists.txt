@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 2.8.12 )
 
-project( cmake_deps_prj )
+project( glean_prj )
 
 include( ExternalProject )
 
@@ -65,25 +65,25 @@ set( HEADER_FOLDER "include" )
 
 set( HEADER_FILES
 	${HEADER_FOLDER}/config.h
-	${HEADER_FOLDER}/cmake_deps_file.h
-	${HEADER_FOLDER}/cmake_deps_file_parser.h
-	${HEADER_FOLDER}/cmake_deps_impl.h
+	${HEADER_FOLDER}/glean_file.h
+	${HEADER_FOLDER}/glean_file_parser.h
+	${HEADER_FOLDER}/glean_impl.h
 	${HEADER_FOLDER}/templates.h
 )
 
 set( SOURCE_FILES
-	cmake_deps.cpp
-	cmake_deps_file.cpp
-	cmake_deps_file_parser.cpp
-	cmake_deps_impl.cpp
+	glean.cpp
+	glean_file.cpp
+	glean_file_parser.cpp
+	glean_impl.cpp
 	config.cpp
 	templates.cpp
 )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 
-add_executable( cmake_deps ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( cmake_deps header_libraries_prj char_range_prj parse_template_prj parse_json_prj )
-target_link_libraries( cmake_deps char_range parse_json parse_template ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} )
+add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj parse_json_prj )
+target_link_libraries( glean char_range parse_json parse_template ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 
-install( TARGETS cmake_deps DESTINATION bin )
+install( TARGETS glean DESTINATION bin )

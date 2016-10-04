@@ -29,12 +29,12 @@
 #include <daw/daw_parser_helper.h>
 #include <daw/daw_parser_addons.h>
 
-#include "cmake_deps_impl.h"
-#include "cmake_deps_file.h"
-#include "cmake_deps_file_parser.h"
+#include "glean_impl.h"
+#include "glean_file.h"
+#include "glean_file_parser.h"
 
 namespace daw {
-	namespace cmake_deps {
+	namespace glean {
 		namespace {
 			auto split( std::string const & str, std::string const & on ) {
 				std::vector<size_t> results;
@@ -58,15 +58,15 @@ namespace daw {
 		std::pair<std::string, std::string> parse_line( std::string const & line ) {
 			auto pos = line.find_first_of( '=' );
 			if( pos == std::string::npos ) {
-				throw cmake_deps_exception( "Error on line, no '=' symbol: " + line );
+				throw glean_exception( "Error on line, no '=' symbol: " + line );
 			}
 			auto quotes = split( line.substr( pos ) , "\"" );
 			if( quotes.size( ) != 2 ) {
-				throw cmake_deps_exception( "Error on line, value isn't quoted properly" + line );
+				throw glean_exception( "Error on line, value isn't quoted properly" + line );
 			}
 			std::string value;
 			if( pos == 0 ) {
-				throw cmake_deps_exception( "Error on line, empty key name" + line );
+				throw glean_exception( "Error on line, empty key name" + line );
 			}
 			auto key = boost::trim_copy( line.substr( 0, pos ) );
 			if( quotes[1] - quotes[0] > 1 ) {
@@ -74,17 +74,17 @@ namespace daw {
 			}
 
 			if( key.empty() ) {
-				throw cmake_deps_exception( "Error on line, empty key name" + line );
+				throw glean_exception( "Error on line, empty key name" + line );
 			}
 			return std::make_pair( key, value );
 		}
 
-		cmake_deps_file parse_cmakes_deps( std::string const & deps_file ) {
-			cmake_deps_file result;
+		glean_file parse_cmakes_deps( std::string const & deps_file ) {
+			glean_file result;
 			auto const lines = split( deps_file, "\n" );
 			auto last_pos = 0;
 			bool in_item = false;
-			cmake_deps_item cur_item;
+			glean_item cur_item;
 			for( auto pos : lines ) {
 				auto const current_line =  boost::trim_copy( deps_file.substr( last_pos, pos - last_pos ) );
 				if( current_line.empty( ) ) {
@@ -97,7 +97,7 @@ namespace daw {
 						result.dependencies.push_back( cur_item );
 					}
 					in_item = true;
-					cur_item = cmake_deps_item{ };
+					cur_item = glean_item{ };
 					cur_item.project_name = kv.second;
 				} else if( in_item ) {
 					if( "uri" == kv.first ) {
@@ -111,12 +111,12 @@ namespace daw {
 					} else if( "install_command" == kv.first ) {
 						cur_item.install_command = kv.second;
 					} else if( "type" == kv.first ) {
-						cur_item.type = daw::cmake_deps::items_type_from_string( kv.second );
+						cur_item.type = daw::glean::items_type_from_string( kv.second );
 					} else {
-						throw cmake_deps_exception( "Unknown key: " + current_line );
+						throw glean_exception( "Unknown key: " + current_line );
 					}
 				} else {
-					throw cmake_deps_exception( "Error in dependencies file key specified without a project_name line first: " + current_line );
+					throw glean_exception( "Error in dependencies file key specified without a project_name line first: " + current_line );
 				}
 			}
 			if( in_item && !cur_item.project_name.empty( ) ) {
@@ -125,14 +125,14 @@ namespace daw {
 			return result;
 		}
 
-		cmake_deps_file parse_cmakes_deps( boost::filesystem::path const & deps_file ) {
+		glean_file parse_cmakes_deps( boost::filesystem::path const & deps_file ) {
 			assert( exists( deps_file ) && is_regular_file( deps_file ) );
 			std::ifstream in_file;
 			in_file.open( deps_file.native( ), std::ios::binary );
 			if( !in_file ) {
 				std::stringstream ss;
 				ss << "Could not open dependency file (" << deps_file << ")";
-				throw cmake_deps_exception( ss.str( ) ); 
+				throw glean_exception( ss.str( ) ); 
 			}
 			in_file >> std::noskipws;
 			std::string in_str;
@@ -140,6 +140,6 @@ namespace daw {
 			in_file.close( );
 			return parse_cmakes_deps( in_str );
 		}
-	}	// namespace cmake_deps
+	}	// namespace glean
 }    // namespace daw
 

@@ -23,7 +23,7 @@
 #include "config.h"
 
 namespace daw {
-	namespace cmake_deps {
+	namespace glean {
 		namespace {
 			auto get_home( ) {
 				auto home = std::getenv( "HOME" );
@@ -39,13 +39,13 @@ namespace daw {
 			}
 		}
 
-		cmake_deps_config get_config( ) {
+		glean_config get_config( ) {
 			auto env_var = std::getenv( "CMAKE_DEPS_CONFIG" );
-			std::string config_file = env_var ? env_var : get_home( ) + "/.cmake_deps.config";
-			daw::cmake_deps::cmake_deps_config result;
+			std::string config_file = env_var ? env_var : get_home( ) + "/.glean.config";
+			daw::glean::glean_config result;
 			bool is_new_file = false;
 			try {
-				result = daw::json::from_file<daw::cmake_deps::cmake_deps_config>( config_file, false );
+				result = daw::json::from_file<daw::glean::glean_config>( config_file, false );
 			} catch( std::exception const & ) {
 				is_new_file = true;
 			}
@@ -62,16 +62,16 @@ namespace daw {
 		}
 
 
-		cmake_deps_config::cmake_deps_config( std::string CacheFolder ):
-				daw::json::JsonLink<cmake_deps_config>{ },
+		glean_config::glean_config( std::string CacheFolder ):
+				daw::json::JsonLink<glean_config>{ },
 				cache_folder{ std::move( CacheFolder ) } { }
 
-		cmake_deps_config::cmake_deps_config( ):
-				cmake_deps_config{ get_home( ) + "/.cmake_deps_cache" } { }
+		glean_config::glean_config( ):
+				glean_config{ get_home( ) + "/.glean_cache" } { }
 
-		cmake_deps_config::~cmake_deps_config( ) { }
+		glean_config::~glean_config( ) { }
 
 
-	}	// namespace cmake_deps
+	}	// namespace glean
 }    // namespace daw
 
