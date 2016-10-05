@@ -20,3 +20,5 @@ From the same directory as glean.txt run glean and it will create a folder calle
 link_directories( "${CMAKE_SOURCE_DIR}/glean_files/lib" )
 include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/glean_files/include" )
 ```
+
+By default a config file in the home folder( %USERPROFILE% on Windows and $HOME on Linux/Mac...) is creted with the name .glean.config.  It has one parameters, currently. called cache_folder that defaults to the same directory with a name .glean_cache.
