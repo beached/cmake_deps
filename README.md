@@ -11,6 +11,7 @@ project_name=Glean
     uri=https://github.com/beached/glean.git
     branch=master
 ```
+Blank spaced and lines where the first non-whitespace character is a # are ignored. The tabulation is for show and not necessary but each section must start with a project_name key followed by the other keys.  The other keys can be in any order.
 
 If branch is omitted it defaults to master.  The value for project_name must be a valid part of a filename and cannot use characters not allowed in a filename
 
