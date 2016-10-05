@@ -26,6 +26,8 @@
 #include <boost/filesystem/path.hpp>
 #include <exception>
 
+#include "config.h"
+
 namespace daw {
 	namespace glean {
 		struct glean_exception: public std::runtime_error {
@@ -37,7 +39,7 @@ namespace daw {
 			glean_exception & operator=( glean_exception && ) = default;
 		};	// glean_exception
 
-		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root );
+		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg );
 	}	// namespace glean
 }    // namespace daw
 

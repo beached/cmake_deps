@@ -41,10 +41,6 @@ namespace daw {
 
 		glean_exception::~glean_exception( ) { }
 		namespace {
-			bool is_update_needed( glean_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_folder ) {
-				return true;
-			}
-
 			boost::filesystem::path cache_path( glean_item const & item, boost::filesystem::path cache_root ) {
 				assert( exists( cache_root ) && is_directory( cache_root ) );
 				assert( !item.project_name.empty( ) );
@@ -102,10 +98,10 @@ namespace daw {
 				change_directory & operator=( change_directory const & ) = delete;
 			};	// change_directory
 
-			item_folders create_cmakelist( glean_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {
+			item_folders create_cmakelist( glean_item const & item, boost::filesystem::path const & prefix, glean_config const & cfg ) {
 				static auto const git_template_str = impl::get_git_template( );
 				item_folders result;
-				result.cache = cache_path( item, cache_root );
+				result.cache = cache_path( item, cfg.cache_folder );
 				verify_folder( result.cache );
 				result.build = result.cache / "build";
 				verify_folder( result.build );
@@ -140,37 +136,29 @@ namespace daw {
 				return result;
 			}
 
-			int build( item_folders const & proj, glean_item const & item ) {
+			int build( item_folders const & proj, glean_item const & item, glean_config const & cfg ) {
 				change_directory chd{ proj.build };
 				{
 					int result;
-					if( EXIT_SUCCESS != (result = system( "cmake .." )) ) {
+					if( EXIT_SUCCESS != (result = system( (cfg.cmake_binary + " ..").c_str( ))) ) {
 						return result;
 					}
 				}
-				return system( "make" );
+				return system( (cfg.cmake_binary + " --build .").c_str( ) );
 			}
 
-			int install( item_folders const & proj, glean_item const & item ) {
-				change_directory chd{ proj.build };
-				return system( "make install" );
-			}
-
-			void process_item( glean_item const & item, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {
-				auto cml = create_cmakelist( item, prefix, cache_root );
-				if( build( cml, item ) != EXIT_SUCCESS ) {
-					return;
-				}
-				//install( cml, item );
+			void process_item( glean_item const & item, boost::filesystem::path const & prefix, glean_config const & cfg ) {
+				auto cml = create_cmakelist( item, prefix, cfg );
+				build( cml, item, cfg );
 			}
 		}
 
-		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, boost::filesystem::path const & cache_root ) {
+		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg ) {
 			auto depends_obj = parse_cmakes_deps( depend_file );
 			for( auto const & dependency : depends_obj.dependencies ) {
 				std::cout << "Processing: " << dependency.project_name << '\n';
 				try {
-					process_item( dependency, prefix, cache_root );
+					process_item( dependency, prefix, cfg );
 				} catch( glean_exception const & ex ) {
 					std::cerr << "Error processing: " << dependency.project_name << ":\n" << ex.what( ) << std::endl;
 				}

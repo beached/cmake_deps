@@ -33,11 +33,10 @@
 
 int main( int argc, char** argv ) {
 	auto config = daw::glean::get_config( );
-	boost::filesystem::path cache_root{ config.cache_folder };
-	if( !exists( cache_root ) ) {
-		create_directory( cache_root );
+	if( !exists( config.cache_folder ) ) {
+		create_directory( config.cache_folder );
 	}
-	if( !exists( cache_root ) || !is_directory( cache_root ) ) {
+	if( !exists( config.cache_folder ) || !is_directory( config.cache_folder ) ) {
 		std::stringstream ss;
 		ss << "Cache root (" << config.cache_folder << ") does not exist or is not a directory";
 		throw daw::glean::glean_exception( ss.str( ) );
@@ -89,7 +88,7 @@ int main( int argc, char** argv ) {
 	} else {
 		boost::filesystem::create_directory( prefix );
 	}
-	daw::glean::process_file( deps_file, prefix, cache_root );
+	daw::glean::process_file( deps_file, prefix, config );
 
 	return EXIT_SUCCESS;
 }

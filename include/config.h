@@ -29,11 +29,11 @@
 namespace daw {
 	namespace glean {
 		struct glean_config {
-			std::string cache_folder; 
-
+			boost::filesystem::path cache_folder; 
+			std::string cmake_binary;
 		public:
-			glean_config( std::string CacheFolder );
-			glean_config( boost::filesystem::path file_path );
+			glean_config( std::string CacheFolder, std::string cmake_binary_path );
+			glean_config( boost::filesystem::path config_file );
 			glean_config( );
 			~glean_config( );
 			glean_config( glean_config const & ) = default;
