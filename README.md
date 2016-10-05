@@ -21,4 +21,9 @@ link_directories( "${CMAKE_SOURCE_DIR}/glean_files/lib" )
 include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/glean_files/include" )
 ```
 
-By default a config file in the home folder( %USERPROFILE% on Windows and $HOME on Linux/Mac...) is creted with the name .glean.config.  It has one parameters, currently. called cache_folder that defaults to the same directory with a name .glean_cache.
+By default a config file in the home folder( %USERPROFILE% on Windows and $HOME on Linux/Mac...) is creted with the name .glean.config.  It has two parameters, currently, called cache_folder and cmake_binary.  The default file is as follows:
+```
+cache_folder=$HOME/.glean_cache
+cmake_binary=cmake
+```
+Where home will be the expanded $HOME or %USERPROFILE% environment variables.  Unknown keys are ignored but cause a warning.
