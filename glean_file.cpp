@@ -22,7 +22,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "glean_file.h"
 

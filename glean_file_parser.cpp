@@ -25,6 +25,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include <daw/daw_parser_helper.h>
 #include <daw/daw_parser_addons.h>
