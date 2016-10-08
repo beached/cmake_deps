@@ -34,6 +34,7 @@
 #include "glean_impl.h"
 #include "glean_file.h"
 #include "glean_file_parser.h"
+#include "utilities.h"
 
 namespace daw {
 	namespace glean {

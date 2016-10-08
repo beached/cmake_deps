@@ -33,13 +33,11 @@
 #include "glean_file.h"
 #include "glean_file_parser.h"
 #include "templates.h"
+#include "utilities.h"
 
 namespace daw {
 	namespace glean {
-		glean_exception::glean_exception( boost::string_ref msg ):
-			std::runtime_error{ msg.data( ) } { }
 
-		glean_exception::~glean_exception( ) { }
 		namespace {
 			boost::filesystem::path cache_path( glean_item const & item, boost::filesystem::path cache_root ) {
 				assert( exists( cache_root ) && is_directory( cache_root ) );
@@ -51,25 +49,6 @@ namespace daw {
 				return cache_root;
 			}
 
-			void verify_folder( boost::filesystem::path const & path ) {
-				if( !exists( path ) ) {
-					create_directories( path );
-				}
-				if( !exists( path ) || !is_directory( path ) ) {
-					std::stringstream ss;
-					ss << "Could not create folder (" << path << ") or is not a directory";
-					throw glean_exception( ss.str( ) );
-				}
-			}
-
-			void verify_file( boost::filesystem::path const & f ) {
-				if( exists( f ) && !is_regular_file( f ) ) {
-					std::stringstream ss;
-					ss << "File already exists but isn't a file (" << f << ")";
-					throw glean_exception( ss.str( ) );
-
-				}
-			}
 
 			struct item_folders {
 				boost::filesystem::path cache;
@@ -77,26 +56,6 @@ namespace daw {
 				boost::filesystem::path src;
 				boost::filesystem::path cmakelist_file;
 			};	// item_folders
-
-			struct change_directory {
-				boost::filesystem::path old_path;
-				change_directory( boost::filesystem::path const & new_path ):
-					old_path{ boost::filesystem::current_path( ) } {
-
-						boost::filesystem::current_path( new_path );
-					}
-
-				~change_directory( ) {
-					if( exists( old_path) && is_directory( old_path ) ) {
-						boost::filesystem::current_path( old_path );
-					}
-				}
-				change_directory( change_directory && ) = default;
-				change_directory & operator=( change_directory && ) = default;
-
-				change_directory( change_directory const & ) = delete;
-				change_directory & operator=( change_directory const & ) = delete;
-			};	// change_directory
 
 			item_folders create_cmakelist( glean_item const & item, boost::filesystem::path const & prefix, glean_config const & cfg ) {
 				static auto const git_template_str = impl::get_git_template( );

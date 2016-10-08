@@ -69,6 +69,7 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/glean_file_parser.h
 	${HEADER_FOLDER}/glean_impl.h
 	${HEADER_FOLDER}/templates.h
+	${HEADER_FOLDER}/utilities.h
 )
 
 set( SOURCE_FILES
@@ -78,6 +79,7 @@ set( SOURCE_FILES
 	glean_impl.cpp
 	config.cpp
 	templates.cpp
+	utilities.cpp
 )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )

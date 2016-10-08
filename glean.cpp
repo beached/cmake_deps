@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "glean_file.h"
+#include "utilities.h"
 
 int main( int argc, char** argv ) {
 	auto config = daw::glean::get_config( );

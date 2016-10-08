@@ -30,14 +30,6 @@
 
 namespace daw {
 	namespace glean {
-		struct glean_exception: public std::runtime_error {
-			glean_exception( boost::string_ref msg );
-			~glean_exception( );
-			glean_exception( glean_exception const & ) = default;
-			glean_exception( glean_exception && ) = default;
-			glean_exception & operator=( glean_exception const & ) = default;
-			glean_exception & operator=( glean_exception && ) = default;
-		};	// glean_exception
 
 		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg );
 	}	// namespace glean
