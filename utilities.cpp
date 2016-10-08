@@ -20,15 +20,50 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include <boost/utilities/string_view.hpp>
+#include <boost/filesystem.hpp>
+#include <sstream>
 
-#include <boost/filesystem/path.hpp>
-
-#include "config.h"
+#include "utilities.h"
 
 namespace daw {
 	namespace glean {
-		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg );
+		change_directory::change_directory( boost::filesystem::path const & new_path ):
+				old_path{ boost::filesystem::current_path( ) } {
+
+			boost::filesystem::current_path( new_path );
+		}
+
+		change_directory::~change_directory( ) {
+			if( exists( old_path ) && is_directory( old_path ) ) {
+				boost::filesystem::current_path( old_path );
+			}
+		}
+
+		glean_exception::glean_exception( boost::string_view msg ):
+				std::runtime_error{ msg.data( ) } { }
+
+		glean_exception::~glean_exception( ) { }
+
+		void verify_folder( boost::filesystem::path const & path ) {
+			if( !exists( path ) ) {
+				create_directories( path );
+			}
+			if( !exists( path ) || !is_directory( path ) ) {
+				std::stringstream ss;
+				ss << "Could not create folder (" << path << ") or is not a directory";
+				throw glean_exception( ss.str( ) );
+			}
+		}
+
+		void verify_file( boost::filesystem::path const & f ) {
+			if( exists( f ) && !is_regular_file( f ) ) {
+				std::stringstream ss;
+				ss << "File already exists but isn't a file (" << f << ")";
+				throw glean_exception( ss.str( ) );
+
+			}
+		}
 	}	// namespace glean
 }    // namespace daw
 

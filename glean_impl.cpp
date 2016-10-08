@@ -21,7 +21,6 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
-#include <boost/utility/string_ref.hpp>
 #include <cstdlib>
 #include <exception>
 #include <fstream>

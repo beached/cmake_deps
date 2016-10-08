@@ -22,13 +22,46 @@
 
 #pragma once
 
+#include <boost/utility/string_view.hpp>
 #include <boost/filesystem/path.hpp>
-
-#include "config.h"
+#include <exception>
 
 namespace daw {
 	namespace glean {
-		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg );
+		struct change_directory {
+			boost::filesystem::path old_path;
+
+			change_directory( boost::filesystem::path const & new_path );
+
+			~change_directory( );
+
+			change_directory( change_directory && ) = default;
+
+			change_directory & operator=( change_directory && ) = default;
+
+			change_directory( change_directory const & ) = delete;
+
+			change_directory & operator=( change_directory const & ) = delete;
+		};    // change_directory
+
+		struct glean_exception: public std::runtime_error {
+			glean_exception( boost::string_view msg );
+
+			~glean_exception( );
+
+			glean_exception( glean_exception const & ) = default;
+
+			glean_exception( glean_exception && ) = default;
+
+			glean_exception & operator=( glean_exception const & ) = default;
+
+			glean_exception & operator=( glean_exception && ) = default;
+		};    // glean_exception
+
+		void verify_folder( boost::filesystem::path const & path );
+
+		void verify_file( boost::filesystem::path const & f );
+
 	}	// namespace glean
 }    // namespace daw
 
