@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <boost/utilities/string_view.hpp>
+#include <boost/utility/string_view.hpp>
 #include <boost/filesystem.hpp>
 #include <sstream>
 
