@@ -70,17 +70,17 @@ namespace daw {
 				auto git_template = daw::parse_template::create_parse_template( git_template_str );
 				git_template.add_callback( "project_name", [&]( ) -> std::string { return item.project_name; } );
 				git_template.add_callback( "git_repo", [&]( ) -> std::string { return *item.uri; } );
-				git_template.add_callback( "source_directory", [&]( ) -> std::string { return result.src.native( ); } );
+				git_template.add_callback( "source_directory", [&]( ) -> std::string { return result.src.string( ); } );
 				if( item.branch && !item.branch->empty( ) ) {
 					git_template.add_callback( "git_tag", [&]( ) -> std::string { return *item.branch; } );
 				} else {
 					git_template.add_callback( "git_tag", []( ) -> std::string { return "master"; } );
 
 				}
-				git_template.add_callback( "install_directory", [&]( ) -> std::string { return canonical( prefix ).native( ); } );
+				git_template.add_callback( "install_directory", [&]( ) -> std::string { return canonical( prefix ).string( ); } );
 				try {
 					std::ofstream out_file;
-					out_file.open( result.cmakelist_file.native( ), std::ios::out | std::ios::trunc );
+					out_file.open( result.cmakelist_file.string( ), std::ios::out | std::ios::trunc );
 					if( !out_file ) {
 						throw std::runtime_error( "Could not open file" );
 					}
@@ -91,6 +91,19 @@ namespace daw {
 					ss << "Could not write cmake file (" << result.cmakelist_file << "): " << ex.what( );
 					throw glean_exception( ss.str( ) );
 				}
+				return result;
+			}
+
+			int download( item_folders const & proj, glean_item const & item, glean_config const & cfg ) {
+				if( !item.uri ) {
+					throw std::runtime_error( "No URI provided" );
+				}
+				if( !exists( proj.src ) ) {
+					create_directory( proj.src );
+				}
+				change_directory chd{ proj.src };
+				int result = system( (cfg.git_binary + " clone " + *item.uri).c_str( ) );
+
 				return result;
 			}
 
@@ -107,7 +120,8 @@ namespace daw {
 
 			void process_item( glean_item const & item, boost::filesystem::path const & prefix, glean_config const & cfg ) {
 				auto cml = create_cmakelist( item, prefix, cfg );
-				build( cml, item, cfg );
+				download( cml, item, cfg );
+				//build( cml, item, cfg );
 			}
 		}
 

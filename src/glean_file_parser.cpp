@@ -86,7 +86,7 @@ namespace daw {
 			glean_file result;
 			glean_item cur_item;
 			bool in_item = false;
-			for( auto const & kv: daw::kv_file{ deps_file.native( ) } ) {
+			for( auto const & kv: daw::kv_file{ deps_file.string( ) } ) {
 				if( kv.key == "project_name" ) {
 					if( in_item ) {
 						result.dependencies.push_back( cur_item );

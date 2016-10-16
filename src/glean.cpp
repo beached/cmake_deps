@@ -24,11 +24,9 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 #include <cstdlib>
-#include <string>
 #include <iostream>
 #include <glean_impl.h>
 
-#include "config.h"
 #include "glean_file.h"
 #include "utilities.h"
 

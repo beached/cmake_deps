@@ -21,9 +21,14 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
+#include <boost/network/protocol/http/client.hpp>
+#include <boost/network/uri.hpp>
+#include <boost/utility/string_view.hpp>
+
 #include <iostream>
 #include <sstream>
 
+#include <daw/delete_on_exit.h>
 #include <daw/kv_file.h>
 
 #include "config.h"
@@ -60,12 +65,13 @@ namespace daw {
 			return glean_config{ config_file };
 		}
 
-		glean_config::glean_config( std::string CacheFolder, std::string cmake_binary_path ):
+		glean_config::glean_config( std::string CacheFolder, std::string cmake_binary_path, std::string git_binary_path ):
 				cache_folder{ std::move( CacheFolder ) }, 
-				cmake_binary{ std::move( cmake_binary_path ) } { }
+				cmake_binary{ std::move( cmake_binary_path ) },
+				git_binary{ std::move( git_binary_path ) } { }
 
 		glean_config::glean_config( ):
-				glean_config{ get_home( ), "cmake" } {
+				glean_config{ get_home( ), "cmake", "git" } {
 		
 			cache_folder /= ".glean_cache";
 		}
@@ -79,24 +85,45 @@ namespace daw {
 					ss << "The config file (" << file_path << ") is not a regular file";
 					throw glean_exception( ss.str( ) );
 				}
-				for( auto const & kv: daw::kv_file{ file_path.native( ) } ) {
+				for( auto const & kv: daw::kv_file{ file_path.string( ) } ) {
 					if( "cache_folder" == kv.key ) {
 						cache_folder = boost::filesystem::path{ kv.value };
 					} else if( "cmake_binary" == kv.key ) {
 						cmake_binary = kv.value;
+					} else if( "git_binary" == kv.key ) {
+						git_binary = kv.value;
 					} else {
 						std::cerr << "WARNING: Unknown key(" << kv.key << ") value in cmake config file (" << file_path << ")" << std::endl;
 					}
 				}
 			} else {
 				daw::kv_file kv;
-				kv.add( "cache_folder", cache_folder.native( ) );
+				kv.add( "cache_folder", cache_folder.string( ) );
 				kv.add( "cmake_binary", cmake_binary );
-				kv.to_file( file_path.native( ) );
+				kv.add( "git_binary", git_binary );
+				kv.to_file( file_path.string( ) );
 			}
 		}
 
 		glean_config::~glean_config( ) { }
+
+
+		daw::delete_on_exit download_file( boost::string_view url ) {
+			boost::network::http::client::options opts;
+			opts.follow_redirects( true );
+			boost::network::http::client client{ opts };
+			boost::network::http::client::request request{ url.data( ) };
+			auto response = client.get( request );
+			auto tmp_file = daw::delete_on_exit{ };
+			auto out_file = tmp_file.secure_create_stream( );
+
+			if( !out_file ) {
+				throw std::runtime_error( "Could not open tmp file for writing" );
+			}
+			out_file << static_cast<std::string>( body( response ) );
+			out_file->close( );
+			return tmp_file;
+		}
 	}	// namespace glean
 }    // namespace daw
 

@@ -6,7 +6,13 @@ include( ExternalProject )
 
 find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 
+add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_NETWORK_ENABLE_HTTPS ) 
+
 find_package( Threads REQUIRED )
+
+find_package ( cppnetlib 0.11.0 REQUIRED )
+
+find_package( OpenSSL REQUIRED )
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
 	add_compile_options( -D_WIN32_WINNT=0x0601 ) 
@@ -54,14 +60,29 @@ externalproject_add(
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
 )
 
-include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
-link_directories( ${Boost_LIBRARY_DIRS} )
-
-include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
-link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
-include_directories( "./include" )
+externalproject_add(
+    delete_on_exit_prj
+    GIT_REPOSITORY "https://github.com/beached/libdelete_on_exit.git"
+    SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/delete_on_exit"
+    GIT_TAG "master"
+    INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
+)
 
 set( HEADER_FOLDER "include" )
+set( SOURCE_FOLDER "src" )
+set( TEST_FOLDER "tests" )
+
+include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
+include_directories( ${HEADER_FOLDER} )
+include_directories( SYSTEM ${OPENSSL_INCLUDE_DIR} )
+
+include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
+include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
+include_directories ( ${CPPNETLIB_INCLUDE_DIRS} )
+
+link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
+link_directories( ${Boost_LIBRARY_DIRS} )
 
 set( HEADER_FILES
 	${HEADER_FOLDER}/config.h
@@ -73,19 +94,21 @@ set( HEADER_FILES
 )
 
 set( SOURCE_FILES
-	glean.cpp
-	glean_file.cpp
-	glean_file_parser.cpp
-	glean_impl.cpp
-	config.cpp
-	templates.cpp
-	utilities.cpp
+	${SOURCE_FOLDER}/glean_file.cpp
+	${SOURCE_FOLDER}/glean_file_parser.cpp
+	${SOURCE_FOLDER}/glean_impl.cpp
+	${SOURCE_FOLDER}/config.cpp
+	${SOURCE_FOLDER}/templates.cpp
+	${SOURCE_FOLDER}/utilities.cpp
 )
 
-include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
+add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
+add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj kv_file_prj delete_on_exit_prj )
+target_link_libraries( glean char_range parse_template kv_file delete_on_exit ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
-add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} )
-add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj kv_file_prj )
-target_link_libraries( glean char_range parse_template kv_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
+add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
+add_dependencies( glean_test_bin header_libraries_prj char_range_prj parse_template_prj kv_file_prj delete_on_exit_prj )
+target_link_libraries( glean_test_bin kv_file parse_template char_range delete_on_exit ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
+#add_test( glean_test glean_test_bin )
 
 install( TARGETS glean DESTINATION bin )

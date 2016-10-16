@@ -1,4 +1,3 @@
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2016 Darrell Wright
@@ -21,39 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#define BOOST_TEST_MODULE glean_test 
 
-#include <boost/filesystem/path.hpp>
-#include <boost/utility/string_view.hpp>
-#include <string>
+#include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <iostream>
+#include <iterator>
 
 #include <daw/delete_on_exit.h>
 
-namespace daw {
-	namespace glean {
-		struct glean_config {
-			boost::filesystem::path cache_folder; 
-			std::string cmake_binary;
-			std::string git_binary;
-		public:
-			glean_config( std::string CacheFolder, std::string cmake_binary_path, std::string git_binary_path );
-			glean_config( boost::filesystem::path config_file );
-			glean_config( );
-			~glean_config( );
-			glean_config( glean_config const & ) = default;
-			glean_config( glean_config && ) = default;
-			glean_config & operator=( glean_config const & ) = default;
-			glean_config & operator=( glean_config && ) = default;
+#include "config.h"
 
-		};	// glean_config
-
-		glean_config get_config( );
-
-		/// @brief Download a file to a temporary location
-		/// @param url Location of file to download
-		/// @return path to downloaded file
-		/// @post The file exists and will be deleted upon program termination
-		daw::delete_on_exit download_file( boost::string_view url ); 
-	}	// namespace glean
-}    // namespace daw
-
+BOOST_AUTO_TEST_CASE( download_test_001 ) {
+	auto path = daw::glean::download_file( "https://www.google.ca" );
+	std::cout << "Downloaded to file " << path.string( ) << std::endl;
+	BOOST_REQUIRE( exists( *path ) );
+	std::ifstream in_file;
+	in_file.open( path.string( ), std::ios::binary );
+	BOOST_REQUIRE( in_file );
+	std::string result;
+	std::copy( std::istreambuf_iterator<char>{ in_file }, std::istreambuf_iterator<char>{ }, std::back_inserter( result ) );
+}
