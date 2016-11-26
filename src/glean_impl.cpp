@@ -48,7 +48,6 @@ namespace daw {
 				return cache_root;
 			}
 
-
 			struct item_folders {
 				boost::filesystem::path cache;
 				boost::filesystem::path build;
@@ -94,7 +93,15 @@ namespace daw {
 				return result;
 			}
 
-			int download( item_folders const & proj, glean_item const & item, glean_config const & cfg ) {
+			bool has_glean_file( boost::filesystem::path p ) {
+				if( p.empty( ) || !exists( p ) || !is_directory( p ) ) {
+					throw std::invalid_argument( "invalid path p" );
+				}
+				p /= "glean.txt";
+				return exists( p ) && is_regular_file( p );
+			}
+
+			int git_clone( item_folders const & proj, glean_item const & item, glean_config const & cfg ) {
 				if( !item.uri ) {
 					throw std::runtime_error( "No URI provided" );
 				}
@@ -118,23 +125,32 @@ namespace daw {
 				return system( (cfg.cmake_binary + " --build .").c_str( ) );
 			}
 
-			void process_item( glean_item const & item, boost::filesystem::path const & prefix, glean_config const & cfg ) {
+			void process_item( std::unordered_map<std::string, bool> & process_cache, glean_item const & item, boost::filesystem::path const & prefix, glean_config const & cfg ) {
 				auto cml = create_cmakelist( item, prefix, cfg );
-				download( cml, item, cfg );
+				git_clone( cml, item, cfg );
+				if( has_glean_file( cml.src ) ) {
+					std::cout << cml.src << " has glean.txt\n";
+				}
+
 				//build( cml, item, cfg );
+			}
+
+			void process_file( std::unordered_map<std::string, bool> & process_cache, boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg ) {
+				auto depends_obj = parse_cmakes_deps( depend_file );
+				for( auto const & dependency : depends_obj.dependencies ) {
+					std::cout << "Processing: " << dependency.project_name << '\n';
+					try {
+						process_item( process_cache, dependency, prefix, cfg );
+					} catch( glean_exception const & ex ) {
+						std::cerr << "Error processing: " << dependency.project_name << ":\n" << ex.what( ) << std::endl;
+					}
+				}
 			}
 		}
 
 		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg ) {
-			auto depends_obj = parse_cmakes_deps( depend_file );
-			for( auto const & dependency : depends_obj.dependencies ) {
-				std::cout << "Processing: " << dependency.project_name << '\n';
-				try {
-					process_item( dependency, prefix, cfg );
-				} catch( glean_exception const & ex ) {
-					std::cerr << "Error processing: " << dependency.project_name << ":\n" << ex.what( ) << std::endl;
-				}
-			}
+			std::unordered_map<std::string, bool> process_cache;
+			process_file( process_cache, depend_file, prefix, cfg );
 		}
 	}	// namespace glean
 }    // namespace daw

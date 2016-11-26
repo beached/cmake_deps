@@ -27,7 +27,7 @@
 #include <boost/utility/string_view.hpp>
 #include <string>
 
-#include <daw/delete_on_exit.h>
+#include <daw/temp_file.h>
 
 namespace daw {
 	namespace glean {
@@ -53,7 +53,7 @@ namespace daw {
 		/// @param url Location of file to download
 		/// @return path to downloaded file
 		/// @post The file exists and will be deleted upon program termination
-		daw::delete_on_exit download_file( boost::string_view url ); 
+		daw::unique_temp_file download_file( boost::string_view url ); 
 	}	// namespace glean
 }    // namespace daw
 

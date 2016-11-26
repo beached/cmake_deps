@@ -28,7 +28,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <daw/delete_on_exit.h>
+#include <daw/temp_file.h>
 #include <daw/kv_file.h>
 
 #include "config.h"
@@ -108,13 +108,13 @@ namespace daw {
 		glean_config::~glean_config( ) { }
 
 
-		daw::delete_on_exit download_file( boost::string_view url ) {
+		daw::unique_temp_file download_file( boost::string_view url ) {
 			boost::network::http::client::options opts;
 			opts.follow_redirects( true );
 			boost::network::http::client client{ opts };
 			boost::network::http::client::request request{ url.data( ) };
 			auto response = client.get( request );
-			auto tmp_file = daw::delete_on_exit{ };
+			auto tmp_file = daw::unique_temp_file{ };
 			auto out_file = tmp_file.secure_create_stream( );
 
 			if( !out_file ) {

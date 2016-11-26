@@ -31,6 +31,10 @@
 #include "utilities.h"
 
 int main( int argc, char** argv ) {
+	if( system( nullptr ) == 0 ) {
+		std::cerr << "Could not call system function" << std::endl;
+		exit( EXIT_FAILURE );
+	}
 	auto config = daw::glean::get_config( );
 	if( !exists( config.cache_folder ) ) {
 		create_directory( config.cache_folder );

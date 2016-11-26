@@ -28,8 +28,6 @@
 #include <iostream>
 #include <iterator>
 
-#include <daw/delete_on_exit.h>
-
 #include "config.h"
 
 BOOST_AUTO_TEST_CASE( download_test_001 ) {

@@ -6,6 +6,7 @@ include( ExternalProject )
 
 find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 
+enable_testing( )
 add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_NETWORK_ENABLE_HTTPS ) 
 
 find_package( Threads REQUIRED )
@@ -61,9 +62,9 @@ externalproject_add(
 )
 
 externalproject_add(
-    delete_on_exit_prj
-    GIT_REPOSITORY "https://github.com/beached/libdelete_on_exit.git"
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/delete_on_exit"
+    temp_file_prj
+    GIT_REPOSITORY "https://github.com/beached/libtemp_file.git"
+    SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/temp_file"
     GIT_TAG "master"
     INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
@@ -103,12 +104,13 @@ set( SOURCE_FILES
 )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
-add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj kv_file_prj delete_on_exit_prj )
-target_link_libraries( glean char_range parse_template kv_file delete_on_exit ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj kv_file_prj temp_file_prj )
+target_link_libraries( glean char_range parse_template kv_file temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
 
 add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
-add_dependencies( glean_test_bin header_libraries_prj char_range_prj parse_template_prj kv_file_prj delete_on_exit_prj )
-target_link_libraries( glean_test_bin kv_file parse_template char_range delete_on_exit ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
+add_test( glean_test glean_test_bin )
+add_dependencies( glean_test_bin header_libraries_prj char_range_prj parse_template_prj kv_file_prj temp_file_prj )
+target_link_libraries( glean_test_bin kv_file parse_template char_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
 #add_test( glean_test glean_test_bin )
 
 install( TARGETS glean DESTINATION bin )
