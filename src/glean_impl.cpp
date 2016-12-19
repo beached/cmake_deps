@@ -25,6 +25,7 @@
 #include <exception>
 #include <fstream>
 #include <thread>
+#include <sstream>
 
 #include <daw/parse_template/daw_parse_template.h>
 

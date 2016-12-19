@@ -11,8 +11,6 @@ add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_NETWORK_ENABLE_HTTPS )
 
 find_package( Threads REQUIRED )
 
-find_package ( cppnetlib 0.11.0 REQUIRED )
-
 find_package( OpenSSL REQUIRED )
 
 if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
@@ -80,7 +78,6 @@ include_directories( SYSTEM ${OPENSSL_INCLUDE_DIR} )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
-include_directories ( ${CPPNETLIB_INCLUDE_DIRS} )
 
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
 link_directories( ${Boost_LIBRARY_DIRS} )
@@ -105,12 +102,12 @@ set( SOURCE_FILES
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
 add_dependencies( glean header_libraries_prj char_range_prj parse_template_prj kv_file_prj temp_file_prj )
-target_link_libraries( glean char_range parse_template kv_file temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( glean char_range parse_template kv_file temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 
 add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
 add_test( glean_test glean_test_bin )
 add_dependencies( glean_test_bin header_libraries_prj char_range_prj parse_template_prj kv_file_prj temp_file_prj )
-target_link_libraries( glean_test_bin kv_file parse_template char_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${CPPNETLIB_LIBRARIES} ${OPENSSL_LIBRARIES} )
+target_link_libraries( glean_test_bin kv_file parse_template char_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 #add_test( glean_test glean_test_bin )
 
 install( TARGETS glean DESTINATION bin )
