@@ -24,6 +24,7 @@
 
 #include <boost/utility/string_view.hpp>
 #include <boost/filesystem/path.hpp>
+#include <curl/curl.h>
 #include <exception>
 
 namespace daw {
@@ -61,6 +62,27 @@ namespace daw {
 		void verify_folder( boost::filesystem::path const & path );
 
 		void verify_file( boost::filesystem::path const & f );
+
+		struct curl_t {
+			CURL * ptr;
+
+			curl_t( ) noexcept;
+
+			constexpr explicit curl_t( CURL* p ) noexcept;
+
+			void close( ) noexcept;
+
+			~curl_t( ) noexcept;
+
+			operator CURL*() const noexcept;
+
+			explicit operator bool( ) const noexcept;
+
+			curl_t( curl_t const & ) = delete;
+			curl_t & operator=( curl_t const & ) = delete;
+			curl_t( curl_t && ) = default;
+			curl_t & operator=( curl_t && ) = default;
+		};	// curl_t
 
 	}	// namespace glean
 }    // namespace daw

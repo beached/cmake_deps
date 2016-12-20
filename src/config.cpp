@@ -21,8 +21,6 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
-#include <boost/network/protocol/http/client.hpp>
-#include <boost/network/uri.hpp>
 #include <boost/utility/string_view.hpp>
 
 #include <iostream>
@@ -107,20 +105,58 @@ namespace daw {
 
 		glean_config::~glean_config( ) { }
 
+		namespace other {
+			auto init_curl( ) {
+				static auto result = curl_global_init( CURL_GLOBAL_DEFAULT );
+				return result;
+			}
+
+			std::string download_file( boost::string_view file_url ) {
+				init_curl( );
+				std::string result;	
+				static auto const write_data = []( char * data, size_t size, size_t nmemb, std::string * writer_data ) -> size_t {
+					if( nullptr == writer_data ) {
+						return 0;
+					}
+					if( data && size*nmemb > 0 ) {
+						writer_data->append( data, size*nmemb );
+					}					
+					return size * nmemb;
+				};
+				curl_t curl;
+				curl_easy_setopt( curl, CURLOPT_URL, file_url.data( ) );
+				curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, write_data );
+				curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
+
+				// Follow redirects
+				curl_easy_setopt( curl, CURLOPT_FOLLOWLOCATION, 1L );
+				// 20 seems to be a fair number, but still a WAG
+				curl_easy_setopt( curl, CURLOPT_MAXREDIRS, 20L );	
+				
+				curl_easy_setopt( curl, CURLOPT_HTTPGET, 1L );
+				auto res = curl_easy_perform( curl );
+				if( res != CURLE_OK ) {
+					throw std::runtime_error( "Could not download file" );
+				}
+				return result;
+			}
+
+		}
+
 
 		daw::unique_temp_file download_file( boost::string_view url ) {
-			boost::network::http::client::options opts;
-			opts.follow_redirects( true );
-			boost::network::http::client client{ opts };
-			boost::network::http::client::request request{ url.data( ) };
-			auto response = client.get( request );
+//				boost::network::http::client::options opts;
+//				opts.follow_redirects( true );
+//				boost::network::http::client client{ opts };
+//				boost::network::http::client::request request{ url.data( ) };
+//				auto response = client.get( request );
 			auto tmp_file = daw::unique_temp_file{ };
 			auto out_file = tmp_file.secure_create_stream( );
 
 			if( !out_file ) {
 				throw std::runtime_error( "Could not open tmp file for writing" );
 			}
-			out_file << static_cast<std::string>( body( response ) );
+			out_file << other::download_file( url );
 			out_file->close( );
 			return tmp_file;
 		}

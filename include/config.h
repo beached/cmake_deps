@@ -53,7 +53,7 @@ namespace daw {
 		/// @param url Location of file to download
 		/// @return path to downloaded file
 		/// @post The file exists and will be deleted upon program termination
-		daw::unique_temp_file download_file( boost::string_view url ); 
+		daw::unique_temp_file download_file( boost::string_view url );
 	}	// namespace glean
 }    // namespace daw
 

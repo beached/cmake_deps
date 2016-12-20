@@ -23,13 +23,14 @@
 #include <boost/utility/string_view.hpp>
 #include <boost/filesystem.hpp>
 #include <sstream>
+#include <curl/curl.h>
 
 #include "utilities.h"
 
 namespace daw {
 	namespace glean {
 		change_directory::change_directory( boost::filesystem::path const & new_path ):
-				old_path{ boost::filesystem::current_path( ) } {
+			old_path { boost::filesystem::current_path( ) } {
 
 			boost::filesystem::current_path( new_path );
 		}
@@ -41,7 +42,7 @@ namespace daw {
 		}
 
 		glean_exception::glean_exception( boost::string_view msg ):
-				std::runtime_error{ msg.data( ) } { }
+			std::runtime_error { msg.data( ) } { }
 
 		glean_exception::~glean_exception( ) { }
 
@@ -63,6 +64,31 @@ namespace daw {
 				throw glean_exception( ss.str( ) );
 
 			}
+		}
+
+		curl_t::curl_t( ) noexcept:
+			ptr { curl_easy_init( ) } { }
+
+		constexpr curl_t::curl_t( CURL* p ) noexcept:
+			ptr { p } { }
+
+		void curl_t::close( ) noexcept {
+			if( ptr ) {
+				auto tmp = std::exchange( ptr, nullptr );
+				curl_easy_cleanup( tmp );
+			}
+		}
+
+		curl_t::~curl_t( ) noexcept {
+			close( );
+		}
+
+		curl_t::operator void*() const noexcept {
+			return ptr;
+		}
+
+		curl_t::operator bool( ) const noexcept {
+			return nullptr != ptr;
 		}
 	}	// namespace glean
 }    // namespace daw
