@@ -66,16 +66,26 @@ namespace daw {
 			}
 		}
 
-		curl_t::curl_t( ) noexcept:
-			ptr { curl_easy_init( ) } { }
+		std::mutex curl_t::m_init_lock { };
 
-		constexpr curl_t::curl_t( CURL* p ) noexcept:
-			ptr { p } { }
+		curl_t::curl_t( ) noexcept:
+				ptr { nullptr } {
+
+			{
+				std::lock_guard<std::mutex> lock { m_init_lock };
+				curl_global_init( CURL_GLOBAL_DEFAULT );
+			}
+			ptr = curl_easy_init( );
+		}
 
 		void curl_t::close( ) noexcept {
 			if( ptr ) {
-				auto tmp = std::exchange( ptr, nullptr );
-				curl_easy_cleanup( tmp );
+				try {
+					auto tmp = std::exchange( ptr, nullptr );
+					curl_easy_cleanup( tmp );
+					std::lock_guard<std::mutex> lock { m_init_lock };
+					curl_global_cleanup( );
+				} catch( std::exception const & ) { }
 			}
 		}
 

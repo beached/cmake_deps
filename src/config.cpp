@@ -106,10 +106,6 @@ namespace daw {
 		glean_config::~glean_config( ) { }
 
 		namespace other {
-			auto init_curl( ) {
-				static auto result = curl_global_init( CURL_GLOBAL_DEFAULT );
-				return result;
-			}
 
 			size_t write_data( char * data, size_t size, size_t nmemb, void * writer_data_p ) {
 				if( nullptr == writer_data_p ) {
@@ -126,7 +122,6 @@ namespace daw {
 				std::string result;
 				curl_t curl;
 
-				init_curl( );
 				curl_easy_setopt( curl, CURLOPT_URL, file_url.data( ) );
 				curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, write_data );
 				curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
