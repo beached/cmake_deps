@@ -111,19 +111,22 @@ namespace daw {
 				return result;
 			}
 
+			size_t write_data( char * data, size_t size, size_t nmemb, void * writer_data_p ) {
+				if( nullptr == writer_data_p ) {
+					return 0;
+				}
+				auto & writer_data = *reinterpret_cast<std::string*>(writer_data_p);
+				if( data && size*nmemb > 0 ) {
+					writer_data.append( data, size*nmemb );
+				}
+				return size * nmemb;
+			}
+
 			std::string download_file( boost::string_view file_url ) {
-				init_curl( );
-				std::string result;	
-				static auto const write_data = []( char * data, size_t size, size_t nmemb, std::string * writer_data ) -> size_t {
-					if( nullptr == writer_data ) {
-						return 0;
-					}
-					if( data && size*nmemb > 0 ) {
-						writer_data->append( data, size*nmemb );
-					}					
-					return size * nmemb;
-				};
+				std::string result;
 				curl_t curl;
+
+				init_curl( );
 				curl_easy_setopt( curl, CURLOPT_URL, file_url.data( ) );
 				curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, write_data );
 				curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
@@ -140,16 +143,9 @@ namespace daw {
 				}
 				return result;
 			}
-
-		}
-
+		}	// namespace other
 
 		daw::unique_temp_file download_file( boost::string_view url ) {
-//				boost::network::http::client::options opts;
-//				opts.follow_redirects( true );
-//				boost::network::http::client client{ opts };
-//				boost::network::http::client::request request{ url.data( ) };
-//				auto response = client.get( request );
 			auto tmp_file = daw::unique_temp_file{ };
 			auto out_file = tmp_file.secure_create_stream( );
 

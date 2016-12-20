@@ -25,9 +25,10 @@
 #include <boost/filesystem.hpp>
 #include <cstdlib>
 #include <iostream>
-#include <glean_impl.h>
+#include <sstream>
 
 #include "glean_file.h"
+#include "glean_impl.h"
 #include "utilities.h"
 
 int main( int argc, char** argv ) {
