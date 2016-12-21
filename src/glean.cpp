@@ -31,11 +31,7 @@
 #include "glean_impl.h"
 #include "utilities.h"
 
-int main( int argc, char** argv ) {
-	if( system( nullptr ) == 0 ) {
-		std::cerr << "Could not call system function" << std::endl;
-		exit( EXIT_FAILURE );
-	}
+auto setup_config( ) {
 	auto config = daw::glean::get_config( );
 	if( !exists( config.cache_folder ) ) {
 		create_directory( config.cache_folder );
@@ -45,6 +41,17 @@ int main( int argc, char** argv ) {
 		ss << "Cache root (" << config.cache_folder << ") does not exist or is not a directory";
 		throw daw::glean::glean_exception( ss.str( ) );
 	}
+	return config;
+}
+
+int main( int argc, char** argv ) {
+	if( system( nullptr ) == 0 ) {
+		std::cerr << "Could not call system function" << std::endl;
+		exit( EXIT_FAILURE );
+	}
+	auto config = setup_config( );
+
+
 	boost::program_options::options_description desc{ "Options" };
 	desc.add_options( )
 		( "help", "print option descriptions" )
