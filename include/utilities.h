@@ -26,6 +26,7 @@
 #include <boost/filesystem/path.hpp>
 #include <curl/curl.h>
 #include <exception>
+#include <mutex>
 
 namespace daw {
 	namespace glean {
@@ -63,12 +64,12 @@ namespace daw {
 
 		void verify_file( boost::filesystem::path const & f );
 
-		struct curl_t {
+		class curl_t {
+			static std::mutex m_init_lock;
 			CURL * ptr;
+		public:
 
 			curl_t( ) noexcept;
-
-			constexpr explicit curl_t( CURL* p ) noexcept;
 
 			void close( ) noexcept;
 
