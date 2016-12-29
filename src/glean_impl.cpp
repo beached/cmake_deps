@@ -68,7 +68,7 @@ namespace daw {
 				result.cmakelist_file = result.cache / "CMakeLists.txt";
 				verify_file( result.cmakelist_file );
 				auto git_template = daw::parse_template::create_parse_template( git_template_str );
-				git_template.add_callback( "project_name", [&]( ) -> std::string { return item.project_name; } );
+				git_template.add_callback( "project_name", [&item]( ) -> std::string { return item.project_name; } );
 				git_template.add_callback( "git_repo", [&]( ) -> std::string { return *item.uri; } );
 				git_template.add_callback( "source_directory", [&]( ) -> std::string { return result.src.string( ); } );
 				if( item.branch && !item.branch->empty( ) ) {
