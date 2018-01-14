@@ -1,7 +1,7 @@
 
 // The MIT License (MIT)
 //
-// Copyright (c) 2016 Darrell Wright
+// Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -30,12 +30,12 @@
 
 namespace daw {
 	namespace glean {
-		enum class item_types: uint8_t { none, git, custom };
+		enum class item_types : uint8_t { none, git, custom };
 		std::string to_string( item_types t );
-		item_types items_type_from_string( std::string const & str );
+		item_types items_type_from_string( std::string const &str );
 
-		std::ostream & operator<<( std::ostream & os, item_types const & item );
-		std::istream & operator>>( std::istream & is, item_types & item );
+		std::ostream &operator<<( std::ostream &os, item_types const &item );
+		std::istream &operator>>( std::istream &is, item_types &item );
 
 		struct glean_item {
 			item_types type;
@@ -46,21 +46,21 @@ namespace daw {
 			boost::optional<std::string> build_command;
 			boost::optional<std::string> install_command;
 			using str_opt = boost::optional<std::string>;
-			glean_item( item_types Type,
-							 std::string ProjectName = "",
-							 boost::optional<std::string> Uri = str_opt{ },
-							 boost::optional<std::string> Branch = str_opt{ },
-							 boost::optional<std::string> DecompressCommand = str_opt{ },
-							 boost::optional<std::string> BuildCommand = str_opt{ },
-							 boost::optional<std::string> InstallCommand = str_opt{ } );
-			glean_item( );
+
+			explicit glean_item( item_types Type = item_types::none, std::string ProjectName = "",
+			                     boost::optional<std::string> Uri = str_opt{},
+			                     boost::optional<std::string> Branch = str_opt{},
+			                     boost::optional<std::string> DecompressCommand = str_opt{},
+			                     boost::optional<std::string> BuildCommand = str_opt{},
+			                     boost::optional<std::string> InstallCommand = str_opt{} );
+
 			~glean_item( );
 
 			glean_item( glean_item const & ) = default;
-			glean_item( glean_item && ) = default;
-			glean_item & operator=( glean_item const & ) = default;
-			glean_item & operator=( glean_item && ) = default;
-		};	// glean_item
+			glean_item( glean_item && ) noexcept = default;
+			glean_item &operator=( glean_item const & ) = default;
+			glean_item &operator=( glean_item && ) noexcept = default;
+		}; // glean_item
 
 		struct glean_file {
 			std::vector<glean_item> dependencies;
@@ -69,11 +69,10 @@ namespace daw {
 			~glean_file( );
 
 			glean_file( glean_file const & ) = default;
-			glean_file( glean_file && ) = default;
-			glean_file & operator=( glean_file const & ) = default;
-			glean_file & operator=( glean_file && ) = default;
-		};	// glean_file
+			glean_file( glean_file && ) noexcept = default;
+			glean_file &operator=( glean_file const & ) = default;
+			glean_file &operator=( glean_file && ) noexcept = default;
+		}; // glean_file
 
-	}	// namespace glean
-}    // namespace daw
-
+	} // namespace glean
+} // namespace daw

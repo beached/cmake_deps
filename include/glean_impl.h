@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016 Darrell Wright
+// Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -25,10 +25,10 @@
 #include <boost/filesystem/path.hpp>
 
 #include "config.h"
+#include "glean_options.h"
 
 namespace daw {
 	namespace glean {
-		void process_file( boost::filesystem::path const & depend_file, boost::filesystem::path const & prefix, glean_config const & cfg );
-	}	// namespace glean
-}    // namespace daw
-
+		void process_file( glean_options const &opts, glean_config const &cfg );
+	} // namespace glean
+} // namespace daw

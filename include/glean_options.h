@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2018 Darrell Wright
+// Copyright (c) 2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -20,34 +20,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
-#include <cstdlib>
-#include <git2.h>
-#include <iostream>
-#include <sstream>
+#pragma once
 
-#include "glean_file.h"
-#include "glean_impl.h"
-#include "glean_options.h"
-#include "utilities.h"
+#include <boost/filesystem/path.hpp>
+#include <boost/optional.hpp>
+#include <boost/program_options/variables_map.hpp>
 
-auto setup_config( ) {
-	auto config = daw::glean::get_config( );
-	if( !exists( config.cache_folder ) ) {
-		create_directory( config.cache_folder );
-	}
-	if( !exists( config.cache_folder ) || !is_directory( config.cache_folder ) ) {
-		std::stringstream ss;
-		ss << "Cache root (" << config.cache_folder << ") does not exist or is not a directory";
-		throw daw::glean::glean_exception( ss.str( ) );
-	}
-	return config;
-}
+namespace daw {
 
-int main( int argc, char** argv ) {
-	auto const config = setup_config( );
-	daw::glean_options opts{ argc, argv };
-	daw::glean::process_file( opts, config );
-	return EXIT_SUCCESS;
-}
+	struct glean_options {
+		boost::program_options::variables_map vm;
+		glean_options( int argc, char ** argv );
+
+		~glean_options( ) = default;
+		glean_options( glean_options const & ) = default;
+		glean_options( glean_options && ) = default;
+		glean_options &operator=( glean_options const & ) = default;
+		glean_options &operator=( glean_options && ) = default;
+
+		glean_options( ) = delete;
+
+		boost::filesystem::path deps_file( ) const;
+		boost::filesystem::path prefix( ) const;
+	};
+}    // namespace daw
+
+

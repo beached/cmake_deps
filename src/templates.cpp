@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016 Darrell Wright
+// Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -29,19 +29,19 @@ namespace daw {
 	namespace glean {
 		namespace impl {
 			std::string get_git_template( ) {
-				std::stringstream ss;
-				ss << "cmake_minimum_required( VERSION 2.8.12 )\n";
-				ss << "project( <%=\"project_name\"%>_parent )\n";
-				ss << "include( ExternalProject )\n";
-			   	ss << "externalproject_add(\n";
-				ss << "	<%=\"project_name\"%>\n";
-				ss << " GIT_REPOSITORY \"<%=\"git_repo\"%>\"\n";
-				ss << " SOURCE_DIR \"<%=\"source_directory\"%>\"\n";
-				ss << " GIT_TAG \"<%=\"git_tag\"%>\"\n";
-				ss << " INSTALL_DIR \"<%=\"install_directory\"%>\"\n";
-				ss << "	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<%=\"install_directory\"%>\n";
-				ss << ")\n";
-				return ss.str( );
+				static std::string const result =
+				  "cmake_minimum_required( VERSION 2.8.12 )\n"
+				  "project( <%call args=\"project_name\"%>_parent )\n"
+				  "include( ExternalProject )\n"
+				  "externalproject_add(\n"
+				  "	<%call args=\"project_name\"%>\n"
+				  " GIT_REPOSITORY \"<%call args=\"git_repo\"%>\"\n"
+				  " SOURCE_DIR \"<%call args=\"source_directory\"%>\"\n"
+				  " GIT_TAG \"<%call args=\"git_tag\"%>\"\n"
+				  " INSTALL_DIR \"<%call args=\"install_directory\"%>\"\n"
+				  "	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<%call args=\"install_directory\"%>\n"
+				  ")\n";
+				return result;
 			}
 		}
 	}

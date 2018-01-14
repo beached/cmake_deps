@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016 Darrell Wright
+// Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -29,44 +29,37 @@
 namespace daw {
 	namespace glean {
 		std::string to_string( item_types t ) {
-			static std::array<std::string, 3> const result = { { "none", "git", "custom" } };
+			static std::array<std::string, 3> const result = {{"none", "git", "custom"}};
 			return result[static_cast<uint8_t>( t )];
 		}
 
-		item_types items_type_from_string( std::string const & str ) {
-			static std::unordered_map<std::string, item_types> const result = { { "none", item_types::none }, { "git", item_types::git }, { "custom", item_types::custom } };
+		item_types items_type_from_string( std::string const &str ) {
+			static std::unordered_map<std::string, item_types> const result = {
+			  {"none", item_types::none}, {"git", item_types::git}, {"custom", item_types::custom}};
 			return result.at( str );
 		}
 
-		std::ostream & operator<<( std::ostream & os, item_types const & item ) {
-			return (os << to_string( item ));
+		std::ostream &operator<<( std::ostream &os, item_types const &item ) {
+			return ( os << to_string( item ) );
 		}
 
-		glean_item::glean_item( item_types Type,
-										  std::string ProjectName,
-										  boost::optional<std::string> Uri,
-										  boost::optional<std::string> Branch,
-										  boost::optional<std::string> DecompressCommand,
-										  boost::optional<std::string> BuildCommand,
-										  boost::optional<std::string> InstallCommand ):
-				type{ Type },
-				project_name{ std::move( ProjectName ) },
-				uri( std::move( Uri ) ),
-				branch( std::move( Branch ) ),
-				decompress_command( std::move( DecompressCommand ) ),
-				build_command( std::move( BuildCommand ) ),
-				install_command( std::move( InstallCommand ) ) { }
+		glean_item::glean_item( item_types Type, std::string ProjectName, boost::optional<std::string> Uri,
+		                        boost::optional<std::string> Branch, boost::optional<std::string> DecompressCommand,
+		                        boost::optional<std::string> BuildCommand, boost::optional<std::string> InstallCommand )
+		  : type{Type}
+		  , project_name{std::move( ProjectName )}
+		  , uri( std::move( Uri ) )
+		  , branch( std::move( Branch ) )
+		  , decompress_command( std::move( DecompressCommand ) )
+		  , build_command( std::move( BuildCommand ) )
+		  , install_command( std::move( InstallCommand ) ) {}
 
-		glean_item::glean_item( ):
-				glean_item( item_types::none ) { }
+		glean_item::~glean_item( ) {}
 
-		glean_item::~glean_item( ) { }
+		glean_file::glean_file( )
+		  : dependencies{} {}
 
-		glean_file::glean_file( ):
-				dependencies{ } { }
+		glean_file::~glean_file( ) {}
 
-		glean_file::~glean_file( ) { }
-
-	}	// namespace glean
-}    // namespace daw
-
+	} // namespace glean
+} // namespace daw

@@ -1,7 +1,7 @@
 
 // The MIT License (MIT)
 //
-// Copyright (c) 2016 Darrell Wright
+// Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to deal
@@ -32,11 +32,10 @@
 namespace daw {
 	namespace glean {
 		struct glean_config {
-			boost::filesystem::path cache_folder; 
+			boost::filesystem::path cache_folder;
 			std::string cmake_binary;
-			std::string git_binary;
 		public:
-			glean_config( std::string CacheFolder, std::string cmake_binary_path, std::string git_binary_path );
+			glean_config( std::string CacheFolder, std::string cmake_binary_path );
 			glean_config( boost::filesystem::path config_file );
 			glean_config( );
 			~glean_config( );
