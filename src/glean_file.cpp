@@ -28,22 +28,24 @@
 
 namespace daw {
 	namespace glean {
-		std::string to_string( item_types t ) {
-			static std::array<std::string, 3> const result = {{"none", "git", "custom"}};
+		std::string to_string( download_type_t t ) {
+			static std::array<std::string, 4> const result = {{"none", "git", "uri", "github"}};
 			return result[static_cast<uint8_t>( t )];
 		}
 
-		item_types items_type_from_string( std::string const &str ) {
-			static std::unordered_map<std::string, item_types> const result = {
-			  {"none", item_types::none}, {"git", item_types::git}, {"custom", item_types::custom}};
+		download_type_t download_type_from_string( std::string const & str ) {
+			static std::unordered_map<std::string, download_type_t> const result = {{"none", download_type_t::none},
+			                                                                        {"git", download_type_t::git},
+			                                                                        {"uri", download_type_t::uri},
+			                                                                        {"github", download_type_t::github}};
 			return result.at( str );
 		}
 
-		std::ostream &operator<<( std::ostream &os, item_types const &item ) {
+		std::ostream &operator<<( std::ostream &os, download_type_t const &item ) {
 			return ( os << to_string( item ) );
 		}
 
-		glean_item::glean_item( item_types Type, std::string ProjectName, boost::optional<std::string> Uri,
+		glean_item::glean_item( download_type_t Type, std::string ProjectName, boost::optional<std::string> Uri,
 		                        boost::optional<std::string> Branch, boost::optional<std::string> DecompressCommand,
 		                        boost::optional<std::string> BuildCommand, boost::optional<std::string> InstallCommand )
 		  : type{Type}

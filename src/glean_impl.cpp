@@ -106,7 +106,7 @@ namespace daw {
 				} catch( std::exception const &ex ) {
 					std::stringstream ss;
 					ss << "Could not write cmake file (" << result.cmakelist_file << "): " << ex.what( );
-					throw glean_exception( ss.str( ) );
+					throw glean_exception{ ss.str( ) };
 				}
 				return result;
 			}

@@ -106,7 +106,7 @@ namespace daw {
 					} else if( "install_command" == kv.key ) {
 						cur_item.install_command = kv.value;
 					} else if( "type" == kv.key ) {
-						cur_item.type = daw::glean::items_type_from_string( kv.value );
+						cur_item.type = daw::glean::download_type_from_string( kv.value );
 					} else {
 						throw glean_exception( "Unknown key: '" + kv.key + "'" );
 					}

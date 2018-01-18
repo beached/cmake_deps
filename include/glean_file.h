@@ -30,15 +30,36 @@
 
 namespace daw {
 	namespace glean {
-		enum class item_types : uint8_t { none, git, custom };
-		std::string to_string( item_types t );
-		item_types items_type_from_string( std::string const &str );
+		struct git_download_t {
+			std::string reposistory_uri;
+			boost::optional<std::string> repository_tag;
+		};
 
-		std::ostream &operator<<( std::ostream &os, item_types const &item );
-		std::istream &operator>>( std::istream &is, item_types &item );
+		struct uri_download_t {
+			std::string uri;
+		};
+
+		struct github_download_t {
+			std::string reposistory;
+			boost::optional<std::string> repository_tag;
+		};
+
+		enum class download_type_t : uint8_t { none, git, uri, github };
+		std::string to_string( download_type_t t );
+		download_type_t download_type_from_string( std::string const & str );
+
+		std::ostream &operator<<( std::ostream &os, download_type_t const &item );
+		std::istream &operator>>( std::istream &is, download_type_t &item );
+
+		struct cmake_build_t {
+			std::string arguments;
+		};
+
+		enum class build_type_t: uint8_t { none, cmake };
+
 
 		struct glean_item {
-			item_types type;
+			download_type_t type;
 			std::string project_name;
 			boost::optional<std::string> uri;
 			boost::optional<std::string> branch;
@@ -47,7 +68,7 @@ namespace daw {
 			boost::optional<std::string> install_command;
 			using str_opt = boost::optional<std::string>;
 
-			explicit glean_item( item_types Type = item_types::none, std::string ProjectName = "",
+			explicit glean_item( download_type_t Type = download_type_t::none, std::string ProjectName = "",
 			                     boost::optional<std::string> Uri = str_opt{},
 			                     boost::optional<std::string> Branch = str_opt{},
 			                     boost::optional<std::string> DecompressCommand = str_opt{},
