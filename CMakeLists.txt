@@ -25,8 +25,13 @@ set( HEADER_FOLDER "include" )
 set( SOURCE_FOLDER "src" )
 set( TEST_FOLDER "tests" )
 
-include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/include" )
-link_directories( "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/lib" )
+if( EXISTS "${CMAKE_SOURCE_DIR}/dependent_projects/build" )
+	add_custom_target( dependency_stub )
+	include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/include" )
+	link_directories( "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/lib" )
+else( )
+	include( "${CMAKE_SOURCE_DIR}/dependent_projects/dependencies.txt" )
+endif( )
 
 include_directories( ${HEADER_FOLDER} )
 include_directories( SYSTEM ${OPENSSL_INCLUDE_DIR} )
@@ -59,11 +64,12 @@ set( SOURCE_FILES
 )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
-target_link_libraries( glean char_range parse_template git2 gnutls kv_file tz temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+target_link_libraries( glean utf_range parse_template git2 gnutls kv_file tz temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 
 add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
 add_test( glean_test glean_test_bin )
-target_link_libraries( glean_test_bin kv_file parse_template git2 gnutls tz char_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+target_link_libraries( glean_test_bin kv_file parse_template git2 gnutls tz utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 #add_test( glean_test glean_test_bin )
 
 install( TARGETS glean DESTINATION bin )
+
