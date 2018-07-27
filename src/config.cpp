@@ -3,14 +3,14 @@
 // Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,13 +21,14 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
-#include <boost/utility/string_view.hpp>
 
 #include <iostream>
 #include <sstream>
 
-#include <daw/temp_file.h>
+#include <daw/daw_exception.h>
+#include <daw/daw_string_view.h>
 #include <daw/kv_file.h>
+#include <daw/temp_file.h>
 
 #include "config.h"
 #include "utilities.h"
@@ -43,37 +44,35 @@ namespace daw {
 						throw std::runtime_error( "Could not determine home folder" );
 					}
 				}
-				std::string result;
-				result = home;
+				std::string result = home;
 				return result;
 			}
-		}
+		} // namespace
 
 		glean_config get_config( ) {
 			auto env_var = std::getenv( "GLEAN_CONFIG" );
 			auto const config_file = [&]( ) -> boost::filesystem::path {
 				if( env_var ) {
-					return { env_var };
+					return {env_var};
 				} else {
-					boost::filesystem::path result{ get_home( ) };
+					auto result = boost::filesystem::path( get_home( ) );
 					return result / ".glean.config";
 				}
 			}( );
-			return glean_config{ config_file };
+			return glean_config( config_file );
 		}
 
-		glean_config::glean_config( std::string CacheFolder, std::string cmake_binary_path )
-		  : cache_folder{std::move( CacheFolder )}
-		  , cmake_binary{std::move( cmake_binary_path )} {}
+		glean_config::glean_config( std::string CacheFolder,
+		                            std::string cmake_binary_path )
+		  : cache_folder( std::move( CacheFolder ) )
+		  , cmake_binary( std::move( cmake_binary_path ) ) {}
 
-		glean_config::glean_config( ):
-				glean_config{ get_home( ), "cmake" } {
+		glean_config::glean_config( )
+		  : cache_folder( boost::filesystem::path( get_home( ) ) / ".glean_cache" )
+		  , cmake_binary( "cmake" ) {}
 
-			cache_folder /= ".glean_cache";
-		}
-
-		glean_config::glean_config( boost::filesystem::path file_path ):
-				glean_config{ } {
+		glean_config::glean_config( boost::filesystem::path file_path )
+		  : glean_config( ) {
 
 			if( exists( file_path ) ) {
 				if( !is_regular_file( file_path ) ) {
@@ -81,13 +80,15 @@ namespace daw {
 					ss << "The config file (" << file_path << ") is not a regular file";
 					throw glean_exception( ss.str( ) );
 				}
-				for( auto const & kv: daw::kv_file{ file_path.string( ) } ) {
+				for( auto const &kv : daw::kv_file{file_path.string( )} ) {
 					if( "cache_folder" == kv.key ) {
-						cache_folder = boost::filesystem::path{ kv.value };
+						cache_folder = boost::filesystem::path( kv.value );
 					} else if( "cmake_binary" == kv.key ) {
 						cmake_binary = kv.value;
 					} else {
-						std::cerr << "WARNING: Unknown key(" << kv.key << ") value in cmake config file (" << file_path << ")" << std::endl;
+						std::cerr << "WARNING: Unknown key(" << kv.key
+						          << ") value in cmake config file (" << file_path << ")"
+						          << std::endl;
 					}
 				}
 			} else {
@@ -98,22 +99,21 @@ namespace daw {
 			}
 		}
 
-		glean_config::~glean_config( ) { }
-
 		namespace other {
 
-			size_t write_data( char * data, size_t size, size_t nmemb, void * writer_data_p ) {
+			size_t write_data( char *data, size_t size, size_t nmemb,
+			                   void *writer_data_p ) {
 				if( nullptr == writer_data_p ) {
 					return 0;
 				}
-				auto & writer_data = *reinterpret_cast<std::string*>(writer_data_p);
-				if( data && size*nmemb > 0 ) {
-					writer_data.append( data, size*nmemb );
+				auto &writer_data = *reinterpret_cast<std::string *>( writer_data_p );
+				if( data && size * nmemb > 0 ) {
+					writer_data.append( data, size * nmemb );
 				}
 				return size * nmemb;
 			}
 
-			std::string download_file( boost::string_view file_url ) {
+			std::string download_file( daw::string_view file_url ) {
 				std::string result;
 				curl_t curl;
 
@@ -133,19 +133,18 @@ namespace daw {
 				}
 				return result;
 			}
-		}	// namespace other
+		} // namespace other
 
-		daw::unique_temp_file download_file( boost::string_view url ) {
-			auto tmp_file = daw::unique_temp_file{ };
+		daw::unique_temp_file download_file( daw::string_view url ) {
+			auto tmp_file = daw::unique_temp_file( );
 			auto out_file = tmp_file.secure_create_stream( );
 
-			if( !out_file ) {
-				throw std::runtime_error( "Could not open tmp file for writing" );
-			}
+			daw::exception::daw_throw_on_false<std::runtime_error>(
+			  out_file, "Could not open tmp file for writing" );
+
 			*out_file << other::download_file( url );
 			out_file->close( );
 			return tmp_file;
 		}
-	}	// namespace glean
-}    // namespace daw
-
+	} // namespace glean
+} // namespace daw

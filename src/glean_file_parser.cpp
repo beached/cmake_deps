@@ -3,14 +3,14 @@
 // Copyright (c) 2016-2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -20,79 +20,88 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <boost/filesystem.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <daw/daw_parser_helper.h>
 #include <daw/daw_parser_addons.h>
+#include <daw/daw_parser_helper.h>
 #include <daw/kv_file.h>
 
-#include "glean_impl.h"
 #include "glean_file.h"
 #include "glean_file_parser.h"
+#include "glean_impl.h"
 #include "utilities.h"
 
 namespace daw {
 	namespace glean {
 		namespace {
-			auto split( std::string const & str, std::string const & on ) {
-				std::vector<size_t> results;
+			auto split( std::string const &str, std::string const &on ) {
+				auto results = std::vector<size_t>( );
+
 				if( on.empty( ) || str.empty( ) ) {
 					return results;
 				}
 				size_t pos = 0;
-				while( (pos = str.find_first_of( on, pos )) != std::string::npos ) {
+				while( ( pos = str.find_first_of( on, pos ) ) != std::string::npos ) {
 					results.push_back( pos );
 					pos += on.size( );
 				}
 				return results;
 			}
-		}
+		} // namespace
 
 		template<class Container>
-		bool begins_with( Container const & input, Container const & match ) {
-			return input.size( ) >= match.size( ) && std::equal( match.begin( ), match.end( ), input.begin( ) );
+		bool begins_with( Container const &input, Container const &match ) {
+			return input.size( ) >= match.size( ) &&
+			       std::equal( match.begin( ), match.end( ), input.begin( ) );
 		}
 
-		std::pair<std::string, std::string> parse_line( std::string const & line ) {
+		std::pair<std::string, std::string> parse_line( std::string const &line ) {
 			auto pos = line.find_first_of( '=' );
-			if( pos == std::string::npos ) {
-				throw glean_exception( "Error on line, no '=' symbol: " + line );
-			}
-			auto quotes = split( line.substr( pos ) , "\"" );
-			if( quotes.size( ) != 2 ) {
-				throw glean_exception( "Error on line, value isn't quoted properly" + line );
-			}
-			std::string value;
-			if( pos == 0 ) {
-				throw glean_exception( "Error on line, empty key name" + line );
-			}
+
+			daw::exception::daw_throw_on_true<glean_exception>(
+			  pos == std::string::npos, "Error on line, no '=' symbol: " + line );
+
+			auto quotes = split( line.substr( pos ), "\"" );
+
+			daw::exception::daw_throw_on_true<glean_exception>(
+			  quotes.size( ) != 2,
+			  "Error on line, value isn't quoted properly" + line );
+
+			auto value = std::string( );
+
+			daw::exception::daw_throw_on_true<glean_exception>(
+			  pos == 0, "Error on line, empty key name" + line );
+
 			auto key = boost::trim_copy( line.substr( 0, pos ) );
+
 			if( quotes[1] - quotes[0] > 1 ) {
-				value = boost::trim_copy( line.substr( pos + quotes[0] + 1, (quotes[1] - quotes[0]) - 1) );
+				value = boost::trim_copy(
+				  line.substr( pos + quotes[0] + 1, ( quotes[1] - quotes[0] ) - 1 ) );
 			}
 
-			if( key.empty() ) {
+			if( key.empty( ) ) {
 				throw glean_exception( "Error on line, empty key name" + line );
 			}
 			return std::make_pair( key, value );
 		}
 
-		glean_file parse_cmakes_deps( boost::filesystem::path const & deps_file ) {
-			glean_file result;
-			glean_item cur_item;
+		glean_file parse_cmakes_deps( boost::filesystem::path const &deps_file ) {
+			auto result = glean_file( );
+			auto cur_item = glean_item( );
 			bool in_item = false;
-			for( auto const & kv: daw::kv_file{ deps_file.string( ) } ) {
+
+			for( auto const &kv : daw::kv_file( deps_file.string( ) ) ) {
 				if( kv.key == "project_name" ) {
 					if( in_item ) {
 						result.dependencies.push_back( cur_item );
 					}
 					in_item = true;
-					cur_item = glean_item{ };
+					cur_item = glean_item( );
 					cur_item.project_name = kv.value;
 				} else if( in_item ) {
 					if( "uri" == kv.key ) {
@@ -111,7 +120,10 @@ namespace daw {
 						throw glean_exception( "Unknown key: '" + kv.key + "'" );
 					}
 				} else {
-					throw glean_exception( "Error in dependencies file key specified without a project_name line first: '" + kv.key + "'" );
+					throw glean_exception(
+					  "Error in dependencies file key specified without a project_name "
+					  "line first: '" +
+					  kv.key + "'" );
 				}
 			}
 			if( in_item && !cur_item.project_name.empty( ) ) {
@@ -119,6 +131,5 @@ namespace daw {
 			}
 			return result;
 		}
-	}	// namespace glean
-}    // namespace daw
-
+	} // namespace glean
+} // namespace daw

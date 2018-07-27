@@ -3,14 +3,14 @@
 // Copyright (c) 2018 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files( the "Software" ), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
+// of this software and associated documentation files( the "Software" ), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and / or
+// sell copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 //
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -40,13 +40,17 @@ namespace daw {
 		boost::program_options::variables_map get_vm( int argc, char **argv ) {
 			boost::program_options::options_description desc{"Options"};
 			desc.add_options( )( "help", "print option descriptions" )(
-			  "prefix", boost::program_options::value<std::string>( ), "installation prefix folder" )(
-			  "deps_file", boost::program_options::value<boost::filesystem::path>( )->default_value( "./glean.txt" ),
+			  "prefix", boost::program_options::value<std::string>( ),
+			  "installation prefix folder" )(
+			  "deps_file",
+			  boost::program_options::value<boost::filesystem::path>( )
+			    ->default_value( "./glean.txt" ),
 			  "dependencies file" );
 
 			boost::program_options::variables_map vm{};
 			try {
-				boost::program_options::store( boost::program_options::parse_command_line( argc, argv, desc ), vm );
+				boost::program_options::store(
+				  boost::program_options::parse_command_line( argc, argv, desc ), vm );
 
 				if( vm.count( "help" ) ) {
 					std::cout << "Command line options\n" << desc << std::endl;
