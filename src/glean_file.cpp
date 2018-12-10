@@ -21,6 +21,7 @@
 // SOFTWARE.
 
 #include <array>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -48,11 +49,11 @@ namespace daw {
 		}
 
 		glean_item::glean_item( download_type_t Type, std::string ProjectName,
-		                        boost::optional<std::string> Uri,
-		                        boost::optional<std::string> Branch,
-		                        boost::optional<std::string> DecompressCommand,
-		                        boost::optional<std::string> BuildCommand,
-		                        boost::optional<std::string> InstallCommand )
+		                        std::optional<std::string> Uri,
+		                        std::optional<std::string> Branch,
+		                        std::optional<std::string> DecompressCommand,
+		                        std::optional<std::string> BuildCommand,
+		                        std::optional<std::string> InstallCommand )
 		  : type( Type )
 		  , project_name( std::move( ProjectName ) )
 		  , uri( std::move( Uri ) )

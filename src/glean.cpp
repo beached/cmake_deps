@@ -37,8 +37,8 @@ auto setup_config( ) {
 	if( !exists( config.cache_folder ) ) {
 		create_directory( config.cache_folder );
 	}
-	if( !exists( config.cache_folder ) || !is_directory( config.cache_folder ) ) {
-		std::stringstream ss;
+	if( !exists( config.cache_folder ) or !is_directory( config.cache_folder ) ) {
+		std::stringstream ss{};
 		ss << "Cache root (" << config.cache_folder
 		   << ") does not exist or is not a directory";
 		throw daw::glean::glean_exception( ss.str( ) );

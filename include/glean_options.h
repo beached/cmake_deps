@@ -23,22 +23,14 @@
 #pragma once
 
 #include <boost/filesystem/path.hpp>
-#include <boost/optional.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <optional>
 
 namespace daw {
 
 	struct glean_options {
 		boost::program_options::variables_map vm;
 		glean_options( int argc, char **argv );
-
-		~glean_options( ) = default;
-		glean_options( glean_options const & ) = default;
-		glean_options( glean_options && ) = default;
-		glean_options &operator=( glean_options const & ) = default;
-		glean_options &operator=( glean_options && ) = default;
-
-		glean_options( ) = delete;
 
 		boost::filesystem::path deps_file( ) const;
 		boost::filesystem::path prefix( ) const;

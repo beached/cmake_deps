@@ -35,8 +35,7 @@
 
 namespace daw {
 	namespace glean {
-		namespace {
-			auto get_home( ) {
+			std::string get_home( ) {
 				auto home = std::getenv( "HOME" );
 				if( !home ) {
 					home = std::getenv( "USERPROFILE" );
@@ -47,10 +46,9 @@ namespace daw {
 				std::string result = home;
 				return result;
 			}
-		} // namespace
 
 		glean_config get_config( ) {
-			auto env_var = std::getenv( "GLEAN_CONFIG" );
+			auto const env_var = std::getenv( "GLEAN_CONFIG" );
 			auto const config_file = [&]( ) -> boost::filesystem::path {
 				if( env_var ) {
 					return {env_var};
@@ -66,10 +64,6 @@ namespace daw {
 		                            std::string cmake_binary_path )
 		  : cache_folder( std::move( CacheFolder ) )
 		  , cmake_binary( std::move( cmake_binary_path ) ) {}
-
-		glean_config::glean_config( )
-		  : cache_folder( boost::filesystem::path( get_home( ) ) / ".glean_cache" )
-		  , cmake_binary( "cmake" ) {}
 
 		glean_config::glean_config( boost::filesystem::path file_path )
 		  : glean_config( ) {

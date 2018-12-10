@@ -22,8 +22,6 @@
 
 #pragma once
 
-#include <boost/filesystem/path.hpp>
-
 #include "config.h"
 #include "glean_options.h"
 

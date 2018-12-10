@@ -21,16 +21,18 @@
 // SOFTWARE.
 
 #include <boost/filesystem.hpp>
-#include <boost/variant.hpp>
 #include <cstdlib>
 #include <exception>
 #include <fstream>
 #include <git2.h>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <thread>
 #include <unordered_set>
+#include <variant>
 
+#include <daw/daw_graph.h>
 #include <daw/daw_parse_template.h>
 #include <daw/daw_string_fmt.h>
 
@@ -47,12 +49,14 @@ namespace daw {
 
 		namespace {
 			struct dependency_t {
-				using child_t = boost::variant<dependency_t, boost::filesystem::path>;
-				std::string provides;
-				boost::filesystem::path folder;
-				std::vector<child_t> children;
-				glean_file gf;
+				std::string provides{};
+				boost::filesystem::path folder{};
+				glean_file gf{};
+
+				dependency_t( ) = default;
 			};
+			using dep_graph_t = daw::graph_t<std::variant<std::string, dependency_t>>;
+			using dep_node_t = typename dep_graph_t::node_t;
 
 			boost::filesystem::path cache_path( glean_item const &item,
 			                                    boost::filesystem::path cache_root ) {
@@ -135,7 +139,8 @@ namespace daw {
 
 			int git_clone( item_folders const &proj, glean_item const &item,
 			               glean_config const &cfg ) {
-				daw::exception::daw_throw_on_false<std::runtime_error>( item.uri, "No URI provided" );
+				daw::exception::daw_throw_on_false<std::runtime_error>(
+				  item.uri, "No URI provided" );
 
 				if( exists( proj.src ) ) {
 					remove_all( proj.src );
@@ -149,7 +154,8 @@ namespace daw {
 			int git_update( item_folders const &proj, glean_item const &item,
 			                glean_config const &cfg ) {
 
-				daw::exception::daw_throw_on_false<std::runtime_error>( item.uri, "No URI provided" );
+				daw::exception::daw_throw_on_false<std::runtime_error>(
+				  item.uri, "No URI provided" );
 
 				git_helper git{};
 				if( !exists( proj.src ) ) {
@@ -172,7 +178,7 @@ namespace daw {
 				return system( ( cfg.cmake_binary + " --build ." ).c_str( ) );
 			}
 
-			boost::optional<boost::filesystem::path>
+			std::optional<boost::filesystem::path>
 			process_item( glean_item const &item,
 			              boost::filesystem::path const &prefix,
 			              glean_config const &cfg ) {
@@ -186,22 +192,21 @@ namespace daw {
 				if( has_glean_file( cml.src ) ) {
 					return cml.src / "glean.txt";
 				}
-				return boost::none;
+				return std::nullopt;
 			}
 
-			dependency_t process_file( std::string const &provides,
-			                           glean_options const &opts,
-			                           glean_config const &cfg ) {
+			std::vector<dependency_t> process_file_impl( dep_graph_t & graph, daw::node_id_t root_node_id, glean_options const &opts,
+			                                        glean_config const &cfg ) {
 
 				auto depends_obj = parse_cmakes_deps( opts.deps_file( ) );
-				dependency_t result{provides, {}};
+				std::vector<dependency_t> result{};
 
 				for( auto const &dependency : depends_obj.dependencies ) {
 					std::cout << "Processing: " << dependency.project_name << '\n';
 					try {
 						auto new_item = process_item( dependency, opts.prefix( ), cfg );
 						if( new_item ) {
-							result.children.push_back( std::move( *new_item ) );
+							result.emplace_back( new_item->generic_string( ) );
 						}
 					} catch( glean_exception const &ex ) {
 						std::cerr << "Error processing: " << dependency.project_name
@@ -219,17 +224,9 @@ namespace daw {
 		} // namespace
 
 		void process_file( glean_options const &opts, glean_config const &cfg ) {
-
-			auto to_dos = std::unordered_set<std::string>( );
-			auto dep_graph = std::unordered_map<std::string, dependency_t>( );
-			dep_graph["root"] = process_file( "root", opts, cfg );
-
-			for( auto const &c : dep_graph["root"].children ) {
-
-				to_dos.insert( ( c.provides ) );
-			}
-
-			while( !to_dos.empty( ) ) {}
+			graph_t<std::variant<std::string, dependency_t>> dep_graph{};
+			auto root_node = dep_graph.add_node( std::string( "root" ) );
+			process_file_impl( dep_graph, root_node, opts, cfg );
 		}
 	} // namespace glean
 } // namespace daw

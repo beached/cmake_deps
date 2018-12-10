@@ -24,20 +24,22 @@
 #pragma once
 
 #include <boost/filesystem/path.hpp>
-#include <boost/utility/string_view.hpp>
 #include <string>
 
 #include <daw/temp_file.h>
+#include <daw/daw_string_view.h>
 
 namespace daw {
 	namespace glean {
+		std::string get_home( );
 		struct glean_config {
-			boost::filesystem::path cache_folder;
-			std::string cmake_binary;
+			boost::filesystem::path  cache_folder = boost::filesystem::path( get_home( ) ) / ".glean_cache";
+			std::string cmake_binary = "cmake";
+
+			glean_config( ) = default;
 
 			glean_config( std::string CacheFolder, std::string cmake_binary_path );
 			glean_config( boost::filesystem::path config_file );
-			glean_config( );
 		}; // glean_config
 
 		glean_config get_config( );
@@ -46,6 +48,6 @@ namespace daw {
 		/// @param url Location of file to download
 		/// @return path to downloaded file
 		/// @post The file exists and will be deleted upon program termination
-		daw::unique_temp_file download_file( boost::string_view url );
+		daw::unique_temp_file download_file( daw::string_view url );
 	} // namespace glean
 } // namespace daw

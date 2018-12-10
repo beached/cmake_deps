@@ -7,31 +7,30 @@ find_package( Threads REQUIRED )
 find_package( OpenSSL REQUIRED )
 find_package( CURL REQUIRED )
 
-
 enable_testing( )
+
+find_package( Boost 1.58.0 COMPONENTS system iostreams filesystem regex unit_test_framework REQUIRED )
 add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_NETWORK_ENABLE_HTTPS -DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK )
 
-if( ${CMAKE_CXX_COMPILER_ID} STREQUAL 'MSVC' )
-	add_compile_options( -D_WIN32_WINNT=0x0601 /std:c++latest )
+include( "${CMAKE_SOURCE_DIR}/dependent_projects/CMakeListsCompiler.txt" )
+add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK )
+
+if( EXISTS "${CMAKE_SOURCE_DIR}/dependent_projects/build" )
+	add_custom_target( dependency_stub )
+	include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/include" )
+	#	link_directories( "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/lib" )
 else( )
-	if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
-		add_compile_options(-std=c++14 -Weverything -pthread -Wno-c++98-compat -g -Wno-covered-switch-default -Wno-padded -Wno-exit-time-destructors -Wno-c++98-compat-pedantic -Wno-unused-parameter -Wno-missing-noreturn -Wno-missing-prototypes -Wno-disabled-macro-expansion)
-	elseif( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" )
-		add_compile_options(-std=c++14 -g -Wall -pthread -Wno-deprecated-declarations)
-	endif( )
+	set( SHOULD_BUILD_DEPS ON )
+	include( "${CMAKE_SOURCE_DIR}/dependent_projects/dependencies.txt" )
+
+	add_library( dependency_stub STATIC "${CMAKE_SOURCE_DIR}/dependent_projects/stub.cpp" )
+	add_dependencies( dependency_stub header_libraries_prj date_prj )
+	include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 endif( )
 
 set( HEADER_FOLDER "include" )
 set( SOURCE_FOLDER "src" )
 set( TEST_FOLDER "tests" )
-
-if( EXISTS "${CMAKE_SOURCE_DIR}/dependent_projects/build" )
-	add_custom_target( dependency_stub )
-	include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/include" )
-	link_directories( "${CMAKE_SOURCE_DIR}/dependent_projects/build/install/lib" )
-else( )
-	include( "${CMAKE_SOURCE_DIR}/dependent_projects/dependencies.txt" )
-endif( )
 
 include_directories( ${HEADER_FOLDER} )
 include_directories( SYSTEM ${OPENSSL_INCLUDE_DIR} )
@@ -65,10 +64,12 @@ set( SOURCE_FILES
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
 target_link_libraries( glean utf_range parse_template git2 gnutls kv_file tz temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+add_dependencies( glean dependency_stub )
 
 add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
 add_test( glean_test glean_test_bin )
 target_link_libraries( glean_test_bin kv_file parse_template git2 gnutls tz utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+add_dependencies( glean_test_bin dependency_stub )
 #add_test( glean_test glean_test_bin )
 
 install( TARGETS glean DESTINATION bin )
