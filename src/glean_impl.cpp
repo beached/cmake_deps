@@ -54,6 +54,7 @@ namespace daw {
 				glean_file gf{};
 
 				dependency_t( ) = default;
+				dependency_t( daw::string_view prev ): provides( prev.to_string( ) ) {}
 			};
 			using dep_graph_t = daw::graph_t<std::variant<std::string, dependency_t>>;
 			using dep_node_t = typename dep_graph_t::node_t;

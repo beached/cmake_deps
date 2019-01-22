@@ -15,7 +15,7 @@ externalproject_add(
 	SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/date"
 	GIT_TAG "master"
 	INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
-	CMAKE_ARGS -DCMAKE_CXX_STANDARD=14 -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
+	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
 )
 
 externalproject_add(
@@ -40,6 +40,15 @@ externalproject_add(
   temp_file_prj
   GIT_REPOSITORY "https://github.com/beached/libtemp_file.git"
   SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/temp_file"
+  GIT_TAG "master"
+  INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
+)
+
+externalproject_add(
+  utf_range_prj
+  GIT_REPOSITORY "https://github.com/beached/utf_range.git"
+  SOURCE_DIR "${CMAKE_BINARY_DIR}/dependencies/utf_range"
   GIT_TAG "master"
   INSTALL_DIR "${CMAKE_BINARY_DIR}/install"
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install
