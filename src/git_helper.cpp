@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 Darrell Wright
+// Copyright (c) 2018-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -31,30 +31,6 @@
 #include "git_helper.h"
 
 namespace daw {
-	git_helper::git_helper( )
-	  : m_repos( nullptr ) {
-
-		git_libgit2_init( );
-	}
-
-	git_helper::git_helper( git_repository *repos )
-	  : m_repos( repos ) {
-
-		git_libgit2_init( );
-	}
-
-	git_helper::~git_helper( ) noexcept {
-		reset( );
-	}
-
-	void git_helper::reset( ) noexcept {
-		auto tmp = std::exchange( m_repos, nullptr );
-		if( tmp ) {
-			git_repository_free( tmp );
-		}
-		git_libgit2_shutdown( );
-	}
-
 	namespace {
 		int sideband_progress( const char *str, int len, void * ) {
 			static daw::fmt_t const fmt1( "remote: {0}\n" );
@@ -130,5 +106,4 @@ namespace daw {
 		}
 		return clone( std::move( repos ), std::move( destination ) );
 	}
-
 } // namespace daw

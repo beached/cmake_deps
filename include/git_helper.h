@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 Darrell Wright
+// Copyright (c) 2018-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -27,24 +27,46 @@
 #include <string>
 
 namespace daw {
-	struct git_helper {
-		git_repository *m_repos;
+	class git_helper {
+		git_repository *m_repos = nullptr;
+	public:
+		constexpr git_helper( ) noexcept = default;
 
-		git_helper( );
-		git_helper( git_repository *repos );
+		constexpr git_helper( git_repository *repos_ptr ) noexcept
+		  : m_repos( repos_ptr ) {
+
+			if( repos_ptr ) {
+				git_libgit2_init( );
+			}
+		}
+
+		constexpr void reset( ) noexcept {
+			if( auto tmp = daw::exchange( m_repos, nullptr ); tmp ) {
+				git_repository_free( tmp );
+				git_libgit2_shutdown( );
+			}
+		}
 
 		git_helper( git_helper const & ) = delete;
 		git_helper &operator=( git_helper const & ) = delete;
 
-		git_helper( git_helper && ) noexcept = default;
-		git_helper &operator=( git_helper && ) noexcept = default;
+		constexpr git_helper( git_helper &&other ) noexcept
+		  : m_repos( daw::exchange( m_repos, nullptr ) ) {}
 
-		~git_helper( ) noexcept;
-		void reset( ) noexcept;
+		constexpr git_helper &operator=( git_helper &&rhs ) noexcept {
+			if( this != &rhs ) {
+				reset( );
+				m_repos = daw::exchange( rhs.m_repos, nullptr );
+			}
+			return *this;
+		}
+
+		inline ~git_helper( ) noexcept {
+			reset( );
+		}
 
 		int clone( std::string repos, boost::filesystem::path destination );
 		int update( std::string repos, boost::filesystem::path destination );
 		int checkout( boost::filesystem::path repos, std::string branch );
 	};
-
 } // namespace daw

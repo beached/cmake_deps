@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.8.12 )
+cmake_minimum_required( VERSION 3.0.2 )
 
 project( glean_prj )
 
@@ -57,7 +57,6 @@ set( SOURCE_FILES
 	${SOURCE_FOLDER}/glean_file_parser.cpp
 	${SOURCE_FOLDER}/glean_impl.cpp
 	${SOURCE_FOLDER}/glean_options.cpp
-	${SOURCE_FOLDER}/templates.cpp
 	${SOURCE_FOLDER}/utilities.cpp
 )
 

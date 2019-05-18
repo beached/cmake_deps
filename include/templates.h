@@ -22,12 +22,21 @@
 
 #pragma once
 
-#include <string>
+#include <daw/daw_string_view.h>
 
-namespace daw {
-	namespace glean {
-		namespace impl {
-			std::string get_git_template( );
-		}
-	} // namespace glean
-} // namespace daw
+namespace daw::glean::impl {
+	namespace {
+		inline constexpr daw::string_view get_git_template =
+		  R"(cmake_minimum_required( VERSION 3.0.2 )
+project( <%call args="project_name"%>_parent )
+include( ExternalProject )
+externalproject_add(
+	<%call args="project_name"%>
+	GIT_REPOSITORY "<%call args="git_repo"%>"
+	SOURCE_DIR "<%call args="source_directory"%>"
+	GIT_TAG "<%call args="git_tag"%>"
+	INSTALL_DIR "<%call args="install_directory"%>"
+	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<%call args="install_directory"%>
+))";
+	}
+} // namespace daw::glean::impl

@@ -32,6 +32,7 @@
 #include <unordered_set>
 #include <variant>
 
+#include <daw/daw_benchmark.h>
 #include <daw/daw_graph.h>
 #include <daw/daw_parse_template.h>
 #include <daw/daw_string_fmt.h>
@@ -46,7 +47,6 @@
 
 namespace daw {
 	namespace glean {
-
 		namespace {
 			struct dependency_t {
 				std::string provides{};
@@ -54,17 +54,18 @@ namespace daw {
 				glean_file gf{};
 
 				dependency_t( ) = default;
-				dependency_t( daw::string_view prev ): provides( prev.to_string( ) ) {}
+				dependency_t( daw::string_view prev )
+				  : provides( prev.to_string( ) ) {}
 			};
 			using dep_graph_t = daw::graph_t<std::variant<std::string, dependency_t>>;
 			using dep_node_t = typename dep_graph_t::node_t;
 
 			boost::filesystem::path cache_path( glean_item const &item,
 			                                    boost::filesystem::path cache_root ) {
-				assert( exists( cache_root ) && is_directory( cache_root ) );
-				assert( !item.project_name.empty( ) );
+				daw::expecting( exists( cache_root ) and is_directory( cache_root ) );
+				daw::expecting( !item.project_name.empty( ) );
 				cache_root /= item.project_name;
-				if( item.branch && !item.branch->empty( ) ) {
+				if( item.branch and !item.branch->empty( ) ) {
 					cache_root /= *item.branch;
 				}
 				return cache_root;
@@ -81,7 +82,6 @@ namespace daw {
 			                               boost::filesystem::path const &prefix,
 			                               glean_config const &cfg ) {
 
-				static std::string const git_template_str = impl::get_git_template( );
 				auto result = item_folders( );
 
 				result.cache = cache_path( item, cfg.cache_folder );
@@ -93,7 +93,7 @@ namespace daw {
 				result.cmakelist_file = result.cache / "CMakeLists.txt";
 				verify_file( result.cmakelist_file );
 
-				daw::parse_template git_template{git_template_str};
+				auto git_template = daw::parse_template( impl::get_git_template );
 				git_template.add_callback( "project_name", [&item]( ) -> std::string {
 					return item.project_name;
 				} );
@@ -102,7 +102,7 @@ namespace daw {
 				git_template.add_callback( "source_directory", [&]( ) -> std::string {
 					return result.src.string( );
 				} );
-				if( item.branch && !item.branch->empty( ) ) {
+				if( item.branch and !item.branch->empty( ) ) {
 					git_template.add_callback(
 					  "git_tag", [&]( ) -> std::string { return *item.branch; } );
 				} else {
@@ -132,10 +132,10 @@ namespace daw {
 
 			bool has_glean_file( boost::filesystem::path p ) {
 				daw::exception::daw_throw_on_true<std::invalid_argument>(
-				  p.empty( ) || !exists( p ) || !is_directory( p ), "invalid path p" );
+				  p.empty( ) or !exists( p ) or !is_directory( p ), "invalid path p" );
 
 				p /= "glean.txt";
-				return exists( p ) && is_regular_file( p );
+				return exists( p ) and is_regular_file( p );
 			}
 
 			int git_clone( item_folders const &proj, glean_item const &item,
@@ -196,8 +196,10 @@ namespace daw {
 				return std::nullopt;
 			}
 
-			std::vector<dependency_t> process_file_impl( dep_graph_t & graph, daw::node_id_t root_node_id, glean_options const &opts,
-			                                        glean_config const &cfg ) {
+			std::vector<dependency_t> process_file_impl( dep_graph_t &graph,
+			                                             daw::node_id_t root_node_id,
+			                                             glean_options const &opts,
+			                                             glean_config const &cfg ) {
 
 				auto depends_obj = parse_cmakes_deps( opts.deps_file( ) );
 				std::vector<dependency_t> result{};
