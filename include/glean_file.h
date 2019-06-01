@@ -74,63 +74,6 @@ namespace daw::glean {
 		             json_class<dependencies, glean_file_item>>>{};
 	}
 
-	// Old config file items
-	/*
 	std::unordered_set<dependency>
-	process_config_file( std::string config_file_path, std::string prefix );
-
-	struct git_download_t {
-	  std::string reposistory_uri{};
-	  std::optional<std::string> repository_tag{};
-	};
-
-	struct uri_download_t {
-	  std::string uri{};
-	};
-
-	struct github_download_t {
-	  std::string reposistory{};
-	  std::optional<std::string> repository_tag{};
-	};
-
-	enum class download_type_t : uint8_t { none, git, uri, github };
-	std::string to_string( download_type_t t );
-	download_type_t download_type_from_string( std::string const &str );
-
-	std::ostream &operator<<( std::ostream &os, download_type_t const &item );
-	std::istream &operator>>( std::istream &is, download_type_t &item );
-
-	struct cmake_build_t {
-	  std::string arguments{};
-	};
-
-	enum class build_type_t : uint8_t { none, cmake };
-
-	struct glean_item {
-	  download_type_t type = download_type_t::none;
-	  std::string project_name{};
-
-	  std::optional<std::string> uri{};
-	  std::optional<std::string> branch{};
-	  std::optional<std::string> decompress_command{};
-	  std::optional<std::string> build_command{};
-	  std::optional<std::string> install_command{};
-
-	  glean_item( ) = default;
-
-	  explicit glean_item( download_type_t Type, std::string ProjectName = "",
-	                       std::optional<std::string> Uri = {},
-	                       std::optional<std::string> Branch = {},
-	                       std::optional<std::string> DecompressCommand = {},
-	                       std::optional<std::string> BuildCommand = {},
-	                       std::optional<std::string> InstallCommand = {} );
-
-	}; // glean_item
-
-	struct glean_file {
-	  std::vector<glean_item> dependencies{};
-
-	  glean_file( ) = default;
-	}; // glean_file
-	 */
+	process_config_file( fs::path config_file_path, fs::path prefix );
 } // namespace daw::glean

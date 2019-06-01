@@ -28,12 +28,6 @@
 #include "git_helper.h"
 
 namespace daw::glean {
-	download_git::download_git( std::string remote, std::string version,
-	                            std::string local )
-	  : m_remote( std::move( remote ) )
-	  , m_version( std::move( version ) )
-	  , m_local( std::move( local ) ) {}
-
 	action_status download_git::download( ) const {
 		auto gh = daw::git_helper( );
 		int result = gh.clone( m_remote, m_local );

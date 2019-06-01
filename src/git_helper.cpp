@@ -33,8 +33,8 @@
 namespace daw {
 	namespace {
 		int sideband_progress( const char *str, int len, void * ) {
-			static daw::fmt_t const fmt1( "remote: {0}\n" );
-			std::cout << fmt1( std::string( str, static_cast<size_t>( len ) ) );
+			std::cout << "remote: " << std::string( str, static_cast<size_t>( len ) )
+			          << '\n';
 			return EXIT_SUCCESS;
 		}
 

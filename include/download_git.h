@@ -27,17 +27,22 @@
 #include <daw/daw_string_view.h>
 
 #include "action_status.h"
+#include "utilities.h"
 
 namespace daw::glean {
 	class download_git {
 		std::string m_remote;
 		std::string m_version;
-		std::string m_local;
+		fs::path m_local;
 
 	public:
 		constexpr static daw::string_view type_id = "git";
 
-		download_git( std::string remote, std::string version, std::string local );
+		inline download_git( std::string remote, std::string version,
+		                     fs::path local )
+		  : m_remote( std::move( remote ) )
+		  , m_version( std::move( version ) )
+		  , m_local( std::move( local ) ) {}
 
 		action_status download( ) const;
 	};

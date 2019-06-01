@@ -56,7 +56,7 @@ namespace daw::glean {
 		return daw::json::from_json<glean_config>( json_data );
 	}
 
-	namespace other {
+	namespace {
 		size_t write_data( char *data, size_t size, size_t nmemb,
 		                   void *writer_data_p ) {
 			if( nullptr == writer_data_p ) {
@@ -69,7 +69,7 @@ namespace daw::glean {
 			return size * nmemb;
 		}
 
-		std::string download_file( daw::string_view file_url ) {
+		std::string download_file2( daw::string_view file_url ) {
 			std::string result;
 			curl_t curl;
 
@@ -89,7 +89,7 @@ namespace daw::glean {
 			}
 			return result;
 		}
-	} // namespace other
+	} // namespace
 
 	daw::unique_temp_file download_file( daw::string_view url ) {
 		auto tmp_file = daw::unique_temp_file( );
@@ -98,7 +98,7 @@ namespace daw::glean {
 		daw::exception::daw_throw_on_false<std::runtime_error>(
 		  out_file, "Could not open tmp file for writing" );
 
-		*out_file << other::download_file( url );
+		*out_file << download_file2( url );
 		out_file->close( );
 		return tmp_file;
 	}

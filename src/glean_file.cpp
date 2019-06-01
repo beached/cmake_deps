@@ -38,33 +38,13 @@
 #include "glean_file.h"
 
 namespace daw::glean {
-	/*
-	std::string to_string( download_type_t t ) {
-	  static std::array<std::string, 4> const result = {
-	    {"none", "git", "uri", "github"}};
-	  return result[static_cast<uint8_t>( t )];
-	}
-
-	download_type_t download_type_from_string( std::string const &str ) {
-	  static std::unordered_map<std::string, download_type_t> const result = {
-	    {"none", download_type_t::none},
-	    {"git", download_type_t::git},
-	    {"uri", download_type_t::uri},
-	    {"github", download_type_t::github}};
-	  return result.at( str );
-	}
-
-	std::ostream &operator<<( std::ostream &os, download_type_t const &item ) {
-	  return ( os << to_string( item ) );
-	}
-	*/
 	namespace {
-		void process_config_file( std::string config_file_path,
+		void process_config_file( fs::path config_file_path,
 		                          std::unordered_set<dependency> &known_deps,
-		                          std::string prefix ) {
+		                          fs::path prefix ) {
 
 			auto cfg_file = daw::json::from_json<glean_config_file>(
-			  daw::read_file( config_file_path ) );
+			  daw::read_file( config_file_path.string( ) ) );
 
 			auto const name_exists = [&known_deps]( auto &&name ) {
 				return std::find_if( known_deps.begin( ), known_deps.end( ),
@@ -84,8 +64,8 @@ namespace daw::glean {
 				if( !name_exists( dep.name ) ) {
 					auto downloader = download_types_t( dep.download_type, dep.uri,
 					                                    *dep.version, prefix );
-					auto builder = build_types_t(
-					  dep.build_type, prefix, prefix + "/build", prefix + "/install" );
+					auto builder = build_types_t( dep.build_type, prefix,
+					                              prefix / "build", prefix / "install" );
 
 					auto current_dep = dependency( dep.name, daw::move( builder ),
 					                               daw::move( downloader ) );
@@ -101,8 +81,8 @@ namespace daw::glean {
 		}
 	} // namespace
 
-	std::unordered_set<dependency>
-	process_config_file( std::string config_file_path, std::string prefix ) {
+	std::unordered_set<dependency> process_config_file( fs::path config_file_path,
+	                                                    fs::path prefix ) {
 		auto known_deps = std::unordered_set<dependency>( );
 
 		process_config_file( config_file_path, known_deps, std::move( prefix ) );
@@ -135,20 +115,4 @@ namespace daw::glean {
 		}
 		return result;
 	}
-
-	/*
-	glean_item::glean_item( download_type_t Type, std::string ProjectName,
-	                        std::optional<std::string> Uri,
-	                        std::optional<std::string> Branch,
-	                        std::optional<std::string> DecompressCommand,
-	                        std::optional<std::string> BuildCommand,
-	                        std::optional<std::string> InstallCommand )
-	  : type( Type )
-	  , project_name( std::move( ProjectName ) )
-	  , uri( std::move( Uri ) )
-	  , branch( std::move( Branch ) )
-	  , decompress_command( std::move( DecompressCommand ) )
-	  , build_command( std::move( BuildCommand ) )
-	  , install_command( std::move( InstallCommand ) ) {}
-	  */
 } // namespace daw::glean

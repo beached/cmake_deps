@@ -26,28 +26,31 @@
 #include <iostream>
 #include <sstream>
 
+#include "config.h"
 #include "glean_file.h"
-#include "glean_impl.h"
 #include "glean_options.h"
 #include "utilities.h"
 
-daw::glean::glean_config setup_config( ) {
-	auto config = daw::glean::get_config( );
-	if( !exists( config.cache_folder ) ) {
-		create_directory( config.cache_folder );
+namespace {
+	daw::glean::glean_config setup_config( ) {
+		auto config = daw::glean::get_config( );
+		if( !exists( config.cache_folder ) ) {
+			create_directory( config.cache_folder );
+		}
+		if( !exists( config.cache_folder ) or
+		    !is_directory( config.cache_folder ) ) {
+			std::stringstream ss{};
+			ss << "Cache root (" << config.cache_folder
+			   << ") does not exist or is not a directory";
+			throw daw::glean::glean_exception( ss.str( ) );
+		}
+		return config;
 	}
-	if( !exists( config.cache_folder ) or !is_directory( config.cache_folder ) ) {
-		std::stringstream ss{};
-		ss << "Cache root (" << config.cache_folder
-		   << ") does not exist or is not a directory";
-		throw daw::glean::glean_exception( ss.str( ) );
-	}
-	return config;
-}
+} // namespace
 
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
 	auto opts = daw::glean_options( argc, argv );
-	daw::glean::process_file( opts, config );
+	auto deps = daw::glean::process_config_file( "./glean.json", opts.prefix( ) );
 	return EXIT_SUCCESS;
 }
