@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2019 Darrell Wright
+// Copyright (c) 2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,13 +20,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <mutex>
+#include <string>
+#include <utility>
 
-//#include "utilities.h"
+#include "action_status.h"
+#include "download_git.h"
+#include "git_helper.h"
 
-namespace daw::glean::impl {
-	std::mutex &get_curl_t_init_mutex( ) {
-		static auto init_lock = std::mutex( );
-		return init_lock;
+namespace daw::glean {
+	download_git::download_git( std::string remote, std::string version,
+	                            std::string local )
+	  : m_remote( std::move( remote ) )
+	  , m_version( std::move( version ) )
+	  , m_local( std::move( local ) ) {}
+
+	action_status download_git::download( ) const {
+		auto gh = daw::git_helper( );
+		int result = gh.clone( m_remote, m_local );
+		// TODO check result
+		Unused( result );
+		result = gh.checkout( m_local, m_version );
+		// TODO check result
+		Unused( result );
+		return action_status::success;
 	}
-} // namespace daw::glean::impl
+} // namespace daw::glean

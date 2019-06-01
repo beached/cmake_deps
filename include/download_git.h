@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2019 Darrell Wright
+// Copyright (c) 2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,13 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <mutex>
+#pragma once
 
-//#include "utilities.h"
+#include <string>
 
-namespace daw::glean::impl {
-	std::mutex &get_curl_t_init_mutex( ) {
-		static auto init_lock = std::mutex( );
-		return init_lock;
-	}
-} // namespace daw::glean::impl
+#include <daw/daw_string_view.h>
+
+#include "action_status.h"
+
+namespace daw::glean {
+	class download_git {
+		std::string m_remote;
+		std::string m_version;
+		std::string m_local;
+
+	public:
+		constexpr static daw::string_view type_id = "git";
+
+		download_git( std::string remote, std::string version, std::string local );
+
+		action_status download( ) const;
+	};
+} // namespace daw::glean

@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2018 Darrell Wright
+// Copyright (c) 2016-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <cstdlib>
 #include <git2.h>
@@ -32,7 +31,7 @@
 #include "glean_options.h"
 #include "utilities.h"
 
-auto setup_config( ) {
+daw::glean::glean_config setup_config( ) {
 	auto config = daw::glean::get_config( );
 	if( !exists( config.cache_folder ) ) {
 		create_directory( config.cache_folder );
@@ -48,7 +47,7 @@ auto setup_config( ) {
 
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
-	daw::glean_options opts{argc, argv};
+	auto opts = daw::glean_options( argc, argv );
 	daw::glean::process_file( opts, config );
 	return EXIT_SUCCESS;
 }

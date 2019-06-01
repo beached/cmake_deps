@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <boost/filesystem.hpp>
 #include <git2.h>
 #include <git2/clone.h>
 #include <iostream>
@@ -29,6 +28,7 @@
 #include <daw/daw_string_fmt.h>
 
 #include "git_helper.h"
+#include "utilities.h"
 
 namespace daw {
 	namespace {
@@ -62,14 +62,13 @@ namespace daw {
 		                     const char *username_from_url,
 		                     unsigned int allowed_types, void *payload ) {
 
-			std::cerr << "Credentia support is not implemented" << std::endl;
+			std::cerr << "Credentia support is not implemented\n";
 			std::abort( );
 		}
 	} // namespace
 
 	// TODO clone branch
-	int git_helper::clone( std::string repos,
-	                       boost::filesystem::path destination ) {
+	int git_helper::clone( std::string repos, glean::fs::path destination ) {
 		static daw::fmt_t const msg( "No previous cache of {0}, cloning to {1}\n" );
 		std::cout << msg( repos, destination.lexically_normal( ).string( ) );
 
@@ -96,8 +95,7 @@ namespace daw {
 	}
 
 	// TODO implement fetch/merge
-	int git_helper::update( std::string repos,
-	                        boost::filesystem::path destination ) {
+	int git_helper::update( std::string repos, glean::fs::path destination ) {
 		static daw::fmt_t const msg( "Existing cache found, updating {0}\n" );
 		std::cout << msg( destination.lexically_normal( ).string( ) );
 
@@ -105,5 +103,14 @@ namespace daw {
 			remove_all( destination );
 		}
 		return clone( std::move( repos ), std::move( destination ) );
+	}
+
+	int git_helper::checkout( glean::fs::path repos, std::string branch ) {
+		if( !exists( repos ) ) {
+			std::cerr << "Could not find valid repos at '" << repos << "'\n";
+			exit( EXIT_FAILURE );
+		}
+		// TODO
+		return 0;
 	}
 } // namespace daw

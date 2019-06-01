@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2018 Darrell Wright
+// Copyright (c) 2016-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,25 +20,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#define BOOST_TEST_MODULE glean_test
-
 #include <boost/filesystem.hpp>
-#include <boost/test/unit_test.hpp>
 #include <fstream>
 #include <iostream>
 #include <iterator>
 
+#include <daw/daw_benchmark.h>
+
 #include "config.h"
 
+void download_test_001( ) {
+	auto const path = daw::glean::download_file( "https://www.google.ca" );
+	std::cout << "Downloaded to file " << path.string( ) << '\n';
+	daw::expecting( exists( *path ) );
+	auto in_file = std::ifstream( path.string( ), std::ios::binary );
+	daw::expecting( in_file );
+	auto result = std::string( );
+	std::copy( std::istreambuf_iterator<char>( in_file ),
+	           std::istreambuf_iterator<char>( ), std::back_inserter( result ) );
+}
 
-BOOST_AUTO_TEST_CASE( download_test_001 ) {
-	auto path = daw::glean::download_file( "https://www.google.ca" );
-	std::cout << "Downloaded to file " << path.string( ) << std::endl;
-	BOOST_REQUIRE( exists( *path ) );
-	std::ifstream in_file;
-	in_file.open( path.string( ), std::ios::binary );
-	BOOST_REQUIRE( in_file );
-	std::string result;
-	std::copy( std::istreambuf_iterator<char>{in_file},
-	           std::istreambuf_iterator<char>{}, std::back_inserter( result ) );
+int main( ) {
+	download_test_001( );
 }

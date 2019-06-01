@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018 Darrell Wright
+// Copyright (c) 2018-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -22,17 +22,17 @@
 
 #pragma once
 
-#include <boost/filesystem/path.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <optional>
 
-namespace daw {
+#include "utilities.h"
 
+namespace daw {
 	struct glean_options {
 		boost::program_options::variables_map vm;
 		glean_options( int argc, char **argv );
 
-		boost::filesystem::path deps_file( ) const;
-		boost::filesystem::path prefix( ) const;
+		glean::fs::path deps_file( ) const;
+		glean::fs::path prefix( ) const;
 	};
 } // namespace daw

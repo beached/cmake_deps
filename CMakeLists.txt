@@ -23,7 +23,7 @@ else( )
 	include( "${CMAKE_SOURCE_DIR}/dependent_projects/dependencies.txt" )
 
 	add_library( dependency_stub STATIC "${CMAKE_SOURCE_DIR}/dependent_projects/stub.cpp" )
-	add_dependencies( dependency_stub utf_range_prj header_libraries_prj date_prj )
+	add_dependencies( dependency_stub parse_template_prj temp_file_prj kv_file_prj date_prj header_libraries_prj utf_range_prj iso8601_parsing_prj )
 	include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 endif( )
 
@@ -40,8 +40,14 @@ include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
 set( HEADER_FILES
+	${HEADER_FOLDER}/action_status.h
+	${HEADER_FOLDER}/build_cmake.h
+	${HEADER_FOLDER}/build_types.h
 	${HEADER_FOLDER}/config.h
+	${HEADER_FOLDER}/dependency.h
 	${HEADER_FOLDER}/git_helper.h
+	${HEADER_FOLDER}/download_git.h
+	${HEADER_FOLDER}/download_types.h
 	${HEADER_FOLDER}/glean_file.h
 	${HEADER_FOLDER}/glean_file_parser.h
 	${HEADER_FOLDER}/glean_impl.h
@@ -52,6 +58,7 @@ set( HEADER_FILES
 
 set( SOURCE_FILES
 	${SOURCE_FOLDER}/config.cpp
+	${SOURCE_FOLDER}/download_git.cpp
 	${SOURCE_FOLDER}/git_helper.cpp
 	${SOURCE_FOLDER}/glean_file.cpp
 	${SOURCE_FOLDER}/glean_file_parser.cpp

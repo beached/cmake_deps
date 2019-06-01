@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2018 Darrell Wright
+// Copyright (c) 2016-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -25,8 +25,6 @@
 #include "config.h"
 #include "glean_options.h"
 
-namespace daw {
-	namespace glean {
-		void process_file( glean_options const &opts, glean_config const &cfg );
-	} // namespace glean
-} // namespace daw
+namespace daw::glean {
+	void process_file( glean_options const &opts, glean_config const &cfg );
+} // namespace daw::glean

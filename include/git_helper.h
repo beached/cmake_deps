@@ -22,13 +22,15 @@
 
 #pragma once
 
-#include <boost/filesystem/path.hpp>
-#include <git2/types.h>
+#include <git2.h>
 #include <string>
+
+#include "utilities.h"
 
 namespace daw {
 	class git_helper {
 		git_repository *m_repos = nullptr;
+
 	public:
 		constexpr git_helper( ) noexcept = default;
 
@@ -41,8 +43,8 @@ namespace daw {
 		}
 
 		constexpr void reset( ) noexcept {
-			if( auto tmp = daw::exchange( m_repos, nullptr ); tmp ) {
-				git_repository_free( tmp );
+			if( auto ptr = daw::exchange( m_repos, nullptr ); ptr ) {
+				git_repository_free( ptr );
 				git_libgit2_shutdown( );
 			}
 		}
@@ -65,8 +67,8 @@ namespace daw {
 			reset( );
 		}
 
-		int clone( std::string repos, boost::filesystem::path destination );
-		int update( std::string repos, boost::filesystem::path destination );
-		int checkout( boost::filesystem::path repos, std::string branch );
+		int clone( std::string repos, glean::fs::path destination );
+		int update( std::string repos, glean::fs::path destination );
+		int checkout( glean::fs::path repos, std::string branch );
 	};
 } // namespace daw

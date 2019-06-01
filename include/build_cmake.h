@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2019 Darrell Wright
+// Copyright (c) 2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,13 +20,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <mutex>
+#pragma once
 
-//#include "utilities.h"
+#include <daw/daw_string_view.h>
 
-namespace daw::glean::impl {
-	std::mutex &get_curl_t_init_mutex( ) {
-		static auto init_lock = std::mutex( );
-		return init_lock;
-	}
-} // namespace daw::glean::impl
+#include "action_status.h"
+#include "utilities.h"
+
+namespace daw::glean {
+	struct build_cmake {
+		static constexpr daw::string_view type_id = "cmake";
+		fs::path m_source;
+		fs::path m_build;
+		fs::path m_install;
+
+		inline build_cmake( fs::path source, fs::path build,
+		                    fs::path install ) noexcept
+		  : m_source( std::move( source ) )
+		  , m_build( std::move( build ) )
+		  , m_install( std::move( install ) ) {}
+
+		inline build_cmake( std::string const &source, std::string const &build,
+		                    std::string const &install )
+		  : m_source( source )
+		  , m_build( build )
+		  , m_install( install ) {}
+
+		inline action_status build( ) const {
+			return action_status::failure;
+		}
+
+		inline action_status install( ) const {
+			return action_status::failure;
+		}
+	};
+} // namespace daw::glean

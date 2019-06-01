@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2018 Darrell Wright
+// Copyright (c) 2016-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include <boost/filesystem.hpp>
 #include <string>
 
 #include "glean_file.h"
+#include "utilities.h"
 
-namespace daw {
-	namespace glean {
-		glean_file parse_cmakes_deps( boost::filesystem::path const &deps_file );
-		glean_file parse_cmakes_deps( std::string const &deps_file );
-	} // namespace glean
-} // namespace daw
+namespace daw::glean {
+	/*
+	glean_file parse_cmakes_deps( fs::path const &deps_file );
+	glean_file parse_cmakes_deps( std::string const &deps_file );
+	 */
+} // namespace daw::glean

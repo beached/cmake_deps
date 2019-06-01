@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2018 Darrell Wright
+// Copyright (c) 2016-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -22,52 +22,112 @@
 
 #pragma once
 
+#if __has_include( <filesystem> ) and __cpp_lib_filesystem
+#define DAW_HAS_STDFILESYSTEM
+#include <filesystem>
+#else
 #include <boost/filesystem/path.hpp>
+#endif
+
+#include <boost/filesystem.hpp>
 #include <curl/curl.h>
 #include <exception>
 #include <mutex>
+#include <sstream>
 
 #include <daw/daw_string_view.h>
 
-namespace daw {
-	namespace glean {
-		struct change_directory {
-			boost::filesystem::path old_path;
+namespace daw::glean {
+#ifdef DAW_HAS_STDFILESYSTEM
+	namespace fs = std::filesystem;
+#else
+	namespace fs = boost::filesystem;
+#endif
 
-			change_directory( boost::filesystem::path const &new_path );
+	namespace impl {
+		std::mutex &get_curl_t_init_mutex( );
+	} // namespace impl
 
-			~change_directory( );
-			change_directory( change_directory && ) noexcept = default;
-			change_directory &operator=( change_directory && ) noexcept = default;
+	struct change_directory {
+		fs::path old_path = fs::current_path( );
 
-			change_directory( change_directory const & ) = delete;
-			change_directory &operator=( change_directory const & ) = delete;
-		}; // change_directory
+		inline change_directory( fs::path const &new_path ) {
+			fs::current_path( new_path );
+		}
 
-		using glean_exception = std::runtime_error;
+		inline ~change_directory( ) noexcept {
+			try {
+				if( exists( old_path ) && is_directory( old_path ) ) {
+					fs::current_path( old_path );
+				}
+			} catch( ... ) {}
+		}
 
-		void verify_folder( boost::filesystem::path const &path );
+		change_directory( change_directory && ) noexcept = default;
+		change_directory &operator=( change_directory && ) noexcept = default;
 
-		void verify_file( boost::filesystem::path const &f );
+		change_directory( change_directory const & ) = delete;
+		change_directory &operator=( change_directory const & ) = delete;
+	}; // change_directory
 
-		class curl_t {
-			CURL *ptr;
+	using glean_exception = std::runtime_error;
 
-		public:
-			curl_t( ) noexcept;
-			~curl_t( ) noexcept;
-			curl_t( curl_t && ) noexcept = default;
-			curl_t &operator=( curl_t && ) noexcept = default;
+	inline void verify_folder( fs::path const &path ) {
+		if( !exists( path ) ) {
+			create_directories( path );
+		}
+		if( !exists( path ) || !is_directory( path ) ) {
+			std::stringstream ss;
+			ss << "Could not create folder (" << path << ") or is not a directory";
+			throw glean_exception( ss.str( ) );
+		}
+	}
 
-			curl_t( curl_t const & ) = delete;
-			curl_t &operator=( curl_t const & ) = delete;
+	inline void verify_file( fs::path const &f ) {
+		if( exists( f ) && !is_regular_file( f ) ) {
+			std::stringstream ss;
+			ss << "File already exists but isn't a file (" << f << ")";
+			throw glean_exception( ss.str( ) );
+		}
+	}
 
-			void close( ) noexcept;
+	class curl_t {
+		CURL *ptr = nullptr;
 
-			operator CURL *( ) const noexcept;
+	public:
+		inline curl_t( ) noexcept {
+			{
+				std::lock_guard<std::mutex> lock( impl::get_curl_t_init_mutex( ) );
+				curl_global_init( CURL_GLOBAL_DEFAULT );
+			}
+			ptr = curl_easy_init( );
+		}
+		inline ~curl_t( ) noexcept {
+			close( );
+		}
 
-			explicit operator bool( ) const noexcept;
-		}; // curl_t
+		curl_t( curl_t && ) noexcept = default;
+		curl_t &operator=( curl_t && ) noexcept = default;
+		curl_t( curl_t const & ) = delete;
+		curl_t &operator=( curl_t const & ) = delete;
 
-	} // namespace glean
-} // namespace daw
+		inline void close( ) noexcept {
+			if( auto tmp = std::exchange( ptr, nullptr ); tmp ) {
+				try {
+					curl_easy_cleanup( tmp );
+					std::lock_guard<std::mutex> lock( impl::get_curl_t_init_mutex( ) );
+					curl_global_cleanup( );
+				} catch( ... ) {}
+			}
+		}
+
+		inline operator CURL *( ) const noexcept {
+			return ptr;
+		}
+
+		inline explicit operator bool( ) const noexcept {
+			return ptr;
+		}
+	}; // curl_t
+
+} // namespace daw::glean
