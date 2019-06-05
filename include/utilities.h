@@ -22,7 +22,7 @@
 
 #pragma once
 
-#if __has_include( <filesystem> ) and __cpp_lib_filesystem
+#if __has_include( <filesystem> ) and defined( __cpp_lib_filesystem )
 #define DAW_HAS_STDFILESYSTEM
 #include <filesystem>
 #else
