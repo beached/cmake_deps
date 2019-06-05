@@ -32,13 +32,13 @@
 
 namespace daw {
 	namespace {
-		int sideband_progress( const char *str, int len, void * ) {
+		extern "C" int sideband_progress( const char *str, int len, void * ) noexcept {
 			static auto const f = daw::fmt_t( "remote: {0}\n" );
 			std::cout << f( std::string( str, static_cast<size_t>( len ) ) );
 			return EXIT_SUCCESS;
 		}
 
-		int fetch_progress( git_transfer_progress const *stats, void * ) {
+		extern "C" int fetch_progress( git_transfer_progress const *stats, void * ) noexcept {
 			auto const fetch_percent =
 			  ( 100 * stats->received_objects ) / stats->total_objects;
 			auto const index_percent =
@@ -53,7 +53,7 @@ namespace daw {
 			return EXIT_SUCCESS;
 		}
 
-		void checkout_progress( const char *path, size_t cur, size_t tot, void * ) {
+		extern "C" void checkout_progress( const char *path, size_t cur, size_t tot, void * ) noexcept {
 			static auto const f = daw::fmt_t( "checkout: {0} - {1}\n" );
 			std::cout << f( 100 * cur / tot, path );
 		}
@@ -79,6 +79,7 @@ namespace daw {
 			remove_all( destination );
 			create_directories( destination );
 		}
+		/*
 		git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
 		git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
 
@@ -93,6 +94,10 @@ namespace daw {
 
 		int result =
 		  git_clone( &m_repos, repos.c_str( ), destination.c_str( ), &clone_opts );
+		  */
+		git_repository * git_repos = nullptr;
+		std::string dest = destination.string( );
+		int result = git_clone( &git_repos, repos.c_str( ), dest.c_str( ), nullptr );
 		if( result != 0 ) {
 			git_error const *err = giterr_last( );
 			std::cerr << "Error while cloning: " << err->message << '\n';
