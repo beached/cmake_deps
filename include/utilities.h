@@ -49,22 +49,36 @@ namespace daw::glean {
 	} // namespace impl
 
 	struct change_directory {
-		fs::path old_path = fs::current_path( );
+		std::optional<fs::path> old_path;
 
 		inline change_directory( fs::path const &new_path ) {
 			fs::current_path( new_path );
 		}
 
-		inline ~change_directory( ) noexcept {
-			try {
-				if( exists( old_path ) && is_directory( old_path ) ) {
-					fs::current_path( old_path );
-				}
-			} catch( ... ) {}
+		inline void reset( ) noexcept {
+			if( auto tmp = std::exchange( old_path, std::nullopt ); tmp ) {
+				try {
+					if( exists( *tmp ) and is_directory( *tmp ) ) {
+						fs::current_path( *tmp );
+					}
+				} catch( ... ) {}
+			}
 		}
 
-		change_directory( change_directory && ) noexcept = default;
-		change_directory &operator=( change_directory && ) noexcept = default;
+		inline ~change_directory( ) noexcept {
+			reset( );
+		}
+
+		change_directory( change_directory &&other ) noexcept
+		  : old_path( std::exchange( other.old_path, std::nullopt ) ) {}
+
+		change_directory &operator=( change_directory &&rhs ) noexcept {
+			if( this != &rhs ) {
+				reset( );
+				old_path = std::exchange( rhs.old_path, std::nullopt );
+			}
+			return *this;
+		}
 
 		change_directory( change_directory const & ) = delete;
 		change_directory &operator=( change_directory const & ) = delete;
@@ -77,7 +91,7 @@ namespace daw::glean {
 			create_directories( path );
 		}
 		if( !exists( path ) || !is_directory( path ) ) {
-			std::stringstream ss;
+			auto ss = std::stringstream( );
 			ss << "Could not create folder (" << path << ") or is not a directory";
 			throw glean_exception( ss.str( ) );
 		}
@@ -85,14 +99,14 @@ namespace daw::glean {
 
 	inline void verify_file( fs::path const &f ) {
 		if( exists( f ) && !is_regular_file( f ) ) {
-			std::stringstream ss;
+			auto ss = std::stringstream( );
 			ss << "File already exists but isn't a file (" << f << ")";
 			throw glean_exception( ss.str( ) );
 		}
 	}
 
 	class curl_t {
-		CURL *ptr = nullptr;
+		CURL *ptr;
 
 	public:
 		inline curl_t( ) noexcept {
@@ -102,12 +116,22 @@ namespace daw::glean {
 			}
 			ptr = curl_easy_init( );
 		}
+
 		inline ~curl_t( ) noexcept {
 			close( );
 		}
 
-		curl_t( curl_t && ) noexcept = default;
-		curl_t &operator=( curl_t && ) noexcept = default;
+		inline curl_t( curl_t &&other ) noexcept
+		  : ptr( std::exchange( other.ptr, nullptr ) ) {}
+
+		inline curl_t &operator=( curl_t &&rhs ) noexcept {
+			if( this != &rhs ) {
+				close( );
+				ptr = std::exchange( rhs.ptr, nullptr );
+			}
+			return *this;
+		}
+
 		curl_t( curl_t const & ) = delete;
 		curl_t &operator=( curl_t const & ) = delete;
 

@@ -1,0 +1,43 @@
+{
+	"provides": "glean",
+	"build_type": "cmake",
+	"dependencies": [ 
+		{
+			"name": "header_libraries",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/header_libraries.git"
+		},
+		{
+			"name": "iso8601_parsing",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/iso8601_parsing.git"
+		},
+		{
+			"name": "utf_range",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/utf_range.git"
+		},
+		{
+			"name": "libtemp_file",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/libtemp_file.git"
+		},
+		{
+			"name": "daw_json_link",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/daw_json_link.git"
+		},
+		{
+			"name": "date",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/howardhinnant/date.gits.git"
+		}
+	]
+}
+

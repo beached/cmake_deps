@@ -27,7 +27,7 @@
 
 #include <daw/daw_benchmark.h>
 
-#include "config.h"
+#include "glean_config.h"
 
 void download_test_001( ) {
 	auto const path = daw::glean::download_file( "https://www.google.ca" );

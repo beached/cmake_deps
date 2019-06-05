@@ -28,6 +28,7 @@
 
 #include "action_status.h"
 #include "build_cmake.h"
+#include "build_none.h"
 
 namespace daw::glean {
 	template<typename... BuildTypes>
@@ -39,7 +40,11 @@ namespace daw::glean {
 		static constexpr std::variant<BuildTypes...>
 		construct_bt( daw::string_view type, Args &&... args ) {
 			if( T::type_id == type ) {
-				return {T( std::forward<Args>( args )... )};
+				if constexpr( std::is_constructible_v<T, Args...> ) {
+					return {T( std::forward<Args>( args )... )};
+				} else {
+					std::abort( );
+				}
 			}
 			std::abort( );
 		}
@@ -49,7 +54,11 @@ namespace daw::glean {
 		static constexpr std::variant<BuildTypes...>
 		construct_bt( daw::string_view type, Args &&... args ) {
 			if( T::type_id == type ) {
-				return {T( std::forward<Args>( args )... )};
+				if constexpr( std::is_constructible_v<T, Args...> ) {
+					return {T( std::forward<Args>( args )... )};
+				} else {
+					std::abort( );
+				}
 			}
 			return construct_bt<Ts...>( type, std::forward<Args>( args )... );
 		}
@@ -77,5 +86,5 @@ namespace daw::glean {
 		}
 	};
 
-	using build_types_t = basic_build_types<build_cmake>;
+	using build_types_t = basic_build_types<build_none, build_cmake>;
 } // namespace daw::glean

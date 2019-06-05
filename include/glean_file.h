@@ -26,15 +26,16 @@
 #include <iostream>
 #include <optional>
 #include <string>
-#include <unordered_set>
 #include <variant>
 #include <vector>
 
+#include <daw/daw_graph.h>
 #include <daw/json/daw_json_link.h>
 
 #include "build_types.h"
 #include "dependency.h"
 #include "download_types.h"
+#include "glean_options.h"
 
 namespace daw::glean {
 
@@ -61,19 +62,22 @@ namespace daw::glean {
 
 	struct glean_config_file {
 		std::string provides;
+		std::string build_type;
 		std::vector<glean_file_item> dependencies;
 	};
 
 	inline auto describe_json_class( glean_config_file ) {
 		using namespace daw::json;
 		static constexpr char const provides[] = "provides";
+		static constexpr char const build_type[] = "build_type";
 		static constexpr char const dependencies[] = "dependencies";
+
 		return class_description_t<
-		  json_string<provides>,
-		  json_array<no_name, std::vector<glean_file_item>,
-		             json_class<dependencies, glean_file_item>>>{};
+		  json_string<provides>, json_string<build_type>,
+		  json_array<dependencies, std::vector<glean_file_item>,
+		             json_class<no_name, glean_file_item>>>{};
 	}
 
-	std::unordered_set<dependency>
-	process_config_file( fs::path config_file_path, fs::path prefix );
+	void process_config_file( fs::path const &config_file_path,
+	                          glean_options const &opts );
 } // namespace daw::glean

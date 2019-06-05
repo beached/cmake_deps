@@ -28,7 +28,7 @@
 #include <daw/daw_string_view.h>
 #include <daw/temp_file.h>
 
-#include "config.h"
+#include "glean_config.h"
 #include "utilities.h"
 
 namespace daw::glean {
@@ -48,12 +48,15 @@ namespace daw::glean {
 			if( env_var ) {
 				return {env_var};
 			} else {
-				auto result = fs::path( get_home( ) );
-				return result / ".glean.config";
+				return get_home( ) / ".glean.config";
 			}
 		}( );
-		auto const json_data = daw::read_file( config_file.string( ) );
-		return daw::json::from_json<glean_config>( json_data );
+		if( exists( config_file ) ) {
+			return daw::json::from_json<glean_config>(
+			  daw::read_file( config_file.string( ) ) );
+		} else {
+			return {};
+		}
 	}
 
 	namespace {

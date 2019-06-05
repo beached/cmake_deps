@@ -25,6 +25,7 @@
 
 #include <boost/program_options.hpp>
 
+#include "glean_config.h"
 #include "glean_options.h"
 #include "utilities.h"
 
@@ -40,12 +41,14 @@ namespace daw {
 		boost::program_options::variables_map get_vm( int argc, char **argv ) {
 			boost::program_options::options_description desc{"Options"};
 			desc.add_options( )( "help", "print option descriptions" )(
-			  "prefix", boost::program_options::value<std::string>( ),
-			  "installation prefix folder" )(
-			  "deps_file",
+			  "cache",
 			  boost::program_options::value<glean::fs::path>( )->default_value(
-			    "./glean.txt" ),
-			  "dependencies file" );
+			    glean::get_home( ) / ".glean_cache" ),
+			  "installation prefix folder" )(
+			  "prefix",
+			  boost::program_options::value<glean::fs::path>( )->default_value(
+			    glean::fs::current_path( ) / ".glean" ),
+			  "prefix for install" );
 
 			boost::program_options::variables_map vm{};
 			try {
@@ -72,35 +75,44 @@ namespace daw {
 		ensure_system( );
 	}
 
-	glean::fs::path glean_options::deps_file( ) const {
-		if( vm.count( "deps_file" ) != 1 ) {
-			std::cerr << "Must specify 1 dependency file\n";
-			exit( EXIT_FAILURE );
+	namespace {
+		template<typename VM>
+		glean::fs::path process_path_opt( VM const &vm, std::string const &name ) {
+			glean::fs::path result;
+			if( vm.count( name.c_str( ) ) ) {
+				result = vm[name.c_str( )].template as<glean::fs::path>( );
+			} else {
+				std::cerr << name << " folder (" << result << ") not specified\n";
+				exit( EXIT_FAILURE );
+			}
+			if( exists( result ) ) {
+				if( !is_directory( result ) ) {
+					std::cerr << name << " folder (" << result
+					          << ") is not a directory\n";
+					exit( EXIT_FAILURE );
+				}
+			}
+			return result;
 		}
-		auto result = vm["deps_file"].as<glean::fs::path>( );
-		if( !exists( result ) ) {
-			std::cerr << "Dependency file (" << result << ") does not exist\n";
-			exit( EXIT_FAILURE );
-		} else if( !is_regular_file( result ) ) {
-			std::cerr << "Dependency file (" << result << ") is not a regular file\n";
-			exit( EXIT_FAILURE );
+	} // namespace
+
+	glean::fs::path glean_options::prefix( ) const {
+		auto result = process_path_opt( vm, "prefix" );
+		if( !is_directory( result ) ) {
+			if( exists( result ) ) {
+				glean::fs::remove( result );
+			}
+			glean::fs::create_directory( result );
 		}
 		return result;
 	}
 
-	glean::fs::path glean_options::prefix( ) const {
-		glean::fs::path result;
-		if( vm.count( "prefix" ) ) {
-			result = vm["prefix"].as<glean::fs::path>( );
-		} else {
-			result = deps_file( ).parent_path( ) /= "glean_files";
-		}
-		if( exists( result ) ) {
-			if( !is_directory( result ) ) {
-				std::cerr << "Prefix folder (" << result << ") is not a directory\n";
-				exit( EXIT_FAILURE );
+	glean::fs::path glean_options::cache( ) const {
+		auto result = process_path_opt( vm, "cache" );
+		if( !is_directory( result ) ) {
+			if( exists( result ) ) {
+				glean::fs::remove( result );
 			}
-		} else {
 			glean::fs::create_directory( result );
 		}
 		return result;

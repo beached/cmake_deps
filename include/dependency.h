@@ -53,7 +53,7 @@ namespace daw::glean {
 			return m_build_type.build( );
 		}
 
-		inline std::string glean_file( ) const {
+		inline fs::path glean_file( ) const {
 			return {};
 		}
 

@@ -26,7 +26,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "config.h"
+#include "glean_config.h"
 #include "glean_file.h"
 #include "glean_options.h"
 #include "utilities.h"
@@ -51,6 +51,8 @@ namespace {
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
 	auto opts = daw::glean_options( argc, argv );
-	auto deps = daw::glean::process_config_file( "./glean.json", opts.prefix( ) );
+	std::cout << "cache: " << opts.cache( ) << '\n';
+	std::cout << "destination: " << opts.prefix( ) << '\n';
+	daw::glean::process_config_file( "./glean.json", opts );
 	return EXIT_SUCCESS;
 }

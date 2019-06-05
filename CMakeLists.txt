@@ -42,11 +42,13 @@ link_directories( ${Boost_LIBRARY_DIRS} )
 set( HEADER_FILES
 	${HEADER_FOLDER}/action_status.h
 	${HEADER_FOLDER}/build_cmake.h
+	${HEADER_FOLDER}/build_none.h
 	${HEADER_FOLDER}/build_types.h
-	${HEADER_FOLDER}/config.h
 	${HEADER_FOLDER}/dependency.h
+	${HEADER_FOLDER}/glean_config.h
 	${HEADER_FOLDER}/git_helper.h
 	${HEADER_FOLDER}/download_git.h
+	${HEADER_FOLDER}/download_none.h
 	${HEADER_FOLDER}/download_types.h
 	${HEADER_FOLDER}/glean_file.h
 	${HEADER_FOLDER}/glean_options.h
@@ -54,8 +56,8 @@ set( HEADER_FILES
 )
 
 set( SOURCE_FILES
-	${SOURCE_FOLDER}/config.cpp
 	${SOURCE_FOLDER}/download_git.cpp
+	${SOURCE_FOLDER}/glean_config.cpp
 	${SOURCE_FOLDER}/git_helper.cpp
 	${SOURCE_FOLDER}/glean_file.cpp
 	${SOURCE_FOLDER}/glean_options.cpp

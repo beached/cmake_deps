@@ -28,24 +28,17 @@
 #include "utilities.h"
 
 namespace daw::glean {
-	struct build_cmake {
-		static constexpr daw::string_view type_id = "cmake";
-		fs::path m_source;
-		fs::path m_build;
-		fs::path m_install;
+	struct build_none {
+		static constexpr daw::string_view type_id = "none";
 
-		inline build_cmake( fs::path source, fs::path build,
-		                    fs::path install ) noexcept
-		  : m_source( std::move( source ) )
-		  , m_build( std::move( build ) )
-		  , m_install( std::move( install ) ) {}
+		constexpr build_none( ) noexcept = default;
 
-		inline action_status build( ) const {
-			return action_status::failure;
+		constexpr action_status build( ) const {
+			return action_status::success;
 		}
 
-		inline action_status install( ) const {
-			return action_status::failure;
+		constexpr action_status install( ) const {
+			return action_status::success;
 		}
 	};
 } // namespace daw::glean

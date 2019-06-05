@@ -32,29 +32,39 @@
 
 #include "action_status.h"
 #include "download_git.h"
+#include "download_none.h"
 
 namespace daw::glean {
 	template<typename... DownloadTypes>
 	class basic_download_types {
-		std::variant<DownloadTypes...> m_value;
+		using variant_t = std::variant<DownloadTypes...>;
+		variant_t m_value;
 
 		template<typename T, typename... Ts, typename... Args,
 		         daw::enable_if_t<( sizeof...( Ts ) < 1 )> = nullptr>
-		static constexpr std::variant<DownloadTypes...>
-		construct_dt( daw::string_view type, Args &&... args ) {
+		static constexpr variant_t construct_dt( daw::string_view type,
+		                                         Args &&... args ) {
 
 			if( T::type_id == type ) {
-				return {T( std::forward<Args>( args )... )};
+				if constexpr( std::is_constructible_v<T, Args...> ) {
+					return {T( std::forward<Args>( args )... )};
+				} else {
+					std::abort( );
+				}
 			}
 			std::abort( );
 		}
 
 		template<typename T, typename... Ts, typename... Args,
 		         daw::enable_if_t<( sizeof...( Ts ) > 0 )> = nullptr>
-		static constexpr std::variant<DownloadTypes...>
-		construct_dt( daw::string_view type, Args &&... args ) {
+		static constexpr variant_t construct_dt( daw::string_view type,
+		                                         Args &&... args ) {
 			if( T::type_id == type ) {
-				return {T( std::forward<Args>( args )... )};
+				if constexpr( std::is_constructible_v<T, Args...> ) {
+					return {T( std::forward<Args>( args )... )};
+				} else {
+					std::abort( );
+				}
 			}
 			return construct_dt<Ts...>( type, std::forward<Args>( args )... );
 		}
@@ -76,5 +86,5 @@ namespace daw::glean {
 		}
 	};
 
-	using download_types_t = basic_download_types<download_git>;
+	using download_types_t = basic_download_types<download_none, download_git>;
 } // namespace daw::glean

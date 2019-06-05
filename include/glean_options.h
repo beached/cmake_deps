@@ -23,7 +23,6 @@
 #pragma once
 
 #include <boost/program_options/variables_map.hpp>
-#include <optional>
 
 #include "utilities.h"
 
@@ -32,7 +31,7 @@ namespace daw {
 		boost::program_options::variables_map vm;
 		glean_options( int argc, char **argv );
 
-		glean::fs::path deps_file( ) const;
 		glean::fs::path prefix( ) const;
+		glean::fs::path cache( ) const;
 	};
 } // namespace daw
