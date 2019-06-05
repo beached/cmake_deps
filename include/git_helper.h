@@ -33,15 +33,12 @@ namespace daw {
 	class git_helper {
 		git_repository *m_repos = nullptr;
 
-		inline static const auto s_git_system = []( ) {
-			git_libgit2_init( );
-			return daw::on_scope_exit( []( ) { git_libgit2_shutdown( ); } );
-		}( );
-
 	public:
-		git_helper( ) noexcept = default;
+		inline git_helper( ) noexcept {
+			git_libgit2_init( );
+		}
 
-		constexpr void reset( ) noexcept {
+		inline void reset( ) noexcept {
 			if( auto ptr = daw::exchange( m_repos, nullptr ); ptr ) {
 				git_repository_free( ptr );
 			}
@@ -50,10 +47,10 @@ namespace daw {
 		git_helper( git_helper const & ) = delete;
 		git_helper &operator=( git_helper const & ) = delete;
 
-		constexpr git_helper( git_helper &&other ) noexcept
+		inline git_helper( git_helper &&other ) noexcept
 		  : m_repos( daw::exchange( m_repos, nullptr ) ) {}
 
-		constexpr git_helper &operator=( git_helper &&rhs ) noexcept {
+		inline git_helper &operator=( git_helper &&rhs ) noexcept {
 			if( this != &rhs ) {
 				reset( );
 				m_repos = daw::exchange( rhs.m_repos, nullptr );
@@ -63,6 +60,7 @@ namespace daw {
 
 		inline ~git_helper( ) noexcept {
 			reset( );
+			git_libgit2_shutdown( );
 		}
 
 		int clone( std::string repos, glean::fs::path destination );
