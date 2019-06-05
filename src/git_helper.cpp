@@ -59,7 +59,7 @@ namespace daw {
 		extern "C" void checkout_progress( const char *path, size_t cur, size_t tot,
 		                                   void * ) noexcept {
 			static auto const f = daw::fmt_t( "checkout: {0} - {1}\n" );
-			std::cout << f( 100 * cur / tot, path );
+			std::cout << "checkout: " << ( 100 * cur / tot) << " = " << path << '\n';
 		}
 
 		extern "C" int cred_acquire_cb( git_cred **cred, const char * /*url*/,
