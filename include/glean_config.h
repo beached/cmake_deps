@@ -37,12 +37,15 @@ namespace daw::glean {
 		fs::path cmake_binary = "cmake";
 	}; // glean_config
 
+	static constexpr char const glean_config_cache_folder[] =
+	  "cache_folder";
+	static constexpr char const glean_config_cmake_binary[] =
+	  "cmake_binary";
+
 	inline auto describe_json_class( glean_config ) {
 		using namespace daw::json;
-		static constexpr char const cache_folder[] = "cache_folder";
-		static constexpr char const cmake_binary[] = "cmake_binary";
-		return class_description_t<json_string<cache_folder>,
-		                           json_string<cmake_binary>>{};
+		return class_description_t<json_string<glean_config_cache_folder>,
+		                           json_string<glean_config_cmake_binary>>{};
 	}
 
 	inline auto to_json_data( glean_config const &gc ) {

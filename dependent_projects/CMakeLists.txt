@@ -13,4 +13,4 @@ include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 include( "dependencies.txt" )
 
 add_library( dependency_stub STATIC stub.cpp )
-add_dependencies( dependency_stub parse_template_prj temp_file_prj kv_file_prj date_prj header_libraries_prj utf_range_prj iso8601_parsing_prj )
+add_dependencies( dependency_stub temp_file_prj date_prj header_libraries_prj utf_range_prj iso8601_parsing_prj daw_json_link_prj )

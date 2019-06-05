@@ -23,7 +23,7 @@ else( )
 	include( "${CMAKE_SOURCE_DIR}/dependent_projects/dependencies.txt" )
 
 	add_library( dependency_stub STATIC "${CMAKE_SOURCE_DIR}/dependent_projects/stub.cpp" )
-	add_dependencies( dependency_stub parse_template_prj temp_file_prj kv_file_prj date_prj header_libraries_prj utf_range_prj iso8601_parsing_prj )
+    add_dependencies( dependency_stub temp_file_prj date_prj header_libraries_prj utf_range_prj iso8601_parsing_prj daw_json_link_prj )
 	include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 endif( )
 

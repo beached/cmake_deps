@@ -48,16 +48,20 @@ namespace daw::glean {
 		std::optional<std::string> version;
 	};
 
+	static constexpr char const glean_file_item_name[] = "name";
+	static constexpr char const glean_file_item_download_type[] = "download_type";
+	static constexpr char const glean_file_item_build_type[] = "build_type";
+	static constexpr char const glean_file_item_uri[] = "uri";
+	static constexpr char const glean_file_item_version[] = "version";
+
 	inline auto describe_json_class( glean_file_item ) {
 		using namespace daw::json;
-		static constexpr char const name[] = "name";
-		static constexpr char const download_type[] = "download_type";
-		static constexpr char const build_type[] = "build_type";
-		static constexpr char const uri[] = "uri";
-		static constexpr char const version[] = "version";
-		return class_description_t<json_string<name>, json_string<download_type>,
-		                           json_string<build_type>, json_string<uri>,
-		                           json_nullable<json_string<version>>>{};
+
+		return class_description_t<
+		  json_string<glean_file_item_name>,
+		  json_string<glean_file_item_download_type>,
+		  json_string<glean_file_item_build_type>, json_string<glean_file_item_uri>,
+		  json_nullable<json_string<glean_file_item_version>>>{};
 	}
 
 	struct glean_config_file {
@@ -66,15 +70,17 @@ namespace daw::glean {
 		std::vector<glean_file_item> dependencies;
 	};
 
+	static constexpr char const glean_config_file_provides[] = "provides";
+	static constexpr char const glean_config_file_build_type[] = "build_type";
+	static constexpr char const glean_config_file_dependencies[] = "dependencies";
+
 	inline auto describe_json_class( glean_config_file ) {
 		using namespace daw::json;
-		static constexpr char const provides[] = "provides";
-		static constexpr char const build_type[] = "build_type";
-		static constexpr char const dependencies[] = "dependencies";
 
 		return class_description_t<
-		  json_string<provides>, json_string<build_type>,
-		  json_array<dependencies, std::vector<glean_file_item>,
+		  json_string<glean_config_file_provides>,
+		  json_string<glean_config_file_build_type>,
+		  json_array<glean_config_file_dependencies, std::vector<glean_file_item>,
 		             json_class<no_name, glean_file_item>>>{};
 	}
 
