@@ -65,5 +65,5 @@ externalproject_add(
 
 include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
 link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
-add_dependencies( dependency_stub temp_file_prj date_prj header_libraries_prj utf_range_prj iso8601_parsing_prj daw_json_link_prj libgit2_prj )
+set( DEP_PROJECT_DEPS temp_file_prj date_prj header_libraries_prj utf_range_prj iso8601_parsing_prj daw_json_link_prj libgit2_prj )
 
