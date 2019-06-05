@@ -6,37 +6,37 @@
 			"name": "header_libraries",
 			"download_type": "git",
 			"build_type": "cmake",
-			"uri": "https://github.com/beached/header_libraries.git"
+			"uri": "https://github.com/beached/header_libraries"
 		},
 		{
 			"name": "iso8601_parsing",
 			"download_type": "git",
 			"build_type": "cmake",
-			"uri": "https://github.com/beached/iso8601_parsing.git"
+			"uri": "https://github.com/beached/iso8601_parsing"
 		},
 		{
 			"name": "utf_range",
 			"download_type": "git",
 			"build_type": "cmake",
-			"uri": "https://github.com/beached/utf_range.git"
+			"uri": "https://github.com/beached/utf_range"
 		},
 		{
 			"name": "libtemp_file",
 			"download_type": "git",
 			"build_type": "cmake",
-			"uri": "https://github.com/beached/libtemp_file.git"
+			"uri": "https://github.com/beached/libtemp_file"
 		},
 		{
 			"name": "daw_json_link",
 			"download_type": "git",
 			"build_type": "cmake",
-			"uri": "https://github.com/beached/daw_json_link.git"
+			"uri": "https://github.com/beached/daw_json_link"
 		},
 		{
 			"name": "date",
 			"download_type": "git",
 			"build_type": "cmake",
-			"uri": "https://github.com/howardhinnant/date.gits.git"
+			"uri": "https://github.com/howardhinnant/date.gits"
 		}
 	]
 }

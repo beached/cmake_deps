@@ -25,27 +25,25 @@
 #include <git2.h>
 #include <string>
 
+#include <daw/daw_utility.h>
+
 #include "utilities.h"
 
 namespace daw {
 	class git_helper {
 		git_repository *m_repos = nullptr;
 
+		inline static const auto s_git_system = []( ) {
+			git_libgit2_init( );
+			return daw::on_scope_exit( []( ) { git_libgit2_shutdown( ); } );
+		}( );
+
 	public:
-		constexpr git_helper( ) noexcept = default;
-
-		constexpr git_helper( git_repository *repos_ptr ) noexcept
-		  : m_repos( repos_ptr ) {
-
-			if( repos_ptr ) {
-				git_libgit2_init( );
-			}
-		}
+		git_helper( ) noexcept = default;
 
 		constexpr void reset( ) noexcept {
 			if( auto ptr = daw::exchange( m_repos, nullptr ); ptr ) {
 				git_repository_free( ptr );
-				git_libgit2_shutdown( );
 			}
 		}
 

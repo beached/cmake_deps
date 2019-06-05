@@ -22,6 +22,7 @@
 
 #include <git2.h>
 #include <git2/clone.h>
+#include <git2/cred_helpers.h>
 #include <iostream>
 #include <string>
 
@@ -32,13 +33,15 @@
 
 namespace daw {
 	namespace {
-		extern "C" int sideband_progress( const char *str, int len, void * ) noexcept {
+		extern "C" int sideband_progress( const char *str, int len,
+		                                  void * ) noexcept {
 			static auto const f = daw::fmt_t( "remote: {0}\n" );
 			std::cout << f( std::string( str, static_cast<size_t>( len ) ) );
 			return EXIT_SUCCESS;
 		}
 
-		extern "C" int fetch_progress( git_transfer_progress const *stats, void * ) noexcept {
+		extern "C" int fetch_progress( git_transfer_progress const *stats,
+		                               void * ) noexcept {
 			auto const fetch_percent =
 			  ( 100 * stats->received_objects ) / stats->total_objects;
 			auto const index_percent =
@@ -53,17 +56,46 @@ namespace daw {
 			return EXIT_SUCCESS;
 		}
 
-		extern "C" void checkout_progress( const char *path, size_t cur, size_t tot, void * ) noexcept {
+		extern "C" void checkout_progress( const char *path, size_t cur, size_t tot,
+		                                   void * ) noexcept {
 			static auto const f = daw::fmt_t( "checkout: {0} - {1}\n" );
 			std::cout << f( 100 * cur / tot, path );
 		}
 
-		int cred_acquire_cb( git_cred **cred, const char *url,
-		                     const char *username_from_url,
-		                     unsigned int allowed_types, void *payload ) {
+		extern "C" int cred_acquire_cb( git_cred **cred, const char * /*url*/,
+		                                const char *username_from_url,
+		                                unsigned int allowed_types,
+		                                void *payload ) {
 
-			std::cerr << "Credentia support is not implemented\n";
-			std::abort( );
+			auto *userpass = reinterpret_cast<git_cred_userpass_payload *>( payload );
+			if( !userpass or !userpass->password ) {
+				return -1;
+			}
+
+			auto *effective_username = [&]( ) -> char const * {
+				if( userpass->username ) {
+					return userpass->username;
+				} else {
+					return username_from_url;
+				}
+				return nullptr;
+			}( );
+
+			if( !effective_username ) {
+				return -1;
+			}
+
+			if( GIT_CREDTYPE_USERNAME & allowed_types ) {
+				return git_cred_username_new( cred, effective_username );
+			}
+
+			if( ( GIT_CREDTYPE_USERPASS_PLAINTEXT & allowed_types ) == 0 or
+			    git_cred_userpass_plaintext_new( cred, effective_username,
+			                                     userpass->password ) < 0 ) {
+				return -1;
+			}
+
+			return 0;
 		}
 	} // namespace
 
@@ -79,7 +111,7 @@ namespace daw {
 			remove_all( destination );
 			create_directories( destination );
 		}
-		/*
+
 		git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
 		git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
 
@@ -89,15 +121,12 @@ namespace daw {
 		clone_opts.checkout_opts = checkout_opts;
 		clone_opts.fetch_opts.callbacks.sideband_progress = &sideband_progress;
 		clone_opts.fetch_opts.callbacks.transfer_progress = &fetch_progress;
-		clone_opts.fetch_opts.callbacks.credentials = cred_acquire_cb;
+		clone_opts.fetch_opts.callbacks.credentials = &cred_acquire_cb;
 		clone_opts.fetch_opts.callbacks.payload = &repos;
 
 		int result =
 		  git_clone( &m_repos, repos.c_str( ), destination.c_str( ), &clone_opts );
-		  */
-		git_repository * git_repos = nullptr;
-		std::string dest = destination.string( );
-		int result = git_clone( &git_repos, repos.c_str( ), dest.c_str( ), nullptr );
+
 		if( result != 0 ) {
 			git_error const *err = giterr_last( );
 			std::cerr << "Error while cloning: " << err->message << '\n';

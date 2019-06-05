@@ -5,8 +5,8 @@ project( glean_prj )
 #find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 find_package( Boost 1.62.0 COMPONENTS program_options filesystem REQUIRED )
 #find_package( Threads REQUIRED )
-#find_package( OpenSSL REQUIRED )
-#find_package( CURL REQUIRED )
+find_package( OpenSSL REQUIRED )
+find_package( CURL REQUIRED )
 
 enable_testing( )
 
@@ -45,7 +45,7 @@ include_directories( ${HEADER_FOLDER} )
 include_directories( SYSTEM ${OPENSSL_INCLUDE_DIR} )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
-#include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
+include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
 
 link_directories( ${Boost_LIBRARY_DIRS} )
 
@@ -75,8 +75,7 @@ set( SOURCE_FILES
 )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
-#target_link_libraries( glean utf_range tz temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
-target_link_libraries( glean utf_range temp_file git2 ${Boost_LIBRARIES} )
+target_link_libraries( glean utf_range temp_file git2 ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 add_dependencies( glean dependency_stub )
 
 #add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
@@ -85,6 +84,10 @@ add_dependencies( glean dependency_stub )
 #target_link_libraries( glean_test_bin utf_range temp_file ${Boost_LIBRARIES} ) 
 #add_dependencies( glean_test_bin dependency_stub )
 #add_test( glean_test glean_test_bin )
+
+add_executable( git_test ${SOURCE_FOLDER}/git_helper.cpp ${TEST_FOLDER}/git_test.cpp )
+target_link_libraries( git_test git2 ${Boost_LIBRARIES} )
+add_dependencies( git_test dependency_stub )
 
 install( TARGETS glean DESTINATION bin )
 
