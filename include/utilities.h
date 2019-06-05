@@ -26,11 +26,10 @@
 #define DAW_HAS_STDFILESYSTEM
 #include <filesystem>
 #else
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 #endif
 
-#include <boost/filesystem.hpp>
-#include <curl/curl.h>
+//#include <curl/curl.h>
 #include <exception>
 #include <mutex>
 #include <sstream>
@@ -105,6 +104,7 @@ namespace daw::glean {
 		}
 	}
 
+	/*
 	class curl_t {
 		CURL *ptr;
 
@@ -153,5 +153,5 @@ namespace daw::glean {
 			return ptr;
 		}
 	}; // curl_t
-
+	*/
 } // namespace daw::glean

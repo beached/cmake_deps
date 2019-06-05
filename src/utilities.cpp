@@ -20,13 +20,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <mutex>
+//#include <mutex>
 
 //#include "utilities.h"
 
 namespace daw::glean::impl {
+	/*
 	std::mutex &get_curl_t_init_mutex( ) {
 		static auto init_lock = std::mutex( );
 		return init_lock;
 	}
+	 */
 } // namespace daw::glean::impl

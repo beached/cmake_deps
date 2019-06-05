@@ -60,6 +60,7 @@ namespace daw::glean {
 	}
 
 	namespace {
+		/*
 		size_t write_data( char *data, size_t size, size_t nmemb,
 		                   void *writer_data_p ) {
 			if( nullptr == writer_data_p ) {
@@ -92,8 +93,10 @@ namespace daw::glean {
 			}
 			return result;
 		}
+		 */
 	} // namespace
 
+	/*
 	daw::unique_temp_file download_file( daw::string_view url ) {
 		auto tmp_file = daw::unique_temp_file( );
 		auto out_file = tmp_file.secure_create_stream( );
@@ -105,4 +108,5 @@ namespace daw::glean {
 		out_file->close( );
 		return tmp_file;
 	}
+	 */
 } // namespace daw::glean

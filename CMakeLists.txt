@@ -4,9 +4,9 @@ project( glean_prj )
 
 #find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 find_package( Boost 1.58.0 COMPONENTS program_options iostreams filesystem REQUIRED )
-find_package( Threads REQUIRED )
+#find_package( Threads REQUIRED )
 #find_package( OpenSSL REQUIRED )
-find_package( CURL REQUIRED )
+#find_package( CURL REQUIRED )
 
 enable_testing( )
 
@@ -66,7 +66,7 @@ set( SOURCE_FILES
 )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
-target_link_libraries( glean utf_range git2 gnutls tz temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+target_link_libraries( glean utf_range git2 tz temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 add_dependencies( glean dependency_stub )
 
 add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
