@@ -33,8 +33,8 @@
 namespace daw {
 	namespace {
 		int sideband_progress( const char *str, int len, void * ) {
-			std::cout << "remote: " << std::string( str, static_cast<size_t>( len ) )
-			          << '\n';
+			static auto const f = daw::fmt_t( "remote: {0}\n" );
+			std::cout << f( std::string( str, static_cast<size_t>( len ) ) );
 			return EXIT_SUCCESS;
 		}
 
@@ -44,8 +44,8 @@ namespace daw {
 			auto const index_percent =
 			  ( 100 * stats->indexed_objects ) / stats->total_objects;
 			auto const kbytes = stats->received_bytes / 1024;
-			static daw::fmt_t const f(
-			  "network {0} ({1} kb, {2}/{3}) / index {4} ({5}/{6})\n" );
+			static auto const f =
+			  daw::fmt_t( "network {0} ({1} kb, {2}/{3}) / index {4} ({5}/{6})\n" );
 
 			std::cout << f( fetch_percent, kbytes, stats->received_objects,
 			                stats->total_objects, index_percent,
@@ -54,7 +54,7 @@ namespace daw {
 		}
 
 		void checkout_progress( const char *path, size_t cur, size_t tot, void * ) {
-			static daw::fmt_t const f( "checkout: {0} - {1}\n" );
+			static auto const f = daw::fmt_t( "checkout: {0} - {1}\n" );
 			std::cout << f( 100 * cur / tot, path );
 		}
 
@@ -69,9 +69,16 @@ namespace daw {
 
 	// TODO clone branch
 	int git_helper::clone( std::string repos, glean::fs::path destination ) {
-		static daw::fmt_t const msg( "No previous cache of {0}, cloning to {1}\n" );
-		std::cout << msg( repos, destination.lexically_normal( ).string( ) );
+		static auto const f =
+		  daw::fmt_t( "No previous cache of '{0}', cloning to '{1}'\n" );
 
+		std::cout << f( repos, destination.string( ) );
+		if( !is_empty( destination ) ) {
+			static auto const f2 = daw::fmt_t( "'{0}' is not empty, clearing\n" );
+			std::cout << f2( destination.string( ) );
+			remove_all( destination );
+			create_directories( destination );
+		}
 		git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
 		git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
 
@@ -85,8 +92,7 @@ namespace daw {
 		clone_opts.fetch_opts.callbacks.payload = &repos;
 
 		int result =
-		  git_clone( &m_repos, repos.c_str( ),
-		             destination.lexically_normal( ).c_str( ), &clone_opts );
+		  git_clone( &m_repos, repos.c_str( ), destination.c_str( ), &clone_opts );
 		if( result != 0 ) {
 			git_error const *err = giterr_last( );
 			std::cerr << "Error while cloning: " << err->message << '\n';
