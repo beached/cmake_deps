@@ -4,7 +4,7 @@ project( glean_prj )
 
 #find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 find_package( Boost 1.62.0 COMPONENTS program_options filesystem REQUIRED )
-#find_package( Threads REQUIRED )
+find_package( Threads REQUIRED )
 find_package( OpenSSL REQUIRED )
 find_package( CURL REQUIRED )
 

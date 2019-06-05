@@ -9,6 +9,10 @@ cd ./dependent_projects/build/release
 cmake ../.. -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 make clean
 make -j2
+RESULT=$?
+if [ $RESULT -neq 0 ]; then
+	exit $RESULT
+fi
 cd ../debug
 cmake ../.. -DCMAKE_BUILD_TYPE=debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 make clean
