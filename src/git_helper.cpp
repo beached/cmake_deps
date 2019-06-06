@@ -20,8 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <libssh2.h>
+
 #include <git2.h>
 #include <git2/clone.h>
+#include <git2/common.h>
+
 #include <git2/cred_helpers.h>
 #include <iostream>
 #include <string>
@@ -36,7 +40,9 @@ namespace daw {
 		extern "C" int sideband_progress( const char *str, int len,
 		                                  void * ) noexcept {
 			static auto const f = daw::fmt_t( "remote: {0}\n" );
-			std::cout << f( std::string( str, static_cast<size_t>( len ) ) );
+			if( str and len > 0 ) {
+				std::cout << f( std::string( str, static_cast<size_t>( len ) ) );
+			}
 			return EXIT_SUCCESS;
 		}
 
@@ -59,11 +65,12 @@ namespace daw {
 		extern "C" void checkout_progress( const char *path, size_t cur, size_t tot,
 		                                   void * ) noexcept {
 			static auto const f = daw::fmt_t( "checkout: {0} - {1}\n" );
-			std::cout << "checkout: " << ( 100 * cur / tot) << " = " << path << '\n';
+			std::cout << "checkout: " << ( 100 * cur / tot ) << " = "
+			          << ( path ? path : "" ) << '\n';
 		}
 
 		extern "C" int cred_acquire_cb( git_cred **cred, const char * /*url*/,
-		                                const char *username_from_url,
+		                                const char *user_from_url,
 		                                unsigned int allowed_types,
 		                                void *payload ) {
 
@@ -75,8 +82,8 @@ namespace daw {
 			auto *effective_username = [&]( ) -> char const * {
 				if( userpass->username ) {
 					return userpass->username;
-				} else {
-					return username_from_url;
+				} else if( user_from_url ) {
+					return user_from_url;
 				}
 				return nullptr;
 			}( );
@@ -112,13 +119,16 @@ namespace daw {
 			create_directories( destination );
 		}
 
-		git_clone_options clone_opts = GIT_CLONE_OPTIONS_INIT;
-		git_checkout_options checkout_opts = GIT_CHECKOUT_OPTIONS_INIT;
+		git_clone_options clone_opts{};
+		git_clone_init_options( &clone_opts, GIT_CLONE_OPTIONS_VERSION );
 
-		checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
-		checkout_opts.progress_cb = &checkout_progress;
-		checkout_opts.progress_payload = &repos;
-		clone_opts.checkout_opts = checkout_opts;
+		git_checkout_init_options( &clone_opts.checkout_opts,
+		                           GIT_CHECKOUT_OPTIONS_VERSION );
+
+		clone_opts.checkout_opts.checkout_strategy = GIT_CHECKOUT_SAFE;
+		clone_opts.checkout_opts.progress_cb = &checkout_progress;
+		clone_opts.checkout_opts.progress_payload = &repos;
+
 		clone_opts.fetch_opts.callbacks.sideband_progress = &sideband_progress;
 		clone_opts.fetch_opts.callbacks.transfer_progress = &fetch_progress;
 		clone_opts.fetch_opts.callbacks.credentials = &cred_acquire_cb;

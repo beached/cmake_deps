@@ -22,7 +22,11 @@
 
 #pragma once
 
-#include <git2.h>
+#include <git2/common.h>
+#include <git2/global.h>
+#include <git2/repository.h>
+#include <git2/types.h>
+#include <iostream>
 #include <string>
 
 #include <daw/daw_utility.h>
@@ -35,6 +39,14 @@ namespace daw {
 
 	public:
 		inline git_helper( ) noexcept {
+
+			if( auto const features = git_libgit2_features( );
+			    ( features & git_feature_t::GIT_FEATURE_HTTPS ) == 0 ) {
+
+				std::cerr << "HTTPS support missing in libgit2\n";
+			} else if( ( features & git_feature_t::GIT_FEATURE_SSH ) == 0 ) {
+				std::clog << "SSH support missing in libgit2\n";
+			}
 			git_libgit2_init( );
 		}
 
