@@ -26,7 +26,6 @@
 #include "git_helper.h"
 
 int main( int argc, char **argv ) {
-	git_repository *git_repos = nullptr;
 	if( argc != 3 ) {
 		std::cerr << "Error in args, " << argv[0] << " repos local_folder\n";
 		exit( EXIT_FAILURE );

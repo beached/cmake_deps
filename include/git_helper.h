@@ -22,10 +22,7 @@
 
 #pragma once
 
-#include <git2/common.h>
-#include <git2/global.h>
-#include <git2/repository.h>
-#include <git2/types.h>
+#include <git2.h>
 #include <iostream>
 #include <string>
 
@@ -75,8 +72,9 @@ namespace daw {
 			git_libgit2_shutdown( );
 		}
 
+		bool open_if_repos( glean::fs::path destination ) noexcept;
 		int clone( std::string repos, glean::fs::path destination );
-		int update( std::string repos, glean::fs::path destination );
+		int update( glean::fs::path destination );
 		int checkout( glean::fs::path repos, std::string branch );
 	};
 } // namespace daw

@@ -30,7 +30,12 @@
 namespace daw::glean {
 	action_status download_git::download( ) const {
 		auto gh = daw::git_helper( );
-		int result = gh.clone( m_remote, m_local );
+		int result = -1;
+		if( gh.open_if_repos( m_local ) ) {
+			result = gh.update( m_local );
+		} else {
+			result = gh.clone( m_remote, m_local );
+		}
 		// TODO check result
 		Unused( result );
 		result = gh.checkout( m_local, m_version );

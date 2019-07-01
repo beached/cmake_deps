@@ -81,7 +81,7 @@ add_dependencies( glean dependency_stub )
 #add_executable( glean_test_bin ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FOLDER}/glean_tests.cpp )
 #add_test( glean_test glean_test_bin )
 #target_link_libraries( glean_test_bin gnutls tz utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
-#target_link_libraries( glean_test_bin utf_range temp_file ${Boost_LIBRARIES} ) 
+#target_link_libraries( glean_test_bin utf_range temp_file ${Boost_LIBRARIES} )
 #add_dependencies( glean_test_bin dependency_stub )
 #add_test( glean_test glean_test_bin )
 
