@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018-2019 Darrell Wright
+// Copyright (c) 2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,18 +20,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include <string>
+#include <vector>
 
-#include <boost/program_options/variables_map.hpp>
+#include <daw/daw_string_fmt.h>
 
+#include "cmake_helper.h"
+#include "process.h"
 #include "utilities.h"
 
-namespace daw {
-	struct glean_options {
-		boost::program_options::variables_map vm;
-		glean_options( int argc, char **argv );
+namespace daw::glean {
+	std::vector<std::string>
+	cmake_action_configure::build_args( fs::path build_path ) const {
+		auto inst_prefix =
+		  daw::fmt_t( "-DCMAKE_INSTALL_PREFIX:PATH={0}" )( install_prefix.c_str( ) );
 
-		glean::fs::path install_prefix( ) const;
-		glean::fs::path glean_cache( ) const;
-	};
-} // namespace daw
+		auto inst_root =
+		  daw::fmt_t( "-DGLEAN_INSTALL_ROOT={0}" )( install_prefix.c_str( ) );
+
+		return {std::move( inst_prefix ),
+		        std::move( inst_root ),
+		        "-S",
+		        source_path.string( ),
+		        "-B",
+		        build_path.string( )};
+	}
+
+	std::vector<std::string>
+	cmake_action_build::build_args( fs::path build_path ) const {
+		return {"--build", build_path.string( )};
+	}
+
+	std::vector<std::string>
+	cmake_action_install::build_args( fs::path build_path ) const {
+		return {"--build", build_path.string( ), "--target", "install"};
+	}
+} // namespace daw::glean

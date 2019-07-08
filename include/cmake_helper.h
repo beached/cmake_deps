@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018-2019 Darrell Wright
+// Copyright (c) 2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -33,31 +33,46 @@
 #include "utilities.h"
 
 namespace daw::glean {
-	template<typename GitAction, typename OutputIterator>
-	action_status git_runner( GitAction &&git_action, fs::path work_tree,
-	                          OutputIterator &&out_it ) {
-		auto args = git_action.build_args( std::move( work_tree ) );
-		std::cout << "Running git";
+	template<typename CmakeAction, typename OutputIterator>
+	action_status cmake_runner( CmakeAction &&cmake_action, fs::path work_tree,
+	                            OutputIterator &&out_it ) {
+		auto args = cmake_action.build_args( std::move( work_tree ) );
+		std::cout << "Running cmake";
 		for( auto arg : args ) {
 			std::cout << ' ' << arg;
 		}
 		std::cout << "\n\n";
 
 		auto run_process = Process( std::forward<OutputIterator>( out_it ) );
-		if( run_process( "git", std::move( args ) ) == EXIT_SUCCESS ) {
+		if( run_process( "cmake", std::move( args ) ) == EXIT_SUCCESS ) {
 			return action_status::success;
 		}
 		return action_status::failure;
 	}
 
-	struct git_action_pull {
-		std::vector<std::string> build_args( fs::path work_tree ) const;
+	struct cmake_action_configure {
+		fs::path source_path;
+		fs::path install_prefix;
+		std::vector<std::string> custom_arguments{};
+
+		inline cmake_action_configure( fs::path source, fs::path install ) noexcept
+		  : source_path( source )
+		  , install_prefix( install ) {}
+
+		inline cmake_action_configure( fs::path source, fs::path install,
+		                               std::vector<std::string> custom ) noexcept
+		  : source_path( source )
+		  , install_prefix( install )
+		  , custom_arguments( std::move( custom ) ) {}
+
+		std::vector<std::string> build_args( fs::path build_path ) const;
 	};
 
-	struct git_action_clone {
-		std::string remote_uri{};
-		bool recurse_submodules = true;
+	struct cmake_action_build {
+		std::vector<std::string> build_args( fs::path build_path ) const;
+	};
 
-		std::vector<std::string> build_args( fs::path work_tree ) const;
+	struct cmake_action_install {
+		std::vector<std::string> build_args( fs::path build_path ) const;
 	};
 } // namespace daw::glean

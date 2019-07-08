@@ -69,7 +69,7 @@ namespace daw::glean {
 				return *tmp;
 			}
 			auto const cache_folder_name =
-			  opts.cache( ) / cfg_file.build_type / cfg_file.provides;
+			  opts.glean_cache( ) / cfg_file.build_type / cfg_file.provides;
 
 			if( !is_directory( cache_folder_name ) ) {
 				fs::create_directories( cache_folder_name / "source" );
@@ -78,7 +78,7 @@ namespace daw::glean {
 			auto cur_node_id = known_deps.add_node(
 			  cfg_file.provides,
 			  build_types_t( cfg_file.build_type, cache_folder_name / "source",
-			                 cache_folder_name / "build", opts.prefix( ) ),
+			                 cache_folder_name / "build", opts.install_prefix( ) ),
 			  download_none{} );
 
 			for( glean_file_item &child_dep : cfg_file.dependencies ) {
@@ -96,7 +96,7 @@ namespace daw::glean {
 					child_dep.version = "";
 				}
 				auto const dep_cache_folder_name =
-				  opts.cache( ) / child_dep.build_type / child_dep.name;
+				  opts.glean_cache( ) / child_dep.build_type / child_dep.name;
 
 				if( !is_directory( dep_cache_folder_name ) ) {
 					fs::create_directories( dep_cache_folder_name / "source" );
@@ -107,7 +107,7 @@ namespace daw::glean {
 				                                    dep_cache_folder_name / "source" );
 				auto builder =
 				  build_types_t( child_dep.build_type, dep_cache_folder_name / "source",
-				                 dep_cache_folder_name / "build", opts.prefix( ) );
+				                 dep_cache_folder_name / "build", opts.install_prefix( ) );
 
 				auto dep_id = known_deps.add_node( child_dep.name, daw::move( builder ),
 				                                   daw::move( downloader ) );

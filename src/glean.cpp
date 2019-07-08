@@ -51,8 +51,8 @@ namespace {
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
 	auto opts = daw::glean_options( argc, argv );
-	std::cout << "cache: " << opts.cache( ) << '\n';
-	std::cout << "destination: " << opts.prefix( ) << '\n';
+	std::cout << "glean cache: " << opts.glean_cache( ) << '\n';
+	std::cout << "install prefix: " << opts.install_prefix( ) << '\n';
 	daw::glean::process_config_file( "./glean.json", opts );
 	return EXIT_SUCCESS;
 }

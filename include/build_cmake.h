@@ -30,22 +30,14 @@
 namespace daw::glean {
 	struct build_cmake {
 		static constexpr daw::string_view type_id = "cmake";
-		fs::path m_source;
-		fs::path m_build;
-		fs::path m_install;
+		fs::path m_source_path;
+		fs::path m_build_path;
+		fs::path m_install_prefix;
 
-		inline build_cmake( fs::path source, fs::path build,
-		                    fs::path install ) noexcept
-		  : m_source( std::move( source ) )
-		  , m_build( std::move( build ) )
-		  , m_install( std::move( install ) ) {}
+		build_cmake( fs::path source_path, fs::path build_path, fs::path install_prefix ) noexcept;
 
-		inline action_status build( ) const {
-			return action_status::failure;
-		}
-
-		inline action_status install( ) const {
-			return action_status::failure;
-		}
+		action_status build( ) const;
+		action_status install( ) const;
 	};
+
 } // namespace daw::glean

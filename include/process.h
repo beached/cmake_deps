@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2018-2019 Darrell Wright
+// Copyright (c) 2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -22,16 +22,41 @@
 
 #pragma once
 
-#include <boost/program_options/variables_map.hpp>
+#include <algorithm>
+#include <boost/process.hpp>
+#include <string>
 
-#include "utilities.h"
+namespace daw::glean {
+	template<typename OutputIterator>
+	class Process {
+		OutputIterator m_out;
 
-namespace daw {
-	struct glean_options {
-		boost::program_options::variables_map vm;
-		glean_options( int argc, char **argv );
+	public:
+		constexpr Process( OutputIterator out ) noexcept
+		  : m_out( out ) {}
 
-		glean::fs::path install_prefix( ) const;
-		glean::fs::path glean_cache( ) const;
+		template<typename Cmd, typename... Args>
+		int operator( )( Cmd &&cmd, Args &&... args ) {
+			auto out = boost::process::ipstream( );
+			auto err = boost::process::ipstream( );
+
+			auto git_proc = boost::process::child(
+			  boost::process::search_path( cmd ), std::forward<Args>( args )...,
+			  boost::process::std_out > out, boost::process::std_err > err );
+
+			auto const process_pipe = [&]( auto &&p ) -> bool {
+				std::string line{};
+				if( !p or !std::getline( p, line ) or line.empty( ) ) {
+					return false;
+				}
+				line += '\n';
+				m_out = std::copy( line.begin( ), line.end( ), m_out );
+				return true;
+			};
+			while( git_proc and ( process_pipe( err ) or process_pipe( out ) ) ) {}
+
+			git_proc.wait( );
+			return git_proc.exit_code( );
+		}
 	};
-} // namespace daw
+} // namespace daw::glean

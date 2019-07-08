@@ -96,7 +96,7 @@ namespace daw {
 		}
 	} // namespace
 
-	glean::fs::path glean_options::prefix( ) const {
+	glean::fs::path glean_options::install_prefix( ) const {
 		auto result = process_path_opt( vm, "prefix" );
 		if( !is_directory( result ) ) {
 			if( exists( result ) ) {
@@ -107,7 +107,7 @@ namespace daw {
 		return result;
 	}
 
-	glean::fs::path glean_options::cache( ) const {
+	glean::fs::path glean_options::glean_cache( ) const {
 		auto result = process_path_opt( vm, "cache" );
 		if( !is_directory( result ) ) {
 			if( exists( result ) ) {
