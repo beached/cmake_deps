@@ -24,6 +24,8 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
+#include <build_types.h>
+#include <iosfwd>
 
 #include "glean_config.h"
 #include "glean_options.h"
@@ -48,7 +50,11 @@ namespace daw {
 			  "prefix",
 			  boost::program_options::value<glean::fs::path>( )->default_value(
 			    glean::fs::current_path( ) / ".glean" ),
-			  "prefix for install" );
+			  "prefix for install" )(
+			  "build_type",
+			  boost::program_options::value<::daw::build_types>( )->default_value(
+			    ::daw::build_types::release ),
+			  "type of build" );
 
 			boost::program_options::variables_map vm{};
 			try {
@@ -116,5 +122,42 @@ namespace daw {
 			glean::fs::create_directory( result );
 		}
 		return result;
+	}
+
+	daw::build_types glean_options::build_type( ) const {
+		return vm["build_type"].template as<daw::build_types>( );
+	}
+
+	std::ostream &operator<<( std::ostream &os, build_types bt ) {
+		switch( bt ) {
+		case build_types::release:
+			os << "release";
+			break;
+		case build_types::debug:
+			os << "debug";
+			break;
+		}
+		return os;
+	}
+
+	std::istream &operator>>( std::istream &is, build_types &bt ) {
+		std::string tmp{};
+		is >> tmp;
+		if( !tmp.empty( ) and ( ( tmp[0] == 'd' ) or ( tmp[0] == 'D' ) ) ) {
+			bt = build_types::debug;
+		} else {
+			bt = build_types::release;
+		}
+		return is;
+	}
+
+	std::string to_string( build_types bt ) {
+		switch( bt ) {
+		case build_types::release:
+			return "release";
+		case build_types::debug:
+			return "debug";
+		}
+		std::abort( );
 	}
 } // namespace daw

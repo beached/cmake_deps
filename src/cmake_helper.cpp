@@ -26,33 +26,38 @@
 #include <daw/daw_string_fmt.h>
 
 #include "cmake_helper.h"
+#include "glean_options.h"
 #include "process.h"
 #include "utilities.h"
 
 namespace daw::glean {
 	std::vector<std::string>
-	cmake_action_configure::build_args( fs::path build_path ) const {
-		auto inst_prefix =
-		  daw::fmt_t( "-DCMAKE_INSTALL_PREFIX:PATH={0}" )( install_prefix.c_str( ) );
+	cmake_action_configure::build_args( fs::path build_path,
+	                                    daw::build_types bt ) const {
+		auto inst_prefix = daw::fmt_t( "-DCMAKE_INSTALL_PREFIX:PATH={0}" )(
+		  ( install_prefix / to_string( bt ) ).c_str( ) );
 
-		auto inst_root =
-		  daw::fmt_t( "-DGLEAN_INSTALL_ROOT={0}" )( install_prefix.c_str( ) );
+		auto inst_root = daw::fmt_t( "-DGLEAN_INSTALL_ROOT={0}" )(
+		  ( install_prefix / to_string( bt ) ).c_str( ) );
 
 		return {std::move( inst_prefix ),
 		        std::move( inst_root ),
 		        "-S",
 		        source_path.string( ),
 		        "-B",
-		        build_path.string( )};
+		        ( build_path / to_string( bt ) ).string( )};
 	}
 
 	std::vector<std::string>
-	cmake_action_build::build_args( fs::path build_path ) const {
-		return {"--build", build_path.string( )};
+	cmake_action_build::build_args( fs::path build_path,
+	                                daw::build_types bt ) const {
+		return {"--build", ( build_path / to_string( bt ) ).string( )};
 	}
 
 	std::vector<std::string>
-	cmake_action_install::build_args( fs::path build_path ) const {
-		return {"--build", build_path.string( ), "--target", "install"};
+	cmake_action_install::build_args( fs::path build_path,
+	                                  daw::build_types bt ) const {
+		return {"--build", ( build_path / to_string( bt ) ).string( ), "--target",
+		        "install"};
 	}
 } // namespace daw::glean

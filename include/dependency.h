@@ -30,6 +30,7 @@
 #include "action_status.h"
 #include "build_types.h"
 #include "download_types.h"
+#include "glean_options.h"
 
 namespace daw::glean {
 
@@ -49,16 +50,16 @@ namespace daw::glean {
 			return m_name;
 		}
 
-		inline action_status build( ) const {
-			return m_build_type.build( );
+		inline action_status build( daw::build_types bt ) const {
+			return m_build_type.build( bt );
 		}
 
 		inline fs::path glean_file( ) const {
 			return {};
 		}
 
-		inline action_status install( ) const {
-			return m_build_type.install( );
+		inline action_status install( daw::build_types bt ) const {
+			return m_build_type.install( bt );
 		}
 
 		inline action_status download( ) const {

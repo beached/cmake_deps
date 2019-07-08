@@ -29,14 +29,15 @@
 #include <daw/daw_utility.h>
 
 #include "action_status.h"
+#include "glean_options.h"
 #include "process.h"
 #include "utilities.h"
 
 namespace daw::glean {
 	template<typename CmakeAction, typename OutputIterator>
 	action_status cmake_runner( CmakeAction &&cmake_action, fs::path work_tree,
-	                            OutputIterator &&out_it ) {
-		auto args = cmake_action.build_args( std::move( work_tree ) );
+	                            daw::build_types bt, OutputIterator &&out_it ) {
+		auto args = cmake_action.build_args( std::move( work_tree ), bt );
 		std::cout << "Running cmake";
 		for( auto arg : args ) {
 			std::cout << ' ' << arg;
@@ -65,14 +66,17 @@ namespace daw::glean {
 		  , install_prefix( install )
 		  , custom_arguments( std::move( custom ) ) {}
 
-		std::vector<std::string> build_args( fs::path build_path ) const;
+		std::vector<std::string> build_args( fs::path build_path,
+		                                     daw::build_types bt ) const;
 	};
 
 	struct cmake_action_build {
-		std::vector<std::string> build_args( fs::path build_path ) const;
+		std::vector<std::string> build_args( fs::path build_path,
+		                                     daw::build_types bt ) const;
 	};
 
 	struct cmake_action_install {
-		std::vector<std::string> build_args( fs::path build_path ) const;
+		std::vector<std::string> build_args( fs::path build_path,
+		                                     daw::build_types bt ) const;
 	};
 } // namespace daw::glean

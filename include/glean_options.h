@@ -23,15 +23,23 @@
 #pragma once
 
 #include <boost/program_options/variables_map.hpp>
+#include <iosfwd>
 
 #include "utilities.h"
 
 namespace daw {
+	enum class build_types: bool { release, debug };
+
+	std::ostream & operator<<( std::ostream & os, build_types bt );
+	std::istream & operator>>( std::istream & is, build_types & bt );
+	std::string to_string( build_types bt );
+
 	struct glean_options {
 		boost::program_options::variables_map vm;
 		glean_options( int argc, char **argv );
 
 		glean::fs::path install_prefix( ) const;
 		glean::fs::path glean_cache( ) const;
+		daw::build_types build_type( ) const;
 	};
 } // namespace daw

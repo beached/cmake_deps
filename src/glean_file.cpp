@@ -105,9 +105,9 @@ namespace daw::glean {
 				auto downloader = download_types_t( child_dep.download_type,
 				                                    child_dep.uri, *child_dep.version,
 				                                    dep_cache_folder_name / "source" );
-				auto builder =
-				  build_types_t( child_dep.build_type, dep_cache_folder_name / "source",
-				                 dep_cache_folder_name / "build", opts.install_prefix( ) );
+				auto builder = build_types_t(
+				  child_dep.build_type, dep_cache_folder_name / "source",
+				  dep_cache_folder_name / "build", opts.install_prefix( ) );
 
 				auto dep_id = known_deps.add_node( child_dep.name, daw::move( builder ),
 				                                   daw::move( downloader ) );
@@ -139,10 +139,10 @@ namespace daw::glean {
 		while( !leaf_ids.empty( ) ) {
 			for( auto leaf_id : leaf_ids ) {
 				auto &cur_dep = known_deps.get_raw_node( leaf_id ).value( );
-				if( cur_dep.build( ) == action_status::failure ) {
+				if( cur_dep.build( opts.build_type( ) ) == action_status::failure ) {
 					// Do error stuff
 				}
-				if( cur_dep.install( ) == action_status::failure ) {
+				if( cur_dep.install( opts.build_type( ) ) == action_status::failure ) {
 					// Do error stuff
 				}
 				known_deps.remove_node( leaf_id );

@@ -46,6 +46,7 @@ namespace daw::glean {
 		std::string build_type;
 		std::string uri;
 		std::optional<std::string> version;
+		std::optional<std::string> custom_options;
 	};
 
 	static constexpr char const glean_file_item_name[] = "name";
@@ -53,6 +54,8 @@ namespace daw::glean {
 	static constexpr char const glean_file_item_build_type[] = "build_type";
 	static constexpr char const glean_file_item_uri[] = "uri";
 	static constexpr char const glean_file_item_version[] = "version";
+	static constexpr char const glean_file_item_custom_options[] =
+	  "custom_options";
 
 	inline auto describe_json_class( glean_file_item ) {
 		using namespace daw::json;
@@ -61,7 +64,8 @@ namespace daw::glean {
 		  json_string<glean_file_item_name>,
 		  json_string<glean_file_item_download_type>,
 		  json_string<glean_file_item_build_type>, json_string<glean_file_item_uri>,
-		  json_nullable<json_string<glean_file_item_version>>>{};
+		  json_nullable<json_string<glean_file_item_version>>,
+		  json_nullable<json_string<glean_file_item_custom_options>>>{};
 	}
 
 	struct glean_config_file {

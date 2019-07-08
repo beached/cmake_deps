@@ -25,6 +25,7 @@
 
 #include "build_cmake.h"
 #include "cmake_helper.h"
+#include "glean_options.h"
 #include "process.h"
 #include "utilities.h"
 
@@ -50,22 +51,22 @@ namespace daw::glean {
 	  , m_build_path( std::move( build_path ) )
 	  , m_install_prefix( std::move( install_prefix ) ) {}
 
-	action_status build_cmake::build( ) const {
+	action_status build_cmake::build( daw::build_types bt ) const {
 		auto const chdir = change_directory( m_build_path );
 		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix ),
-		                  m_build_path,
+		                  m_build_path, bt,
 		                  std::ostreambuf_iterator<char>( std::cout ) ) ==
 		    action_status::failure ) {
 
 			return action_status::failure;
 		}
-		return cmake_runner( cmake_action_build( ), m_build_path,
+		return cmake_runner( cmake_action_build( ), m_build_path, bt,
 		                     std::ostreambuf_iterator<char>( std::cout ) );
 	}
 
-	action_status build_cmake::install( ) const {
+	action_status build_cmake::install( daw::build_types bt ) const {
 		auto const chdir = change_directory( m_build_path );
-		return cmake_runner( cmake_action_install( ), m_build_path,
+		return cmake_runner( cmake_action_install( ), m_build_path, bt,
 		                     std::ostreambuf_iterator<char>( std::cout ) );
 	}
 } // namespace daw::glean

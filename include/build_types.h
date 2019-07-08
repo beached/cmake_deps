@@ -29,6 +29,7 @@
 #include "action_status.h"
 #include "build_cmake.h"
 #include "build_none.h"
+#include "glean_options.h"
 
 namespace daw::glean {
 	template<typename... BuildTypes>
@@ -75,14 +76,14 @@ namespace daw::glean {
 		      construct_bt<BuildTypes...>( type, std::forward<Args>( args )... ) ) {
 		}
 
-		constexpr action_status build( ) const {
+		constexpr action_status build( daw::build_types bt ) const {
 			return daw::visit_nt( m_value,
-			                      []( auto const &v ) { return v.build( ); } );
+			                      [bt]( auto const &v ) { return v.build( bt ); } );
 		}
 
-		constexpr action_status install( ) const {
+		constexpr action_status install( daw::build_types bt ) const {
 			return daw::visit_nt( m_value,
-			                      []( auto const &v ) { return v.install( ); } );
+			                      [bt]( auto const &v ) { return v.install( bt ); } );
 		}
 	};
 

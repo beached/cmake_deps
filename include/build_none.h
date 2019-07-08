@@ -25,20 +25,21 @@
 #include <daw/daw_string_view.h>
 
 #include "action_status.h"
+#include "glean_options.h"
 #include "utilities.h"
 
 namespace daw::glean {
 	struct build_none {
 		static constexpr daw::string_view type_id = "none";
 
-		template<typename...Ignored>
-		constexpr build_none( Ignored&&... ) noexcept { }
+		template<typename... Ignored>
+		constexpr build_none( Ignored &&... ) noexcept {}
 
-		constexpr action_status build( ) const {
+		constexpr action_status build( daw::build_types ) const {
 			return action_status::success;
 		}
 
-		constexpr action_status install( ) const {
+		constexpr action_status install( daw::build_types ) const {
 			return action_status::success;
 		}
 	};

@@ -25,6 +25,7 @@
 #include <daw/daw_string_view.h>
 
 #include "action_status.h"
+#include "glean_options.h"
 #include "utilities.h"
 
 namespace daw::glean {
@@ -34,10 +35,11 @@ namespace daw::glean {
 		fs::path m_build_path;
 		fs::path m_install_prefix;
 
-		build_cmake( fs::path source_path, fs::path build_path, fs::path install_prefix ) noexcept;
+		build_cmake( fs::path source_path, fs::path build_path,
+		             fs::path install_prefix ) noexcept;
 
-		action_status build( ) const;
-		action_status install( ) const;
+		action_status build( daw::build_types bt ) const;
+		action_status install( daw::build_types bt ) const;
 	};
 
 } // namespace daw::glean
