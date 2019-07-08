@@ -31,7 +31,8 @@ namespace daw::glean {
 	struct build_none {
 		static constexpr daw::string_view type_id = "none";
 
-		constexpr build_none( ) noexcept = default;
+		template<typename...Ignored>
+		constexpr build_none( Ignored&&... ) noexcept { }
 
 		constexpr action_status build( ) const {
 			return action_status::success;
