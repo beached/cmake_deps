@@ -59,15 +59,18 @@ namespace daw::glean {
 
 		daw::node_id_t process_config_file( fs::path const &config_file_path,
 		                                    daw::graph_t<dependency> &known_deps,
-		                                    glean_options const &opts ) {
+		                                    glean_options const &opts,
+		                                    daw::string_view provides ) {
 
 			auto cfg_file = daw::json::from_json<glean_config_file>(
 			  daw::read_file( config_file_path.string( ) ) );
 
-			auto const find_dep_by_name = impl::find_dep_by_name_t( known_deps );
-			if( auto tmp = find_dep_by_name( cfg_file.provides ); tmp ) {
-				return *tmp;
+			if( cfg_file.provides != provides ) {
+				std::cerr << "Expected that '" << config_file_path << "' provides '"
+				          << provides << "' but '" << cfg_file.provides << "' found\n";
+				std::abort( );
 			}
+
 			auto const cache_folder_name =
 			  opts.glean_cache( ) / cfg_file.build_type / cfg_file.provides;
 
@@ -75,11 +78,24 @@ namespace daw::glean {
 				fs::create_directories( cache_folder_name / "source" );
 				fs::create_directory( cache_folder_name / "build" );
 			}
-			auto cur_node_id = known_deps.add_node(
-			  cfg_file.provides,
-			  build_types_t( cfg_file.build_type, cache_folder_name / "source",
-			                 cache_folder_name / "build", opts.install_prefix( ) ),
-			  download_none{} );
+			auto const find_dep_by_name = impl::find_dep_by_name_t( known_deps );
+
+			auto cur_node_id = [&]( ) {
+				if( auto tmp = find_dep_by_name( cfg_file.provides ); tmp ) {
+					return *tmp;
+				}
+				// New node
+				return known_deps.add_node(
+				  cfg_file.provides,
+				  build_types_t( cfg_file.build_type, cache_folder_name / "source",
+				                 cache_folder_name / "build", opts.install_prefix( ) ),
+				  download_none{} );
+			}( );
+
+			if( cfg_file.dependencies.empty( ) or
+			    !known_deps.get_node( cur_node_id ).outgoing_edges( ).empty( ) ) {
+				return cur_node_id;
+			}
 
 			for( glean_file_item &child_dep : cfg_file.dependencies ) {
 				if( auto dep_id = find_dep_by_name( child_dep.name ); dep_id ) {
@@ -89,8 +105,8 @@ namespace daw::glean {
 					continue;
 				}
 				// For now we only support git/cmake
-				//assert( child_dep.download_type == "git" );
-				//assert( child_dep.build_type == "cmake" );
+				// assert( child_dep.download_type == "git" );
+				// assert( child_dep.build_type == "cmake" );
 
 				if( !child_dep.version ) {
 					child_dep.version = "";
@@ -102,9 +118,10 @@ namespace daw::glean {
 					fs::create_directories( dep_cache_folder_name / "source" );
 					fs::create_directory( dep_cache_folder_name / "build" );
 				}
-				auto downloader = download_types_t( child_dep.download_type,
-				                                    child_dep.uri, *child_dep.version,
-				                                    dep_cache_folder_name / "source" );
+				auto dep_folder = dep_cache_folder_name / "source";
+				auto downloader =
+				  download_types_t( child_dep.download_type, child_dep.uri,
+				                    *child_dep.version, dep_folder );
 				auto builder = build_types_t(
 				  child_dep.build_type, dep_cache_folder_name / "source",
 				  dep_cache_folder_name / "build", opts.install_prefix( ) );
@@ -115,11 +132,12 @@ namespace daw::glean {
 
 				auto &cur_dep = known_deps.get_raw_node( dep_id ).value( );
 				if( cur_dep.download( ) != action_status::success ) {
-					// Error downloading
+					std::cerr << "Error downloading\n";
 					std::abort( );
 				}
-				if( cur_dep.dep_count( ) > 0 ) {
-					process_config_file( cur_dep.glean_file( ), known_deps, opts );
+				if( exists( dep_folder / "glean.json" ) ) {
+					process_config_file( dep_folder / "glean.json", known_deps, opts,
+					                     cur_dep.name( ) );
 				}
 			}
 			return cur_node_id;
@@ -133,12 +151,22 @@ namespace daw::glean {
 			return;
 		}
 		auto known_deps = daw::graph_t<dependency>( );
-		process_config_file( config_file_path, known_deps, opts );
+
+		auto const cfg_file = daw::json::from_json<glean_config_file>(
+		  daw::read_file( config_file_path.string( ) ) );
+
+		process_config_file( config_file_path, known_deps, opts,
+		                     cfg_file.provides );
 
 		auto leaf_ids = known_deps.find_leaves( );
 		while( !leaf_ids.empty( ) ) {
 			for( auto leaf_id : leaf_ids ) {
-				auto &cur_dep = known_deps.get_raw_node( leaf_id ).value( );
+				auto &cur_node = known_deps.get_raw_node( leaf_id );
+				auto &cur_dep = cur_node.value( );
+				std::cout << "-------------------------------------\n";
+				std::cout << "Processing - " << cur_dep.name( ) << '\n';
+				std::cout << "-------------------------------------\n\n";
+
 				if( cur_dep.build( opts.build_type( ) ) == action_status::failure ) {
 					// Do error stuff
 				}
