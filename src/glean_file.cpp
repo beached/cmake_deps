@@ -61,6 +61,8 @@ namespace daw::glean {
 		                                    daw::graph_t<dependency> &known_deps,
 		                                    glean_options const &opts,
 		                                    daw::string_view provides,
+		                                    daw::string_view download_type,
+		                                    daw::string_view uri,
 		                                    bool is_root = false ) {
 
 			auto cfg_file = daw::json::from_json<glean_config_file>(
@@ -93,7 +95,7 @@ namespace daw::glean {
 				  cfg_file.provides,
 				  build_types_t( build_type, cache_folder_name / "source",
 				                 cache_folder_name / "build", opts.install_prefix( ) ),
-				  download_none{} );
+				  download_none{}, uri );
 			}( );
 
 			if( cfg_file.dependencies.empty( ) or
@@ -108,9 +110,6 @@ namespace daw::glean {
 					known_deps.add_directed_edge( cur_node_id, *dep_id );
 					continue;
 				}
-				// For now we only support git/cmake
-				// assert( child_dep.download_type == "git" );
-				// assert( child_dep.build_type == "cmake" );
 
 				if( !child_dep.version ) {
 					child_dep.version = "";
@@ -130,8 +129,9 @@ namespace daw::glean {
 				  child_dep.build_type, dep_cache_folder_name / "source",
 				  dep_cache_folder_name / "build", opts.install_prefix( ) );
 
-				auto dep_id = known_deps.add_node( child_dep.name, daw::move( builder ),
-				                                   daw::move( downloader ) );
+				auto dep_id =
+				  known_deps.add_node( child_dep.name, daw::move( builder ),
+				                       daw::move( downloader ), child_dep.uri );
 				known_deps.add_directed_edge( cur_node_id, dep_id );
 
 				auto &cur_dep = known_deps.get_raw_node( dep_id ).value( );
@@ -141,10 +141,26 @@ namespace daw::glean {
 				}
 				if( exists( dep_folder / "glean.json" ) ) {
 					process_config_file( dep_folder / "glean.json", known_deps, opts,
-					                     cur_dep.name( ) );
+					                     cur_dep.name( ), child_dep.download_type,
+					                     child_dep.uri );
 				}
 			}
 			return cur_node_id;
+		}
+
+		template<typename Function>
+		void deps_for_each( daw::graph_t<dependency> known_deps, Function func ) {
+			auto leaf_ids = known_deps.find_leaves( );
+			while( !leaf_ids.empty( ) ) {
+				for( auto leaf_id : leaf_ids ) {
+					auto &cur_node = known_deps.get_raw_node( leaf_id );
+					auto &cur_dep = cur_node.value( );
+					func( cur_dep );
+					known_deps.remove_node( leaf_id );
+				}
+				leaf_ids = known_deps.find_leaves( );
+			}
+			daw::exception::postcondition_check( known_deps.empty( ) );
 		}
 	} // namespace
 
@@ -163,32 +179,72 @@ namespace daw::glean {
 		  daw::read_file( config_file_path.string( ) ) );
 
 		process_config_file( config_file_path, known_deps, opts, cfg_file.provides,
-		                     true );
+		                     "none", "", true );
 
 		return known_deps;
 	}
 
 	void process_deps( daw::graph_t<dependency> known_deps,
 	                   glean_options const &opts ) {
-		auto leaf_ids = known_deps.find_leaves( );
-		while( !leaf_ids.empty( ) ) {
-			for( auto leaf_id : leaf_ids ) {
-				auto &cur_node = known_deps.get_raw_node( leaf_id );
-				auto &cur_dep = cur_node.value( );
-				std::cout << "-------------------------------------\n";
-				std::cout << "Processing - " << cur_dep.name( ) << '\n';
-				std::cout << "-------------------------------------\n\n";
+		deps_for_each( std::move( known_deps ), [&]( auto &&cur_dep ) {
+			std::cout << "-------------------------------------\n";
+			std::cout << "Processing - " << cur_dep.name( ) << '\n';
+			std::cout << "-------------------------------------\n\n";
 
-				if( cur_dep.build( opts.build_type( ) ) == action_status::failure ) {
-					// Do error stuff
-				}
-				if( cur_dep.install( opts.build_type( ) ) == action_status::failure ) {
-					// Do error stuff
-				}
-				known_deps.remove_node( leaf_id );
+			if( cur_dep.build( opts.build_type( ) ) == action_status::failure ) {
+				// Do error stuff
 			}
-			leaf_ids = known_deps.find_leaves( );
+			if( cur_dep.install( opts.build_type( ) ) == action_status::failure ) {
+				// Do error stuff
+			}
+		} );
+	}
+
+	void cmake_deps( daw::graph_t<dependency> known_deps ) {
+
+		struct dep_t {
+			std::string name;
+			std::string uri;
+		};
+		auto deps = std::vector<dep_t>( );
+		bool has_unsupported = false;
+
+		deps_for_each( std::move( known_deps ), [&]( dependency const &cur_dep ) {
+			auto const &type_id = cur_dep.download_type( ).type_id( );
+			if( type_id == "git" and !cur_dep.name( ).empty( ) ) {
+				deps.push_back( dep_t{std::string( cur_dep.name( ) ),
+				                      std::string( cur_dep.uri( ) )} );
+			} else if( type_id != "none" ) {
+				has_unsupported = true;
+			}
+		} );
+		if( has_unsupported ) {
+			std::cerr << "Warning: unsupported download type(s) detected.  currently "
+			             "only git "
+			             "supported\n";
 		}
-		daw::exception::postcondition_check( known_deps.empty( ) );
+		std::cout << "\ninclude( ExternalProject )\n";
+		// need to go backwards so that cmake has correct order
+		for( auto const &cur_dep : deps ) {
+			std::cout << "externalproject_add(\n";
+			std::cout << "  " << cur_dep.name << "_prj\n";
+			std::cout << "  GIT_REPOSITORY \"" << cur_dep.uri << "\"\n";
+			std::cout << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/"
+			          << cur_dep.name << "\"\n";
+			std::cout << "  GIT_TAG \"master\"\n"; // TODO use version
+			std::cout << "  INSTALL_DIR \"${CMAKE_BINARY_DIR}/install\"\n";
+			std::cout << "  CMAKE_ARGS "
+			             "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install "
+			             "-DGLEAN_INSTALL_ROOT=${CMAKE_BINARY_DIR}/install\n";
+			std::cout << ")\n\n";
+		}
+		std::cout << "include_directories( SYSTEM "
+		             "\"${CMAKE_BINARY_DIR}/install/include\" )\n";
+		std::cout << "link_directories( \"${CMAKE_BINARY_DIR}/install/lib\" )\n";
+		std::cout << "set( DEP_PROJECT_DEPS";
+		for( auto const &dep : deps ) {
+			std::cout << ' ' << dep.name << "_prj";
+		}
+		std::cout << " )\n";
 	}
 } // namespace daw::glean

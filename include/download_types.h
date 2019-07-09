@@ -84,6 +84,11 @@ namespace daw::glean {
 			return daw::visit_nt( m_value,
 			                      []( auto const &v ) { return v.download( ); } );
 		}
+
+		constexpr daw::string_view type_id( ) const noexcept {
+			return daw::visit_nt( m_value,
+			                      []( auto const &v ) { return v.type_id; } );
+		}
 	};
 
 	using download_types_t =

@@ -38,16 +38,22 @@ namespace daw::glean {
 		build_types_t m_build_type;
 		download_types_t m_download_type;
 		std::string m_name;
+		std::string m_uri;
 
 	public:
 		inline dependency( std::string name, build_types_t build_type,
-		                   download_types_t download_type )
+		                   download_types_t download_type, std::string uri )
 		  : m_build_type( std::move( build_type ) )
 		  , m_download_type( std::move( download_type ) )
-		  , m_name( std::move( name ) ) {}
+		  , m_name( std::move( name ) )
+		  , m_uri( std::move( uri ) ) {}
 
 		inline std::string const &name( ) const noexcept {
 			return m_name;
+		}
+
+		inline std::string const &uri( ) const noexcept {
+			return m_uri;
 		}
 
 		inline action_status build( daw::build_types bt ) const {
@@ -76,6 +82,10 @@ namespace daw::glean {
 
 		inline int compare( dependency const &rhs ) const noexcept {
 			return m_name.compare( rhs.m_name );
+		}
+
+		inline download_types_t download_type( ) const noexcept {
+			return m_download_type;
 		}
 	};
 

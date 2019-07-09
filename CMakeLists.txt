@@ -5,8 +5,8 @@ project( glean_prj )
 #find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 find_package( Boost 1.62.0 COMPONENTS program_options filesystem REQUIRED )
 find_package( Threads REQUIRED )
-find_package( OpenSSL REQUIRED )
-find_package( CURL REQUIRED )
+#find_package( OpenSSL REQUIRED )
+#find_package( CURL REQUIRED )
 
 enable_testing( )
 
@@ -24,7 +24,14 @@ elseif( "${CMAKE_BUILD_TYPE}" STREQUAL "" )
 endif( )
 
 message( "Building for: ${CMAKE_BUILD_TYPE}" )
-if( EXISTS "${DEP_ROOT_DIR}" )
+if( EXISTS "${CMAKE_SOURCE_DIR}/glean.cmake" )
+	message( "glean.cmake detected" )
+	include( "${CMAKE_SOURCE_DIR}/glean.cmake" )
+	add_library( dependency_stub STATIC "${CMAKE_SOURCE_DIR}/dependent_projects/stub.cpp" )
+	add_dependencies( dependency_stub ${DEP_PROJECT_DEPS} )
+	include_directories( SYSTEM "${CMAKE_BINARY_DIR}/install/include" )
+	link_directories( "${CMAKE_BINARY_DIR}/install/lib" )
+elseif( EXISTS "${DEP_ROOT_DIR}" )
 	message( "${DEP_ROOT_DIR}" )
 	message( "using dependency folder" )
 	add_custom_target( dependency_stub )
@@ -42,10 +49,10 @@ set( SOURCE_FOLDER "src" )
 set( TEST_FOLDER "tests" )
 
 include_directories( ${HEADER_FOLDER} )
-include_directories( SYSTEM ${OPENSSL_INCLUDE_DIR} )
+#include_directories( SYSTEM ${OPENSSL_INCLUDE_DIR} )
 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
-include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
+#include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
 
 link_directories( ${Boost_LIBRARY_DIRS} )
 
@@ -84,7 +91,8 @@ set( SOURCE_FILES
 )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
-target_link_libraries( glean utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+#target_link_libraries( glean utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+target_link_libraries( glean utf_range temp_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 add_dependencies( glean dependency_stub )
 
 install( TARGETS glean DESTINATION bin )

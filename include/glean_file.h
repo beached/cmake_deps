@@ -94,4 +94,6 @@ namespace daw::glean {
 
 	void process_deps( daw::graph_t<dependency> known_deps,
 	                   glean_options const &opts );
+
+	void cmake_deps( daw::graph_t<dependency> known_deps );
 } // namespace daw::glean

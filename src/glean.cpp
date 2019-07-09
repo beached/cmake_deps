@@ -58,6 +58,8 @@ int main( int argc, char **argv ) {
 		daw::glean::process_deps( std::move( deps ), opts );
 		break;
 	case daw::output_types::cmake:
+		daw::glean::cmake_deps( std::move( deps ) );
+		break;
 	default:
 		std::cerr << "Not implemented\n";
 		std::abort( );
