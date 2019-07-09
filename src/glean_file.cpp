@@ -200,24 +200,43 @@ namespace daw::glean {
 		} );
 	}
 
-	void cmake_deps( daw::graph_t<dependency> known_deps ) {
-
+	void cmake_deps( daw::graph_t<dependency> const & kd ) {
+		daw::graph_t<dependency> known_deps = kd;
 		struct dep_t {
 			std::string name;
 			std::string uri;
+			std::vector<std::string> depends_on{};
 		};
 		auto deps = std::vector<dep_t>( );
 		bool has_unsupported = false;
 
-		deps_for_each( std::move( known_deps ), [&]( dependency const &cur_dep ) {
-			auto const &type_id = cur_dep.download_type( ).type_id( );
-			if( type_id == "git" and !cur_dep.name( ).empty( ) ) {
-				deps.push_back( dep_t{std::string( cur_dep.name( ) ),
-				                      std::string( cur_dep.uri( ) )} );
-			} else if( type_id != "none" ) {
-				has_unsupported = true;
+		auto leaf_ids = known_deps.find_leaves( );
+		auto const find_name = [&kd]( node_id_t id ) {
+			return kd.get_raw_node( id ).value( ).name( );
+		};
+		while( !leaf_ids.empty( ) ) {
+			for( auto leaf_id : leaf_ids ) {
+				auto &cur_node = known_deps.get_raw_node( leaf_id );
+				auto &cur_dep = cur_node.value( );
+				auto const &type_id = cur_dep.download_type( ).type_id( );
+				if( type_id == "git" and !cur_dep.name( ).empty( ) ) {
+					auto dep = dep_t{std::string( cur_dep.name( ) ),
+					                 std::string( cur_dep.uri( ) )};
+					for( auto child_id : kd.get_node( leaf_id ).outgoing_edges( ) ) {
+						auto cur_name = find_name( child_id );
+						if( !cur_name.empty( ) ) {
+							dep.depends_on.push_back( cur_name );
+						}
+					}
+					deps.push_back( std::move( dep ) );
+				} else if( type_id != "none" ) {
+					has_unsupported = true;
+				}
+				known_deps.remove_node( leaf_id );
 			}
-		} );
+			leaf_ids = known_deps.find_leaves( );
+		}
+
 		if( has_unsupported ) {
 			std::cerr << "Warning: unsupported download type(s) detected.  currently "
 			             "only git "
@@ -228,6 +247,13 @@ namespace daw::glean {
 		for( auto const &cur_dep : deps ) {
 			std::cout << "externalproject_add(\n";
 			std::cout << "  " << cur_dep.name << "_prj\n";
+			if( !cur_dep.depends_on.empty( ) ) {
+				std::cout << "  DEPENDS";
+				for( auto const &child : cur_dep.depends_on ) {
+					std::cout << ' ' << child << "_prj";
+				}
+				std::cout << '\n';
+			}
 			std::cout << "  GIT_REPOSITORY \"" << cur_dep.uri << "\"\n";
 			std::cout << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/"
 			          << cur_dep.name << "\"\n";
