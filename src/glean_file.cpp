@@ -60,7 +60,8 @@ namespace daw::glean {
 		daw::node_id_t process_config_file( fs::path const &config_file_path,
 		                                    daw::graph_t<dependency> &known_deps,
 		                                    glean_options const &opts,
-		                                    daw::string_view provides ) {
+		                                    daw::string_view provides,
+		                                    bool is_root = false ) {
 
 			auto cfg_file = daw::json::from_json<glean_config_file>(
 			  daw::read_file( config_file_path.string( ) ) );
@@ -85,9 +86,12 @@ namespace daw::glean {
 					return *tmp;
 				}
 				// New node
+
+				std::string const build_type =
+				  is_root ? std::string( "none" ) : cfg_file.build_type;
 				return known_deps.add_node(
 				  cfg_file.provides,
-				  build_types_t( cfg_file.build_type, cache_folder_name / "source",
+				  build_types_t( build_type, cache_folder_name / "source",
 				                 cache_folder_name / "build", opts.install_prefix( ) ),
 				  download_none{} );
 			}( );
@@ -155,8 +159,8 @@ namespace daw::glean {
 		auto const cfg_file = daw::json::from_json<glean_config_file>(
 		  daw::read_file( config_file_path.string( ) ) );
 
-		process_config_file( config_file_path, known_deps, opts,
-		                     cfg_file.provides );
+		process_config_file( config_file_path, known_deps, opts, cfg_file.provides,
+		                     true );
 
 		auto leaf_ids = known_deps.find_leaves( );
 		while( !leaf_ids.empty( ) ) {

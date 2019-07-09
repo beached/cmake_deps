@@ -1,6 +1,6 @@
 {
 	"provides": "glean",
-	"build_type": "none",
+	"build_type": "cmake",
 	"dependencies": [ 
 		{
 			"name": "header_libraries",
