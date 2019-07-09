@@ -89,8 +89,8 @@ namespace daw::glean {
 					continue;
 				}
 				// For now we only support git/cmake
-				assert( child_dep.download_type == "git" );
-				assert( child_dep.build_type == "cmake" );
+				//assert( child_dep.download_type == "git" );
+				//assert( child_dep.build_type == "cmake" );
 
 				if( !child_dep.version ) {
 					child_dep.version = "";

@@ -20,21 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
-
-#include <daw/daw_string_view.h>
+#include <iostream>
+#include <string>
+#include <utility>
 
 #include "action_status.h"
+#include "download_svn.h"
+#include "process.h"
+#include "svn_helper.h"
+#include "utilities.h"
 
 namespace daw::glean {
-	struct download_none {
-		constexpr static daw::string_view type_id = "none";
-
-		template<typename... Ignored>
-		constexpr download_none( Ignored &&... ) noexcept {}
-
-		constexpr action_status download( ) const {
-			return action_status::success;
+	namespace {
+		bool is_svn_repos( fs::path repos ) {
+			return is_directory( repos / ".svn" );
 		}
-	};
+
+		action_status svn_repos_update( fs::path repos ) {
+			return svn_runner( svn_action_update{}, repos,
+			                   std::ostreambuf_iterator<char>( std::cout ) );
+		}
+
+		action_status svn_repos_checkout( std::string const &remote_repos,
+		                               fs::path repos ) {
+
+			auto svn_action = svn_action_checkout( );
+			svn_action.remote_uri = remote_repos;
+
+			return svn_runner( svn_action, repos,
+			                   std::ostreambuf_iterator<char>( std::cout ) );
+		}
+
+	} // namespace
+
+	action_status download_svn::download( ) const {
+		if( is_svn_repos( m_local ) ) {
+			return svn_repos_update( m_local );
+		}
+		return svn_repos_checkout( m_remote, m_local );
+	}
 } // namespace daw::glean

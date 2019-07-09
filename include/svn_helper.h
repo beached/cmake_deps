@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2019 Darrell Wright
+// Copyright (c) 2018-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -22,19 +22,41 @@
 
 #pragma once
 
-#include <daw/daw_string_view.h>
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include <daw/daw_utility.h>
 
 #include "action_status.h"
+#include "process.h"
+#include "utilities.h"
 
 namespace daw::glean {
-	struct download_none {
-		constexpr static daw::string_view type_id = "none";
+	template<typename SvnAction, typename OutputIterator>
+	action_status svn_runner( SvnAction &&svn_action, fs::path work_tree,
+	                          OutputIterator &&out_it ) {
+		auto args = svn_action.build_args( std::move( work_tree ) );
+		std::cout << "Running svn";
+		for( auto arg : args ) {
+			std::cout << ' ' << arg;
+		}
+		std::cout << "\n\n";
 
-		template<typename... Ignored>
-		constexpr download_none( Ignored &&... ) noexcept {}
-
-		constexpr action_status download( ) const {
+		auto run_process = Process( std::forward<OutputIterator>( out_it ) );
+		if( run_process( "svn", std::move( args ) ) == EXIT_SUCCESS ) {
 			return action_status::success;
 		}
+		return action_status::failure;
+	}
+
+	struct svn_action_update {
+		std::vector<std::string> build_args( fs::path work_tree ) const;
+	};
+
+	struct svn_action_checkout {
+		std::string remote_uri{};
+
+		std::vector<std::string> build_args( fs::path work_tree ) const;
 	};
 } // namespace daw::glean

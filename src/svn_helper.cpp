@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2019 Darrell Wright
+// Copyright (c) 2018-2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,21 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma once
+#include <string>
+#include <vector>
 
-#include <daw/daw_string_view.h>
+#include <daw/daw_string_fmt.h>
 
-#include "action_status.h"
+#include "svn_helper.h"
+#include "utilities.h"
 
 namespace daw::glean {
-	struct download_none {
-		constexpr static daw::string_view type_id = "none";
+	std::vector<std::string>
+	svn_action_update::build_args( fs::path work_tree ) const {
+		return {"update", work_tree.string( )};
+	}
 
-		template<typename... Ignored>
-		constexpr download_none( Ignored &&... ) noexcept {}
-
-		constexpr action_status download( ) const {
-			return action_status::success;
-		}
-	};
+	std::vector<std::string>
+	svn_action_checkout::build_args( fs::path work_tree ) const {
+		return {"checkout", remote_uri, work_tree.string( )};
+	}
 } // namespace daw::glean

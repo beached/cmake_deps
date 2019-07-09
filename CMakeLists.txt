@@ -60,10 +60,12 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/git_helper.h
 	${HEADER_FOLDER}/download_git.h
 	${HEADER_FOLDER}/download_none.h
+	${HEADER_FOLDER}/download_svn.h
 	${HEADER_FOLDER}/download_types.h
 	${HEADER_FOLDER}/glean_file.h
 	${HEADER_FOLDER}/glean_options.h
 	${HEADER_FOLDER}/process.h
+	${HEADER_FOLDER}/svn_helper.h
 	${HEADER_FOLDER}/utilities.h
 )
 
@@ -71,10 +73,13 @@ set( SOURCE_FILES
 	${SOURCE_FOLDER}/build_cmake.cpp
 	${SOURCE_FOLDER}/cmake_helper.cpp
 	${SOURCE_FOLDER}/download_git.cpp
+	${SOURCE_FOLDER}/download_svn.cpp
 	${SOURCE_FOLDER}/glean_config.cpp
 	${SOURCE_FOLDER}/git_helper.cpp
 	${SOURCE_FOLDER}/glean_file.cpp
 	${SOURCE_FOLDER}/glean_options.cpp
+	${SOURCE_FOLDER}/svn_helper.cpp
+	${SOURCE_FOLDER}/glean_file.cpp
 	${SOURCE_FOLDER}/utilities.cpp
 )
 

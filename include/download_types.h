@@ -33,6 +33,7 @@
 #include "action_status.h"
 #include "download_git.h"
 #include "download_none.h"
+#include "download_svn.h"
 
 namespace daw::glean {
 	template<typename... DownloadTypes>
@@ -40,8 +41,7 @@ namespace daw::glean {
 		using variant_t = std::variant<DownloadTypes...>;
 		variant_t m_value;
 
-		template<typename T, typename... Ts, typename... Args,
-		         daw::enable_if_t<( sizeof...( Ts ) < 1 )> = nullptr>
+		template<typename T, typename... Args>
 		static constexpr variant_t construct_dt( daw::string_view type,
 		                                         Args &&... args ) {
 
@@ -86,5 +86,6 @@ namespace daw::glean {
 		}
 	};
 
-	using download_types_t = basic_download_types<download_none, download_git>;
+	using download_types_t =
+	  basic_download_types<download_none, download_git, download_svn>;
 } // namespace daw::glean
