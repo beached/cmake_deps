@@ -84,7 +84,7 @@ set( SOURCE_FILES
 )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )
-target_link_libraries( glean utf_range temp_file git2 ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
+target_link_libraries( glean utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 add_dependencies( glean dependency_stub )
 
 install( TARGETS glean DESTINATION bin )
