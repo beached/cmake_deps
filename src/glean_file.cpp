@@ -148,12 +148,15 @@ namespace daw::glean {
 		}
 	} // namespace
 
-	void process_config_file( fs::path const &config_file_path,
-	                          glean_options const &opts ) {
+	daw::graph_t<dependency>
+	process_config_file( fs::path const &config_file_path,
+	                     glean_options const &opts ) {
 
 		if( !exists( config_file_path ) ) {
-			return;
+			std::cerr << "Could not find config file '" << config_file_path << "'\n";
+			std::abort( );
 		}
+
 		auto known_deps = daw::graph_t<dependency>( );
 
 		auto const cfg_file = daw::json::from_json<glean_config_file>(
@@ -162,6 +165,11 @@ namespace daw::glean {
 		process_config_file( config_file_path, known_deps, opts, cfg_file.provides,
 		                     true );
 
+		return known_deps;
+	}
+
+	void process_deps( daw::graph_t<dependency> known_deps,
+	                   glean_options const &opts ) {
 		auto leaf_ids = known_deps.find_leaves( );
 		while( !leaf_ids.empty( ) ) {
 			for( auto leaf_id : leaf_ids ) {

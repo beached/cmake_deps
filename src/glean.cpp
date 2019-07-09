@@ -22,7 +22,6 @@
 
 #include <boost/program_options.hpp>
 #include <cstdlib>
-#include <git2.h>
 #include <iostream>
 #include <sstream>
 
@@ -53,6 +52,15 @@ int main( int argc, char **argv ) {
 	auto opts = daw::glean_options( argc, argv );
 	std::cout << "glean cache: " << opts.glean_cache( ) << '\n';
 	std::cout << "install prefix: " << opts.install_prefix( ) << '\n';
-	daw::glean::process_config_file( "./glean.json", opts );
+	auto deps = daw::glean::process_config_file( "./glean.json", opts );
+	switch( opts.output_type( ) ) {
+	case daw::output_types::process:
+		daw::glean::process_deps( std::move( deps ), opts );
+		break;
+	case daw::output_types::cmake:
+	default:
+		std::cerr << "Not implemented\n";
+		std::abort( );
+	}
 	return EXIT_SUCCESS;
 }

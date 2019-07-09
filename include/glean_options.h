@@ -29,10 +29,14 @@
 
 namespace daw {
 	enum class build_types: bool { release, debug };
-
 	std::ostream & operator<<( std::ostream & os, build_types bt );
 	std::istream & operator>>( std::istream & is, build_types & bt );
 	std::string to_string( build_types bt );
+
+	enum class output_types: bool { process, cmake };
+	std::ostream & operator<<( std::ostream & os, output_types bt );
+	std::istream & operator>>( std::istream & is, output_types & bt );
+	std::string to_string( output_types bt );
 
 	struct glean_options {
 		boost::program_options::variables_map vm;
@@ -41,5 +45,6 @@ namespace daw {
 		glean::fs::path install_prefix( ) const;
 		glean::fs::path glean_cache( ) const;
 		daw::build_types build_type( ) const;
+		daw::output_types output_type( ) const;
 	};
 } // namespace daw

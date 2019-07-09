@@ -88,6 +88,10 @@ namespace daw::glean {
 		             json_class<no_name, glean_file_item>>>{};
 	}
 
-	void process_config_file( fs::path const &config_file_path,
-	                          glean_options const &opts );
+	daw::graph_t<dependency>
+	process_config_file( fs::path const &config_file_path,
+	                     glean_options const &opts );
+
+	void process_deps( daw::graph_t<dependency> known_deps,
+	                   glean_options const &opts );
 } // namespace daw::glean

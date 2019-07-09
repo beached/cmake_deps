@@ -54,7 +54,11 @@ namespace daw {
 			  "build_type",
 			  boost::program_options::value<::daw::build_types>( )->default_value(
 			    ::daw::build_types::release ),
-			  "type of build" );
+			  "type of build" )(
+			  "output_type",
+			  boost::program_options::value<::daw::output_types>( )->default_value(
+			    ::daw::output_types::process ),
+			  "type of output" );
 
 			boost::program_options::variables_map vm{};
 			try {
@@ -160,4 +164,42 @@ namespace daw {
 		}
 		std::abort( );
 	}
+
+	daw::output_types glean_options::output_type( ) const {
+		return vm["output_type"].template as<daw::output_types>( );
+	}
+
+	std::ostream &operator<<( std::ostream &os, output_types bt ) {
+		switch( bt ) {
+		case output_types::process:
+			os << "process";
+			break;
+		case output_types::cmake:
+			os << "cmake";
+			break;
+		}
+		return os;
+	}
+
+	std::istream &operator>>( std::istream &is, output_types &bt ) {
+		std::string tmp{};
+		is >> tmp;
+		if( !tmp.empty( ) and ( ( tmp[0] == 'c' ) or ( tmp[0] == 'C' ) ) ) {
+			bt = output_types::cmake;
+		} else {
+			bt = output_types::process;
+		}
+		return is;
+	}
+
+	std::string to_string( output_types bt ) {
+		switch( bt ) {
+		case output_types::process:
+			return "process";
+		case output_types::cmake:
+			return "cmake";
+		}
+		std::abort( );
+	}
+
 } // namespace daw
