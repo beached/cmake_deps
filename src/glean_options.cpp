@@ -196,7 +196,10 @@ namespace daw::glean {
 	}
 
 	std::vector<std::string> glean_options::cmake_args( ) const {
-		return vm["cmake_args"].template as<std::vector<std::string>>( );
+		if( vm["cmake_arg"].empty( ) ) {
+			return {};
+		}
+		return vm["cmake_arg"].template as<std::vector<std::string>>( );
 	}
 
 	std::ostream &operator<<( std::ostream &os, output_types bt ) {
