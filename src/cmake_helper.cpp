@@ -40,12 +40,17 @@ namespace daw::glean {
 		auto inst_root = daw::fmt_t( "-DGLEAN_INSTALL_ROOT={0}" )(
 		  ( install_prefix / to_string( bt ) ).string( ) );
 
-		return {std::move( inst_prefix ),
-		        std::move( inst_root ),
-		        "-S",
-		        source_path.string( ),
-		        "-B",
-		        ( build_path / to_string( bt ) ).string( )};
+		auto result =
+		  std::vector<std::string>{std::move( inst_prefix ),
+		                           std::move( inst_root ),
+		                           "-S",
+		                           source_path.string( ),
+		                           "-B",
+		                           ( build_path / to_string( bt ) ).string( )};
+
+		result.insert( result.cend( ), custom_arguments.cbegin( ),
+		               custom_arguments.cend( ) );
+		return result;
 	}
 
 	std::vector<std::string>

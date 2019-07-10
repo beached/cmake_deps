@@ -41,7 +41,8 @@ namespace daw::glean {
 		}
 
 		boost::program_options::variables_map get_vm( int argc, char **argv ) {
-			boost::program_options::options_description desc{"Options"};
+			auto desc = boost::program_options::options_description( "Options" );
+
 			desc.add_options( )( "help", "print option descriptions" )(
 			  "cache",
 			  boost::program_options::value<glean::fs::path>( )->default_value(
@@ -58,15 +59,19 @@ namespace daw::glean {
 			  "output_type",
 			  boost::program_options::value<::daw::glean::output_types>( )
 			    ->default_value( ::daw::glean::output_types::process ),
-			  "type of output" );
+			  "type of output" )(
+			  "cmake_arg",
+			  boost::program_options::value<std::vector<std::string>>( )
+			    ->multitoken( ),
+			  "additional commandline arguments to pass to cmake(1 per cmake_arg)" );
 
-			boost::program_options::variables_map vm{};
+			auto vm = boost::program_options::variables_map( );
 			try {
 				boost::program_options::store(
 				  boost::program_options::parse_command_line( argc, argv, desc ), vm );
 
 				if( vm.count( "help" ) ) {
-					std::stringstream ss{};
+					auto ss = std::stringstream( );
 					ss << desc;
 					log_message << "Command line options\n" << ss.str( ) << '\n';
 					exit( EXIT_SUCCESS );
@@ -74,7 +79,7 @@ namespace daw::glean {
 				boost::program_options::notify( vm );
 			} catch( boost::program_options::error const &po_error ) {
 				log_error << "ERROR: " << po_error.what( ) << '\n';
-				std::stringstream ss{};
+				auto ss = std::stringstream( );
 				ss << desc;
 				log_error << ss.str( ) << '\n';
 				exit( EXIT_FAILURE );
@@ -96,14 +101,14 @@ namespace daw::glean {
 			if( vm.count( name.c_str( ) ) ) {
 				result = vm[name.c_str( )].template as<glean::fs::path>( );
 			} else {
-				std::stringstream ss{};
+				auto ss = std::stringstream( );
 				ss << result;
 				log_error << name << " folder (" << ss.str( ) << ") not specified\n";
 				exit( EXIT_FAILURE );
 			}
 			if( exists( result ) ) {
 				if( !is_directory( result ) ) {
-					std::stringstream ss{};
+					auto ss = std::stringstream( );
 					ss << result;
 					log_error << name << " folder (" << ss.str( )
 					          << ") is not a directory\n";
@@ -188,6 +193,10 @@ namespace daw::glean {
 
 	daw::glean::output_types glean_options::output_type( ) const {
 		return vm["output_type"].template as<daw::glean::output_types>( );
+	}
+
+	std::vector<std::string> glean_options::cmake_args( ) const {
+		return vm["cmake_args"].template as<std::vector<std::string>>( );
 	}
 
 	std::ostream &operator<<( std::ostream &os, output_types bt ) {

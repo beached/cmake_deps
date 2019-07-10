@@ -26,6 +26,8 @@
 #include <boost/process.hpp>
 #include <string>
 
+#include "utilities.h"
+
 namespace daw::glean {
 	template<typename OutputIterator>
 	class Process {
@@ -45,11 +47,11 @@ namespace daw::glean {
 			  boost::process::std_out > out, boost::process::std_err > err );
 
 			auto const process_pipe = [&]( auto &&p ) -> bool {
-				std::string line{};
+				typename glean::fs::path::string_type line{};
 				if( !p or !std::getline( p, line ) or line.empty( ) ) {
 					return false;
 				}
-				line += '\n';
+				line += static_cast<typename glean::fs::path::value_type>( '\n' );
 				m_out = std::copy( line.begin( ), line.end( ), m_out );
 				return true;
 			};

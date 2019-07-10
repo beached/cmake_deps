@@ -46,14 +46,16 @@ namespace daw::glean {
 	}
 
 	build_cmake::build_cmake( fs::path source_path, fs::path build_path,
-	                          fs::path install_prefix ) noexcept
+	                          fs::path install_prefix,
+	                          glean_options const &opts ) noexcept
 	  : m_source_path( std::move( source_path ) )
 	  , m_build_path( std::move( build_path ) )
-	  , m_install_prefix( std::move( install_prefix ) ) {}
+	  , m_install_prefix( std::move( install_prefix ) )
+	  , m_opt( &opts ) {}
 
 	action_status build_cmake::build( daw::glean::build_types bt ) const {
 		auto const chdir = change_directory( m_build_path );
-		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix ),
+		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix, m_opt->cmake_args() ),
 		                  m_build_path, bt,
 		                  log_message ) == action_status::failure ) {
 

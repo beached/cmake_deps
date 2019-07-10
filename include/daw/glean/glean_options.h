@@ -46,5 +46,6 @@ namespace daw::glean {
 		daw::glean::fs::path glean_cache( ) const;
 		daw::glean::build_types build_type( ) const;
 		daw::glean::output_types output_type( ) const;
+		std::vector<std::string> cmake_args( ) const;
 	};
 } // namespace daw::glean

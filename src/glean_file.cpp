@@ -95,7 +95,7 @@ namespace daw::glean {
 				return known_deps.add_node(
 				  cfg_file.provides,
 				  build_types_t( build_type, cache_folder_name / "source",
-				                 cache_folder_name / "build", opts.install_prefix( ) ),
+				                 cache_folder_name / "build", opts.install_prefix( ), opts ),
 				  download_none{}, uri );
 			}( );
 
