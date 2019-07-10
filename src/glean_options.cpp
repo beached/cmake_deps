@@ -20,22 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <boost/program_options.hpp>
 #include <cstdlib>
 #include <iostream>
-
-#include <boost/program_options.hpp>
-#include <iosfwd>
+#include <sstream>
 
 #include "daw/glean/build_types.h"
 #include "daw/glean/glean_config.h"
 #include "daw/glean/glean_options.h"
+#include "daw/glean/logging.h"
 #include "daw/glean/utilities.h"
 
 namespace daw::glean {
 	namespace {
 		void ensure_system( ) noexcept {
 			if( system( nullptr ) == 0 ) {
-				std::cerr << "Could not call system function\n";
+				log_error << "Could not call system function\n";
 				exit( EXIT_FAILURE );
 			}
 		}
@@ -66,13 +66,17 @@ namespace daw::glean {
 				  boost::program_options::parse_command_line( argc, argv, desc ), vm );
 
 				if( vm.count( "help" ) ) {
-					std::cout << "Command line options\n" << desc << '\n';
+					std::stringstream ss{};
+					ss << desc;
+					log_message << "Command line options\n" << ss.str( ) << '\n';
 					exit( EXIT_SUCCESS );
 				}
 				boost::program_options::notify( vm );
 			} catch( boost::program_options::error const &po_error ) {
-				std::cerr << "ERROR: " << po_error.what( ) << '\n';
-				std::cerr << desc << '\n';
+				log_error << "ERROR: " << po_error.what( ) << '\n';
+				std::stringstream ss{};
+				ss << desc;
+				log_error << ss.str( ) << '\n';
 				exit( EXIT_FAILURE );
 			}
 			return vm;
@@ -87,17 +91,21 @@ namespace daw::glean {
 
 	namespace {
 		template<typename VM>
-		glean::fs::path process_path_opt( VM const &vm, std::string const &name ) {
-			glean::fs::path result;
+		fs::path process_path_opt( VM const &vm, std::string const &name ) {
+			fs::path result;
 			if( vm.count( name.c_str( ) ) ) {
 				result = vm[name.c_str( )].template as<glean::fs::path>( );
 			} else {
-				std::cerr << name << " folder (" << result << ") not specified\n";
+				std::stringstream ss{};
+				ss << result;
+				log_error << name << " folder (" << ss.str( ) << ") not specified\n";
 				exit( EXIT_FAILURE );
 			}
 			if( exists( result ) ) {
 				if( !is_directory( result ) ) {
-					std::cerr << name << " folder (" << result
+					std::stringstream ss{};
+					ss << result;
+					log_error << name << " folder (" << ss.str( )
 					          << ") is not a directory\n";
 					exit( EXIT_FAILURE );
 				}
@@ -130,6 +138,19 @@ namespace daw::glean {
 
 	daw::glean::build_types glean_options::build_type( ) const {
 		return vm["build_type"].template as<daw::glean::build_types>( );
+	}
+
+	::daw::glean::logger const &operator<<( ::daw::glean::logger const &os,
+	                                        build_types bt ) {
+		switch( bt ) {
+		case build_types::release:
+			os << "release";
+			break;
+		case build_types::debug:
+			os << "debug";
+			break;
+		}
+		return os;
 	}
 
 	std::ostream &operator<<( std::ostream &os, build_types bt ) {

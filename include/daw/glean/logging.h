@@ -20,41 +20,54 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <string>
-#include <utility>
+#pragma once
 
-#include "daw/glean/action_status.h"
-#include "daw/glean/download_svn.h"
-#include "daw/glean/logging.h"
-#include "daw/glean/proc.h"
-#include "daw/glean/svn_helper.h"
-#include "daw/glean/utilities.h"
+#include <string>
+
+#include "utilities.h"
 
 namespace daw::glean {
-	namespace {
-		bool is_svn_repos( fs::path repos ) {
-			return is_directory( repos / ".svn" );
+	enum class log_output_types { message, error };
+	class logger {
+		log_output_types m_out_type;
+
+	public:
+		constexpr logger( log_output_types out_type ) noexcept
+		  : m_out_type( out_type ) {}
+
+		logger const &operator( )( std::string const &message ) const;
+		logger const &operator( )( std::wstring const &message ) const;
+		logger const &operator( )( char c ) const;
+		logger const &operator( )( wchar_t wc ) const;
+
+		constexpr logger const &operator*( ) const {
+			return *this;
 		}
 
-		action_status svn_repos_update( fs::path repos ) {
-			return svn_runner( svn_action_update{}, repos, log_message );
+		template<typename T>
+		logger const &operator=( T &&value ) const {
+			return this->operator( )( std::forward<T>( value ) );
 		}
 
-		action_status svn_repos_checkout( std::string const &remote_repos,
-		                                  fs::path repos ) {
-
-			auto svn_action = svn_action_checkout( );
-			svn_action.remote_uri = remote_repos;
-
-			return svn_runner( svn_action, repos, log_message );
+		constexpr logger const &operator++( ) const {
+			return *this;
 		}
 
-	} // namespace
-
-	action_status download_svn::download( ) const {
-		if( is_svn_repos( m_local ) ) {
-			return svn_repos_update( m_local );
+		constexpr logger const &operator++( int ) const {
+			return *this;
 		}
-		return svn_repos_checkout( m_remote, m_local );
+	};
+
+	template<typename T>
+	constexpr logger const &operator<<( logger const &l, T const &message ) {
+		return l( message );
 	}
+
+	logger const &operator<<( logger const &l, fs::path const &path );
 } // namespace daw::glean
+
+inline constexpr ::daw::glean::logger log_message =
+  ::daw::glean::logger( daw::glean::log_output_types::message );
+
+inline constexpr ::daw::glean::logger log_error =
+  ::daw::glean::logger( daw::glean::log_output_types::error );

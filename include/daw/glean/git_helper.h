@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <vector>
 
 #include <daw/daw_utility.h>
 
 #include "action_status.h"
+#include "logging.h"
 #include "proc.h"
 #include "utilities.h"
 
@@ -37,11 +37,11 @@ namespace daw::glean {
 	action_status git_runner( GitAction &&git_action, fs::path work_tree,
 	                          OutputIterator &&out_it ) {
 		auto args = git_action.build_args( std::move( work_tree ) );
-		std::cout << "Running git";
+		log_message << "Running git";
 		for( auto arg : args ) {
-			std::cout << ' ' << arg;
+			log_message << ' ' << arg;
 		}
-		std::cout << "\n\n";
+		log_message << "\n\n";
 
 		auto run_process = Process( std::forward<OutputIterator>( out_it ) );
 		if( run_process( "git", std::move( args ) ) == EXIT_SUCCESS ) {

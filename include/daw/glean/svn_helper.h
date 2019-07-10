@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <vector>
 
 #include <daw/daw_utility.h>
 
 #include "action_status.h"
+#include "logging.h"
 #include "proc.h"
 #include "utilities.h"
 
@@ -37,11 +37,11 @@ namespace daw::glean {
 	action_status svn_runner( SvnAction &&svn_action, fs::path work_tree,
 	                          OutputIterator &&out_it ) {
 		auto args = svn_action.build_args( std::move( work_tree ) );
-		std::cout << "Running svn";
+		log_message << "Running svn";
 		for( auto arg : args ) {
-			std::cout << ' ' << arg;
+			log_message << ' ' << arg;
 		}
-		std::cout << "\n\n";
+		log_message << "\n\n";
 
 		auto run_process = Process( std::forward<OutputIterator>( out_it ) );
 		if( run_process( "svn", std::move( args ) ) == EXIT_SUCCESS ) {

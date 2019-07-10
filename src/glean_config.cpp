@@ -20,9 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <iostream>
-#include <sstream>
-
 #include <daw/daw_exception.h>
 #include <daw/daw_read_file.h>
 #include <daw/daw_string_view.h>
@@ -58,55 +55,4 @@ namespace daw::glean {
 			return {};
 		}
 	}
-
-	namespace {
-		/*
-		size_t write_data( char *data, size_t size, size_t nmemb,
-		                   void *writer_data_p ) {
-		  if( nullptr == writer_data_p ) {
-		    return 0;
-		  }
-		  auto &writer_data = *reinterpret_cast<std::string *>( writer_data_p );
-		  if( data && size * nmemb > 0 ) {
-		    writer_data.append( data, size * nmemb );
-		  }
-		  return size * nmemb;
-		}
-
-		std::string download_file2( daw::string_view file_url ) {
-		  std::string result;
-		  curl_t curl;
-
-		  curl_easy_setopt( curl, CURLOPT_URL, file_url.data( ) );
-		  curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, write_data );
-		  curl_easy_setopt( curl, CURLOPT_WRITEDATA, &result );
-
-		  // Follow redirects
-		  curl_easy_setopt( curl, CURLOPT_FOLLOWLOCATION, 1L );
-		  // 20 seems to be a fair number, but still a WAG
-		  curl_easy_setopt( curl, CURLOPT_MAXREDIRS, 20L );
-
-		  curl_easy_setopt( curl, CURLOPT_HTTPGET, 1L );
-		  auto res = curl_easy_perform( curl );
-		  if( res != CURLE_OK ) {
-		    throw std::runtime_error( "Could not download file" );
-		  }
-		  return result;
-		}
-		 */
-	} // namespace
-
-	/*
-	daw::unique_temp_file download_file( daw::string_view url ) {
-	  auto tmp_file = daw::unique_temp_file( );
-	  auto out_file = tmp_file.secure_create_stream( );
-
-	  daw::exception::daw_throw_on_false<std::runtime_error>(
-	    out_file, "Could not open tmp file for writing" );
-
-	  *out_file << download_file2( url );
-	  out_file->close( );
-	  return tmp_file;
-	}
-	 */
 } // namespace daw::glean

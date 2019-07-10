@@ -20,12 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <iostream>
 #include <utility>
 
 #include "daw/glean/build_cmake.h"
 #include "daw/glean/cmake_helper.h"
 #include "daw/glean/glean_options.h"
+#include "daw/glean/logging.h"
 #include "daw/glean/proc.h"
 #include "daw/glean/utilities.h"
 
@@ -55,18 +55,16 @@ namespace daw::glean {
 		auto const chdir = change_directory( m_build_path );
 		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix ),
 		                  m_build_path, bt,
-		                  std::ostreambuf_iterator<char>( std::cout ) ) ==
-		    action_status::failure ) {
+		                  log_message ) == action_status::failure ) {
 
 			return action_status::failure;
 		}
-		return cmake_runner( cmake_action_build( ), m_build_path, bt,
-		                     std::ostreambuf_iterator<char>( std::cout ) );
+		return cmake_runner( cmake_action_build( ), m_build_path, bt, log_message );
 	}
 
 	action_status build_cmake::install( daw::glean::build_types bt ) const {
 		auto const chdir = change_directory( m_build_path );
 		return cmake_runner( cmake_action_install( ), m_build_path, bt,
-		                     std::ostreambuf_iterator<char>( std::cout ) );
+		                     log_message );
 	}
 } // namespace daw::glean

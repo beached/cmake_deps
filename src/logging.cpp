@@ -20,53 +20,65 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <iostream>
 #include <string>
-#include <utility>
 
-#include "daw/glean/action_status.h"
-#include "daw/glean/download_git.h"
-#include "daw/glean/git_helper.h"
 #include "daw/glean/logging.h"
-#include "daw/glean/proc.h"
-#include "daw/glean/utilities.h"
 
 namespace daw::glean {
-	namespace {
-		bool is_git_repos( fs::path repos ) {
-			return is_directory( repos / ".git" );
+	logger const &logger::operator( )( std::string const &message ) const {
+		switch( m_out_type ) {
+		case log_output_types::message:
+			std::cout << message;
+			break;
+		case log_output_types::error:
+			std::cerr << message;
+			break;
 		}
+		return *this;
+	}
 
-		action_status git_repos_checkout( fs::path repos,
-		                                  std::string const &version ) {
-
-			return action_status::success;
+	logger const &logger::operator( )( std::wstring const &message ) const {
+		switch( m_out_type ) {
+		case log_output_types::message:
+			std::wcout << message;
+			break;
+		case log_output_types::error:
+			std::wcerr << message;
+			break;
 		}
+		return *this;
+	}
 
-		action_status git_repos_update( fs::path repos ) {
-			return git_runner( git_action_pull{}, repos, log_message );
+	logger const &logger::operator( )( char c ) const {
+		switch( m_out_type ) {
+		case log_output_types::message:
+			std::cout << c;
+			break;
+		case log_output_types::error:
+			std::cerr << c;
+			break;
 		}
+		return *this;
+	}
 
-		action_status git_repos_clone( std::string const &remote_repos,
-		                               fs::path repos ) {
-
-			auto git_action = git_action_clone( );
-			git_action.remote_uri = remote_repos;
-
-			return git_runner( git_action, repos, log_message );
+	logger const &logger::operator( )( wchar_t wc ) const {
+		switch( m_out_type ) {
+		case log_output_types::message:
+			std::wcout << wc;
+			break;
+		case log_output_types::error:
+			std::wcerr << wc;
+			break;
 		}
+		return *this;
+	}
 
-	} // namespace
-
-	action_status download_git::download( ) const {
-		action_status result = [&]( ) {
-			if( is_git_repos( m_local ) ) {
-				return git_repos_update( m_local );
-			}
-			return git_repos_clone( m_remote, m_local );
-		}( );
-		if( result == action_status::failure ) {
-			return result;
+	logger const &operator<<( logger const &l, fs::path const &path ) {
+		if constexpr( std::is_same_v<fs::path::value_type, char> ) {
+			return l( path.string( ) );
+		} else {
+			return l( path.wstring( ) );
 		}
-		return git_repos_checkout( m_local, m_version );
 	}
 } // namespace daw::glean

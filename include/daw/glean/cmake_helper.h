@@ -22,7 +22,6 @@
 
 #pragma once
 
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -30,6 +29,7 @@
 
 #include "action_status.h"
 #include "glean_options.h"
+#include "logging.h"
 #include "proc.h"
 #include "utilities.h"
 
@@ -39,11 +39,11 @@ namespace daw::glean {
 	                            daw::glean::build_types bt,
 	                            OutputIterator &&out_it ) {
 		auto args = cmake_action.build_args( std::move( work_tree ), bt );
-		std::cout << "Running cmake";
+		log_message << "Running cmake";
 		for( auto arg : args ) {
-			std::cout << ' ' << arg;
+			log_message << ' ' << arg;
 		}
-		std::cout << "\n\n";
+		log_message << "\n\n";
 
 		auto run_process = Process( std::forward<OutputIterator>( out_it ) );
 		if( run_process( "cmake", std::move( args ) ) == EXIT_SUCCESS ) {

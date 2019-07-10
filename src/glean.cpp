@@ -22,12 +22,12 @@
 
 #include <boost/program_options.hpp>
 #include <cstdlib>
-#include <iostream>
 #include <sstream>
 
 #include "daw/glean/glean_config.h"
 #include "daw/glean/glean_file.h"
 #include "daw/glean/glean_options.h"
+#include "daw/glean/logging.h"
 #include "daw/glean/utilities.h"
 
 namespace {
@@ -50,8 +50,8 @@ namespace {
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
 	auto opts = daw::glean::glean_options( argc, argv );
-	std::cout << "glean cache: " << opts.glean_cache( ) << '\n';
-	std::cout << "install prefix: " << opts.install_prefix( ) << '\n';
+	log_message << "glean cache: " << opts.glean_cache( ) << '\n';
+	log_message << "install prefix: " << opts.install_prefix( ) << '\n';
 	auto deps = daw::glean::process_config_file( "./glean.json", opts );
 	switch( opts.output_type( ) ) {
 	case daw::glean::output_types::process:
@@ -61,7 +61,7 @@ int main( int argc, char **argv ) {
 		daw::glean::cmake_deps( std::move( deps ) );
 		break;
 	default:
-		std::cerr << "Not implemented\n";
+		log_error << "Not implemented\n";
 		std::abort( );
 	}
 	return EXIT_SUCCESS;

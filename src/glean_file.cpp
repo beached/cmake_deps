@@ -33,6 +33,7 @@
 #include "daw/glean/download_types.h"
 #include "daw/glean/glean_file.h"
 #include "daw/glean/glean_options.h"
+#include "daw/glean/logging.h"
 
 namespace daw::glean {
 	namespace {
@@ -69,7 +70,7 @@ namespace daw::glean {
 			  daw::read_file( config_file_path.string( ) ) );
 
 			if( cfg_file.provides != provides ) {
-				std::cerr << "Expected that '" << config_file_path << "' provides '"
+				log_error << "Expected that '" << config_file_path << "' provides '"
 				          << provides << "' but '" << cfg_file.provides << "' found\n";
 				std::abort( );
 			}
@@ -136,7 +137,7 @@ namespace daw::glean {
 
 				auto &cur_dep = known_deps.get_raw_node( dep_id ).value( );
 				if( cur_dep.download( ) != action_status::success ) {
-					std::cerr << "Error downloading\n";
+					log_error << "Error downloading\n";
 					std::abort( );
 				}
 				if( exists( dep_folder / "glean.json" ) ) {
@@ -169,7 +170,7 @@ namespace daw::glean {
 	                     glean_options const &opts ) {
 
 		if( !exists( config_file_path ) ) {
-			std::cerr << "Could not find config file '" << config_file_path << "'\n";
+			log_error << "Could not find config file '" << config_file_path << "'\n";
 			std::abort( );
 		}
 
@@ -187,9 +188,9 @@ namespace daw::glean {
 	void process_deps( daw::graph_t<dependency> known_deps,
 	                   glean_options const &opts ) {
 		deps_for_each( std::move( known_deps ), [&]( auto &&cur_dep ) {
-			std::cout << "-------------------------------------\n";
-			std::cout << "Processing - " << cur_dep.name( ) << '\n';
-			std::cout << "-------------------------------------\n\n";
+			log_message << "-------------------------------------\n";
+			log_message << "Processing - " << cur_dep.name( ) << '\n';
+			log_message << "-------------------------------------\n\n";
 
 			if( cur_dep.build( opts.build_type( ) ) == action_status::failure ) {
 				// Do error stuff
@@ -238,39 +239,39 @@ namespace daw::glean {
 		}
 
 		if( has_unsupported ) {
-			std::cerr << "Warning: unsupported download type(s) detected.  currently "
+			log_error << "Warning: unsupported download type(s) detected.  currently "
 			             "only git "
 			             "supported\n";
 		}
-		std::cout << "\ninclude( ExternalProject )\n";
+		log_message << "\ninclude( ExternalProject )\n";
 		// need to go backwards so that cmake has correct order
 		for( auto const &cur_dep : deps ) {
-			std::cout << "externalproject_add(\n";
-			std::cout << "  " << cur_dep.name << "_prj\n";
+			log_message << "externalproject_add(\n";
+			log_message << "  " << cur_dep.name << "_prj\n";
 			if( !cur_dep.depends_on.empty( ) ) {
-				std::cout << "  DEPENDS";
+				log_message << "  DEPENDS";
 				for( auto const &child : cur_dep.depends_on ) {
-					std::cout << ' ' << child << "_prj";
+					log_message << ' ' << child << "_prj";
 				}
-				std::cout << '\n';
+				log_message << '\n';
 			}
-			std::cout << "  GIT_REPOSITORY \"" << cur_dep.uri << "\"\n";
-			std::cout << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/"
-			          << cur_dep.name << "\"\n";
-			std::cout << "  GIT_TAG \"master\"\n"; // TODO use version
-			std::cout << "  INSTALL_DIR \"${CMAKE_BINARY_DIR}/install\"\n";
-			std::cout << "  CMAKE_ARGS "
-			             "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install "
-			             "-DGLEAN_INSTALL_ROOT=${CMAKE_BINARY_DIR}/install\n";
-			std::cout << ")\n\n";
+			log_message << "  GIT_REPOSITORY \"" << cur_dep.uri << "\"\n";
+			log_message << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/"
+			            << cur_dep.name << "\"\n";
+			log_message << "  GIT_TAG \"master\"\n"; // TODO use version
+			log_message << "  INSTALL_DIR \"${CMAKE_BINARY_DIR}/install\"\n";
+			log_message << "  CMAKE_ARGS "
+			               "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install "
+			               "-DGLEAN_INSTALL_ROOT=${CMAKE_BINARY_DIR}/install\n";
+			log_message << ")\n\n";
 		}
-		std::cout << "include_directories( SYSTEM "
-		             "\"${CMAKE_BINARY_DIR}/install/include\" )\n";
-		std::cout << "link_directories( \"${CMAKE_BINARY_DIR}/install/lib\" )\n";
-		std::cout << "set( DEP_PROJECT_DEPS";
+		log_message << "include_directories( SYSTEM "
+		               "\"${CMAKE_BINARY_DIR}/install/include\" )\n";
+		log_message << "link_directories( \"${CMAKE_BINARY_DIR}/install/lib\" )\n";
+		log_message << "set( DEP_PROJECT_DEPS";
 		for( auto const &dep : deps ) {
-			std::cout << ' ' << dep.name << "_prj";
+			log_message << ' ' << dep.name << "_prj";
 		}
-		std::cout << " )\n";
+		log_message << " )\n";
 	}
 } // namespace daw::glean

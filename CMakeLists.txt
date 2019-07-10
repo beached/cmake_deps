@@ -58,14 +58,15 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw/glean/build_types.h
 	${HEADER_FOLDER}/daw/glean/cmake_helper.h
 	${HEADER_FOLDER}/daw/glean/dependency.h
-	${HEADER_FOLDER}/daw/glean/glean_config.h
-	${HEADER_FOLDER}/daw/glean/git_helper.h
 	${HEADER_FOLDER}/daw/glean/download_git.h
 	${HEADER_FOLDER}/daw/glean/download_none.h
 	${HEADER_FOLDER}/daw/glean/download_svn.h
 	${HEADER_FOLDER}/daw/glean/download_types.h
+	${HEADER_FOLDER}/daw/glean/git_helper.h
+	${HEADER_FOLDER}/daw/glean/glean_config.h
 	${HEADER_FOLDER}/daw/glean/glean_file.h
 	${HEADER_FOLDER}/daw/glean/glean_options.h
+	${HEADER_FOLDER}/daw/glean/logging.h
 	${HEADER_FOLDER}/daw/glean/proc.h
 	${HEADER_FOLDER}/daw/glean/svn_helper.h
 	${HEADER_FOLDER}/daw/glean/utilities.h
@@ -76,10 +77,11 @@ set( SOURCE_FILES
 	${SOURCE_FOLDER}/cmake_helper.cpp
 	${SOURCE_FOLDER}/download_git.cpp
 	${SOURCE_FOLDER}/download_svn.cpp
-	${SOURCE_FOLDER}/glean_config.cpp
 	${SOURCE_FOLDER}/git_helper.cpp
+	${SOURCE_FOLDER}/glean_config.cpp
 	${SOURCE_FOLDER}/glean_file.cpp
 	${SOURCE_FOLDER}/glean_options.cpp
+	${SOURCE_FOLDER}/logging.cpp
 	${SOURCE_FOLDER}/svn_helper.cpp
 	${SOURCE_FOLDER}/glean_file.cpp
 )
