@@ -67,12 +67,12 @@ namespace daw::glean {
 		                                    bool is_root = false ) {
 
 			auto cfg_file = daw::json::from_json<glean_config_file>(
-			  daw::read_file( config_file_path.string( ) ) );
+			  daw::read_file( config_file_path.c_str( ) ) );
 
 			if( cfg_file.provides != provides ) {
 				log_error << "Expected that '" << config_file_path << "' provides '"
 				          << provides << "' but '" << cfg_file.provides << "' found\n";
-				std::abort( );
+				exit( EXIT_FAILURE );
 			}
 
 			auto const cache_folder_name =
@@ -138,7 +138,7 @@ namespace daw::glean {
 				auto &cur_dep = known_deps.get_raw_node( dep_id ).value( );
 				if( cur_dep.download( ) != action_status::success ) {
 					log_error << "Error downloading\n";
-					std::abort( );
+					exit( EXIT_FAILURE );
 				}
 				if( exists( dep_folder / "glean.json" ) ) {
 					process_config_file( dep_folder / "glean.json", known_deps, opts,
@@ -171,13 +171,13 @@ namespace daw::glean {
 
 		if( !exists( config_file_path ) ) {
 			log_error << "Could not find config file '" << config_file_path << "'\n";
-			std::abort( );
+			exit( EXIT_FAILURE );
 		}
 
 		auto known_deps = daw::graph_t<dependency>( );
 
 		auto const cfg_file = daw::json::from_json<glean_config_file>(
-		  daw::read_file( config_file_path.string( ) ) );
+		  daw::read_file( config_file_path.c_str( ) ) );
 
 		process_config_file( config_file_path, known_deps, opts, cfg_file.provides,
 		                     "none", "", true );
