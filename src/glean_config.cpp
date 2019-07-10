@@ -50,7 +50,7 @@ namespace daw::glean {
 		}( );
 		if( exists( config_file ) ) {
 			return daw::json::from_json<glean_config>(
-			  daw::read_file( config_file.string( ) ) );
+			  daw::read_file( config_file.c_str( ) ) );
 		} else {
 			return {};
 		}
