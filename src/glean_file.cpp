@@ -128,7 +128,7 @@ namespace daw::glean {
 				                    *child_dep.version, dep_folder );
 				auto builder = build_types_t(
 				  child_dep.build_type, dep_cache_folder_name / "source",
-				  dep_cache_folder_name / "build", opts.install_prefix( ) );
+				  dep_cache_folder_name / "build", opts.install_prefix( ), opts );
 
 				auto dep_id =
 				  known_deps.add_node( child_dep.name, daw::move( builder ),

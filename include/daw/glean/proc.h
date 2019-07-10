@@ -47,11 +47,11 @@ namespace daw::glean {
 			  boost::process::std_out > out, boost::process::std_err > err );
 
 			auto const process_pipe = [&]( auto &&p ) -> bool {
-				typename glean::fs::path::string_type line{};
+				auto line = std::string( );
 				if( !p or !std::getline( p, line ) or line.empty( ) ) {
 					return false;
 				}
-				line += static_cast<typename glean::fs::path::value_type>( '\n' );
+				line += '\n';
 				m_out = std::copy( line.begin( ), line.end( ), m_out );
 				return true;
 			};
