@@ -23,8 +23,6 @@
 #include <string>
 #include <vector>
 
-#include <daw/daw_string_fmt.h>
-
 #include "daw/glean/svn_helper.h"
 #include "daw/glean/utilities.h"
 

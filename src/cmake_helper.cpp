@@ -35,10 +35,10 @@ namespace daw::glean {
 	cmake_action_configure::build_args( fs::path build_path,
 	                                    daw::glean::build_types bt ) const {
 		auto inst_prefix = daw::fmt_t( "-DCMAKE_INSTALL_PREFIX:PATH={0}" )(
-		  ( install_prefix / to_string( bt ) ).c_str( ) );
+		  ( install_prefix / to_string( bt ) ).string( ) );
 
 		auto inst_root = daw::fmt_t( "-DGLEAN_INSTALL_ROOT={0}" )(
-		  ( install_prefix / to_string( bt ) ).c_str( ) );
+		  ( install_prefix / to_string( bt ) ).string( ) );
 
 		return {std::move( inst_prefix ),
 		        std::move( inst_root ),

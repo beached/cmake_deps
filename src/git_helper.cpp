@@ -23,8 +23,6 @@
 #include <string>
 #include <vector>
 
-#include <daw/daw_string_fmt.h>
-
 #include "daw/glean/git_helper.h"
 #include "daw/glean/utilities.h"
 
@@ -32,7 +30,7 @@ namespace daw::glean {
 	std::vector<std::string>
 	git_action_pull::build_args( fs::path work_tree ) const {
 		std::string work_tree_str = "--work-tree=";
-		work_tree_str += work_tree.c_str( );
+		work_tree_str += work_tree.string( );
 		return {work_tree_str, "pull"};
 	}
 
@@ -43,7 +41,7 @@ namespace daw::glean {
 			result.push_back( "--recurse-submodules" );
 		}
 		result.push_back( remote_uri );
-		result.push_back( work_tree.c_str( ) );
+		result.push_back( work_tree.string( ) );
 		return result;
 	}
 } // namespace daw::glean
