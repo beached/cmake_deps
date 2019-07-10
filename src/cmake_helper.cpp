@@ -33,7 +33,7 @@
 namespace daw::glean {
 	std::vector<std::string>
 	cmake_action_configure::build_args( fs::path build_path,
-	                                    daw::build_types bt ) const {
+	                                    daw::glean::build_types bt ) const {
 		auto inst_prefix = daw::fmt_t( "-DCMAKE_INSTALL_PREFIX:PATH={0}" )(
 		  ( install_prefix / to_string( bt ) ).c_str( ) );
 
@@ -50,13 +50,13 @@ namespace daw::glean {
 
 	std::vector<std::string>
 	cmake_action_build::build_args( fs::path build_path,
-	                                daw::build_types bt ) const {
+	                                daw::glean::build_types bt ) const {
 		return {"--build", ( build_path / to_string( bt ) ).string( )};
 	}
 
 	std::vector<std::string>
 	cmake_action_install::build_args( fs::path build_path,
-	                                  daw::build_types bt ) const {
+	                                  daw::glean::build_types bt ) const {
 		return {"--build", ( build_path / to_string( bt ) ).string( ), "--target",
 		        "install"};
 	}

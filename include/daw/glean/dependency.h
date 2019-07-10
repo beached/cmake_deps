@@ -55,7 +55,7 @@ namespace daw::glean {
 			return m_uri;
 		}
 
-		inline action_status build( daw::build_types bt ) const {
+		inline action_status build( daw::glean::build_types bt ) const {
 			return m_build_type.build( bt );
 		}
 
@@ -63,7 +63,7 @@ namespace daw::glean {
 			return {};
 		}
 
-		inline action_status install( daw::build_types bt ) const {
+		inline action_status install( daw::glean::build_types bt ) const {
 			return m_build_type.install( bt );
 		}
 

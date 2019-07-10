@@ -42,7 +42,7 @@ namespace daw::glean {
 		}
 
 		action_status svn_repos_checkout( std::string const &remote_repos,
-		                               fs::path repos ) {
+		                                  fs::path repos ) {
 
 			auto svn_action = svn_action_checkout( );
 			svn_action.remote_uri = remote_repos;

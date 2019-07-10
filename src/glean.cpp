@@ -49,15 +49,15 @@ namespace {
 
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
-	auto opts = daw::glean_options( argc, argv );
+	auto opts = daw::glean::glean_options( argc, argv );
 	std::cout << "glean cache: " << opts.glean_cache( ) << '\n';
 	std::cout << "install prefix: " << opts.install_prefix( ) << '\n';
 	auto deps = daw::glean::process_config_file( "./glean.json", opts );
 	switch( opts.output_type( ) ) {
-	case daw::output_types::process:
+	case daw::glean::output_types::process:
 		daw::glean::process_deps( std::move( deps ), opts );
 		break;
-	case daw::output_types::cmake:
+	case daw::glean::output_types::cmake:
 		daw::glean::cmake_deps( std::move( deps ) );
 		break;
 	default:

@@ -200,7 +200,7 @@ namespace daw::glean {
 		} );
 	}
 
-	void cmake_deps( daw::graph_t<dependency> const & kd ) {
+	void cmake_deps( daw::graph_t<dependency> const &kd ) {
 		daw::graph_t<dependency> known_deps = kd;
 		struct dep_t {
 			std::string name;

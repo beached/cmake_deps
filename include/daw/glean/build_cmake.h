@@ -38,8 +38,8 @@ namespace daw::glean {
 		build_cmake( fs::path source_path, fs::path build_path,
 		             fs::path install_prefix ) noexcept;
 
-		action_status build( daw::build_types bt ) const;
-		action_status install( daw::build_types bt ) const;
+		action_status build( daw::glean::build_types bt ) const;
+		action_status install( daw::glean::build_types bt ) const;
 	};
 
 } // namespace daw::glean

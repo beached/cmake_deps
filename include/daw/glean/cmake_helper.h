@@ -36,7 +36,8 @@
 namespace daw::glean {
 	template<typename CmakeAction, typename OutputIterator>
 	action_status cmake_runner( CmakeAction &&cmake_action, fs::path work_tree,
-	                            daw::build_types bt, OutputIterator &&out_it ) {
+	                            daw::glean::build_types bt,
+	                            OutputIterator &&out_it ) {
 		auto args = cmake_action.build_args( std::move( work_tree ), bt );
 		std::cout << "Running cmake";
 		for( auto arg : args ) {
@@ -67,16 +68,16 @@ namespace daw::glean {
 		  , custom_arguments( std::move( custom ) ) {}
 
 		std::vector<std::string> build_args( fs::path build_path,
-		                                     daw::build_types bt ) const;
+		                                     daw::glean::build_types bt ) const;
 	};
 
 	struct cmake_action_build {
 		std::vector<std::string> build_args( fs::path build_path,
-		                                     daw::build_types bt ) const;
+		                                     daw::glean::build_types bt ) const;
 	};
 
 	struct cmake_action_install {
 		std::vector<std::string> build_args( fs::path build_path,
-		                                     daw::build_types bt ) const;
+		                                     daw::glean::build_types bt ) const;
 	};
 } // namespace daw::glean

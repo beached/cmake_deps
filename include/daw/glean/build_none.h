@@ -35,11 +35,11 @@ namespace daw::glean {
 		template<typename... Ignored>
 		constexpr build_none( Ignored &&... ) noexcept {}
 
-		constexpr action_status build( daw::build_types ) const {
+		constexpr action_status build( daw::glean::build_types ) const {
 			return action_status::success;
 		}
 
-		constexpr action_status install( daw::build_types ) const {
+		constexpr action_status install( daw::glean::build_types ) const {
 			return action_status::success;
 		}
 	};

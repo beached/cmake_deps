@@ -76,12 +76,12 @@ namespace daw::glean {
 		      construct_bt<BuildTypes...>( type, std::forward<Args>( args )... ) ) {
 		}
 
-		constexpr action_status build( daw::build_types bt ) const {
+		constexpr action_status build( daw::glean::build_types bt ) const {
 			return daw::visit_nt( m_value,
 			                      [bt]( auto const &v ) { return v.build( bt ); } );
 		}
 
-		constexpr action_status install( daw::build_types bt ) const {
+		constexpr action_status install( daw::glean::build_types bt ) const {
 			return daw::visit_nt( m_value,
 			                      [bt]( auto const &v ) { return v.install( bt ); } );
 		}

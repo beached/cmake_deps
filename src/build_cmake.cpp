@@ -51,7 +51,7 @@ namespace daw::glean {
 	  , m_build_path( std::move( build_path ) )
 	  , m_install_prefix( std::move( install_prefix ) ) {}
 
-	action_status build_cmake::build( daw::build_types bt ) const {
+	action_status build_cmake::build( daw::glean::build_types bt ) const {
 		auto const chdir = change_directory( m_build_path );
 		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix ),
 		                  m_build_path, bt,
@@ -64,7 +64,7 @@ namespace daw::glean {
 		                     std::ostreambuf_iterator<char>( std::cout ) );
 	}
 
-	action_status build_cmake::install( daw::build_types bt ) const {
+	action_status build_cmake::install( daw::glean::build_types bt ) const {
 		auto const chdir = change_directory( m_build_path );
 		return cmake_runner( cmake_action_install( ), m_build_path, bt,
 		                     std::ostreambuf_iterator<char>( std::cout ) );

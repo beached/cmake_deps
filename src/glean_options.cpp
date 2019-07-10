@@ -31,7 +31,7 @@
 #include "daw/glean/glean_options.h"
 #include "daw/glean/utilities.h"
 
-namespace daw {
+namespace daw::glean {
 	namespace {
 		void ensure_system( ) noexcept {
 			if( system( nullptr ) == 0 ) {
@@ -52,12 +52,12 @@ namespace daw {
 			    glean::fs::current_path( ) / ".glean" ),
 			  "prefix for install" )(
 			  "build_type",
-			  boost::program_options::value<::daw::build_types>( )->default_value(
-			    ::daw::build_types::release ),
+			  boost::program_options::value<::daw::glean::build_types>( )
+			    ->default_value( ::daw::glean::build_types::release ),
 			  "type of build" )(
 			  "output_type",
-			  boost::program_options::value<::daw::output_types>( )->default_value(
-			    ::daw::output_types::process ),
+			  boost::program_options::value<::daw::glean::output_types>( )
+			    ->default_value( ::daw::glean::output_types::process ),
 			  "type of output" );
 
 			boost::program_options::variables_map vm{};
@@ -128,8 +128,8 @@ namespace daw {
 		return result;
 	}
 
-	daw::build_types glean_options::build_type( ) const {
-		return vm["build_type"].template as<daw::build_types>( );
+	daw::glean::build_types glean_options::build_type( ) const {
+		return vm["build_type"].template as<daw::glean::build_types>( );
 	}
 
 	std::ostream &operator<<( std::ostream &os, build_types bt ) {
@@ -165,8 +165,8 @@ namespace daw {
 		std::abort( );
 	}
 
-	daw::output_types glean_options::output_type( ) const {
-		return vm["output_type"].template as<daw::output_types>( );
+	daw::glean::output_types glean_options::output_type( ) const {
+		return vm["output_type"].template as<daw::glean::output_types>( );
 	}
 
 	std::ostream &operator<<( std::ostream &os, output_types bt ) {
@@ -201,5 +201,4 @@ namespace daw {
 		}
 		std::abort( );
 	}
-
-} // namespace daw
+} // namespace daw::glean
