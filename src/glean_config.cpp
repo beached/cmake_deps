@@ -28,8 +28,8 @@
 #include <daw/daw_string_view.h>
 #include <daw/temp_file.h>
 
-#include "glean_config.h"
-#include "utilities.h"
+#include "daw/glean/glean_config.h"
+#include "daw/glean/utilities.h"
 
 namespace daw::glean {
 	fs::path get_home( ) {

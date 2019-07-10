@@ -25,10 +25,10 @@
 #include <iostream>
 #include <sstream>
 
-#include "glean_config.h"
-#include "glean_file.h"
-#include "glean_options.h"
-#include "utilities.h"
+#include "daw/glean/glean_config.h"
+#include "daw/glean/glean_file.h"
+#include "daw/glean/glean_options.h"
+#include "daw/glean/utilities.h"
 
 namespace {
 	daw::glean::glean_config setup_config( ) {

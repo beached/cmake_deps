@@ -24,11 +24,11 @@
 #include <string>
 #include <utility>
 
-#include "action_status.h"
-#include "download_svn.h"
-#include "proc.h"
-#include "svn_helper.h"
-#include "utilities.h"
+#include "daw/glean/action_status.h"
+#include "daw/glean/download_svn.h"
+#include "daw/glean/proc.h"
+#include "daw/glean/svn_helper.h"
+#include "daw/glean/utilities.h"
 
 namespace daw::glean {
 	namespace {

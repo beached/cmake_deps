@@ -2,15 +2,10 @@ cmake_minimum_required( VERSION 3.0.2 )
 
 project( glean_prj )
 
-#find_package( Boost 1.58.0 COMPONENTS system iostreams program_options filesystem regex unit_test_framework REQUIRED )
 find_package( Boost 1.62.0 COMPONENTS program_options filesystem REQUIRED )
 find_package( Threads REQUIRED )
-#find_package( OpenSSL REQUIRED )
-#find_package( CURL REQUIRED )
 
 enable_testing( )
-
-#add_definitions( -DBOOST_TEST_DYN_LINK -DBOOST_NETWORK_ENABLE_HTTPS -DBOOST_ALL_NO_LIB -DBOOST_ALL_DYN_LINK )
 
 include( "${CMAKE_SOURCE_DIR}/dependent_projects/CMakeListsCompiler.txt" )
 
@@ -57,23 +52,23 @@ include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
 set( HEADER_FILES
-	${HEADER_FOLDER}/action_status.h
-	${HEADER_FOLDER}/build_cmake.h
-	${HEADER_FOLDER}/build_none.h
-	${HEADER_FOLDER}/build_types.h
-	${HEADER_FOLDER}/cmake_helper.h
-	${HEADER_FOLDER}/dependency.h
-	${HEADER_FOLDER}/glean_config.h
-	${HEADER_FOLDER}/git_helper.h
-	${HEADER_FOLDER}/download_git.h
-	${HEADER_FOLDER}/download_none.h
-	${HEADER_FOLDER}/download_svn.h
-	${HEADER_FOLDER}/download_types.h
-	${HEADER_FOLDER}/glean_file.h
-	${HEADER_FOLDER}/glean_options.h
-	${HEADER_FOLDER}/proc.h
-	${HEADER_FOLDER}/svn_helper.h
-	${HEADER_FOLDER}/utilities.h
+	${HEADER_FOLDER}/daw/glean/action_status.h
+	${HEADER_FOLDER}/daw/glean/build_cmake.h
+	${HEADER_FOLDER}/daw/glean/build_none.h
+	${HEADER_FOLDER}/daw/glean/build_types.h
+	${HEADER_FOLDER}/daw/glean/cmake_helper.h
+	${HEADER_FOLDER}/daw/glean/dependency.h
+	${HEADER_FOLDER}/daw/glean/glean_config.h
+	${HEADER_FOLDER}/daw/glean/git_helper.h
+	${HEADER_FOLDER}/daw/glean/download_git.h
+	${HEADER_FOLDER}/daw/glean/download_none.h
+	${HEADER_FOLDER}/daw/glean/download_svn.h
+	${HEADER_FOLDER}/daw/glean/download_types.h
+	${HEADER_FOLDER}/daw/glean/glean_file.h
+	${HEADER_FOLDER}/daw/glean/glean_options.h
+	${HEADER_FOLDER}/daw/glean/proc.h
+	${HEADER_FOLDER}/daw/glean/svn_helper.h
+	${HEADER_FOLDER}/daw/glean/utilities.h
 )
 
 set( SOURCE_FILES
@@ -87,7 +82,6 @@ set( SOURCE_FILES
 	${SOURCE_FOLDER}/glean_options.cpp
 	${SOURCE_FOLDER}/svn_helper.cpp
 	${SOURCE_FOLDER}/glean_file.cpp
-	${SOURCE_FOLDER}/utilities.cpp
 )
 
 add_executable( glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp )

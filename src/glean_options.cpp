@@ -24,12 +24,12 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
-#include <build_types.h>
 #include <iosfwd>
 
-#include "glean_config.h"
-#include "glean_options.h"
-#include "utilities.h"
+#include "daw/glean/build_types.h"
+#include "daw/glean/glean_config.h"
+#include "daw/glean/glean_options.h"
+#include "daw/glean/utilities.h"
 
 namespace daw {
 	namespace {

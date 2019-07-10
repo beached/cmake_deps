@@ -25,8 +25,8 @@
 
 #include <daw/daw_string_fmt.h>
 
-#include "git_helper.h"
-#include "utilities.h"
+#include "daw/glean/git_helper.h"
+#include "daw/glean/utilities.h"
 
 namespace daw::glean {
 	std::vector<std::string>

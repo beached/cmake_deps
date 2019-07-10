@@ -23,11 +23,11 @@
 #include <iostream>
 #include <utility>
 
-#include "build_cmake.h"
-#include "cmake_helper.h"
-#include "glean_options.h"
-#include "proc.h"
-#include "utilities.h"
+#include "daw/glean/build_cmake.h"
+#include "daw/glean/cmake_helper.h"
+#include "daw/glean/glean_options.h"
+#include "daw/glean/proc.h"
+#include "daw/glean/utilities.h"
 
 namespace daw::glean {
 	template<size_t pos = 0, typename Runner, typename Action,

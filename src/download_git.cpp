@@ -24,11 +24,11 @@
 #include <string>
 #include <utility>
 
-#include "action_status.h"
-#include "download_git.h"
-#include "git_helper.h"
-#include "proc.h"
-#include "utilities.h"
+#include "daw/glean/action_status.h"
+#include "daw/glean/download_git.h"
+#include "daw/glean/git_helper.h"
+#include "daw/glean/proc.h"
+#include "daw/glean/utilities.h"
 
 namespace daw::glean {
 	namespace {

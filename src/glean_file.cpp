@@ -28,11 +28,11 @@
 #include <daw/daw_read_file.h>
 #include <daw/json/daw_json_link.h>
 
-#include "build_types.h"
-#include "dependency.h"
-#include "download_types.h"
-#include "glean_file.h"
-#include "glean_options.h"
+#include "daw/glean/build_types.h"
+#include "daw/glean/dependency.h"
+#include "daw/glean/download_types.h"
+#include "daw/glean/glean_file.h"
+#include "daw/glean/glean_options.h"
 
 namespace daw::glean {
 	namespace {

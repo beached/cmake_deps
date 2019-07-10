@@ -25,10 +25,10 @@
 
 #include <daw/daw_string_fmt.h>
 
-#include "cmake_helper.h"
-#include "glean_options.h"
-#include "proc.h"
-#include "utilities.h"
+#include "daw/glean/cmake_helper.h"
+#include "daw/glean/glean_options.h"
+#include "daw/glean/proc.h"
+#include "daw/glean/utilities.h"
 
 namespace daw::glean {
 	std::vector<std::string>
