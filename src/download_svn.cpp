@@ -26,7 +26,7 @@
 
 #include "action_status.h"
 #include "download_svn.h"
-#include "process.h"
+#include "proc.h"
 #include "svn_helper.h"
 #include "utilities.h"
 

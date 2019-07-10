@@ -27,7 +27,7 @@
 
 #include "cmake_helper.h"
 #include "glean_options.h"
-#include "process.h"
+#include "proc.h"
 #include "utilities.h"
 
 namespace daw::glean {

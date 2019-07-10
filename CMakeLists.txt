@@ -71,7 +71,7 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/download_types.h
 	${HEADER_FOLDER}/glean_file.h
 	${HEADER_FOLDER}/glean_options.h
-	${HEADER_FOLDER}/process.h
+	${HEADER_FOLDER}/proc.h
 	${HEADER_FOLDER}/svn_helper.h
 	${HEADER_FOLDER}/utilities.h
 )
