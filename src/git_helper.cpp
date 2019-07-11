@@ -28,10 +28,8 @@
 
 namespace daw::glean {
 	std::vector<std::string>
-	git_action_pull::build_args( fs::path work_tree ) const {
-		std::string work_tree_str = "--work-tree=";
-		work_tree_str += work_tree.string( );
-		return {work_tree_str, "pull"};
+	git_action_pull::build_args( fs::path ) const {
+		return {"pull", "--ff-only" };
 	}
 
 	std::vector<std::string>

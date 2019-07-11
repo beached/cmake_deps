@@ -39,13 +39,18 @@ namespace daw::glean {
 
 		template<typename Cmd, typename... Args>
 		int operator( )( Cmd &&cmd, Args &&... args ) {
+			
+		/*
 			auto out = boost::process::ipstream( );
 			auto err = boost::process::ipstream( );
 
 			auto git_proc = boost::process::child(
 			  boost::process::search_path( cmd ), std::forward<Args>( args )...,
-			  boost::process::std_out > out, boost::process::std_err > err );
-
+			  boost::process::std_out > out, boost::process::std_err > err, boost::process::std_in < boost::process::null );
+				*/
+			return boost::process::system( boost::process::search_path( cmd ),
+			                        std::forward<Args>( args )... );
+		/*
 			auto const process_pipe = [&]( auto &&p ) -> bool {
 				auto line = std::string( );
 				if( !p or !std::getline( p, line ) or line.empty( ) ) {
@@ -59,6 +64,7 @@ namespace daw::glean {
 
 			git_proc.wait( );
 			return git_proc.exit_code( );
+			*/
 		}
 	};
 } // namespace daw::glean

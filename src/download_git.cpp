@@ -43,6 +43,7 @@ namespace daw::glean {
 		}
 
 		action_status git_repos_update( fs::path repos ) {
+			auto const chdir = change_directory( repos );
 			return git_runner( git_action_pull{}, repos, log_message );
 		}
 
