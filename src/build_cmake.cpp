@@ -20,10 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "daw/glean/build_cmake.h"
 #include "daw/glean/cmake_helper.h"
+#include "daw/glean/glean_file.h"
 #include "daw/glean/glean_options.h"
 #include "daw/glean/logging.h"
 #include "daw/glean/proc.h"
@@ -46,16 +49,27 @@ namespace daw::glean {
 	}
 
 	build_cmake::build_cmake( fs::path source_path, fs::path build_path,
-	                          fs::path install_prefix,
-	                          glean_options const &opts ) noexcept
+	                          fs::path install_prefix, glean_options const &opts,
+	                          glean_file_item const &dep_item ) noexcept
 	  : m_source_path( std::move( source_path ) )
 	  , m_build_path( std::move( build_path ) )
 	  , m_install_prefix( std::move( install_prefix ) )
-	  , m_opt( &opts ) {}
+	  , m_opt( &opts )
+	  , m_dep_item( &dep_item ) {}
 
 	action_status build_cmake::build( daw::glean::build_types bt ) const {
+		assert( m_opt != nullptr );
+		assert( m_dep_item != nullptr );
 		auto const chdir = change_directory( m_build_path );
-		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix, m_opt->cmake_args() ),
+		auto args = std::vector<std::string>( );
+		if( !m_opt->cmake_args( ).empty( ) ) {
+			args.insert( args.cend( ), m_opt->cmake_args( ).cbegin( ),
+			             m_opt->cmake_args( ).cend( ) );
+		}
+		args.insert( args.cend( ), m_dep_item->cmake_args.cbegin( ),
+		             m_dep_item->cmake_args.cend( ) );
+		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix,
+		                                          std::move( args ) ),
 		                  m_build_path, bt,
 		                  log_message ) == action_status::failure ) {
 

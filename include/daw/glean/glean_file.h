@@ -33,7 +33,6 @@
 #include "build_types.h"
 #include "dependency.h"
 #include "download_types.h"
-#include "glean_options.h"
 
 namespace daw::glean {
 
@@ -45,25 +44,45 @@ namespace daw::glean {
 		std::string uri;
 		std::optional<std::string> version;
 		std::optional<std::string> custom_options;
+		std::vector<std::string> cmake_args;
+
+		inline glean_file_item( std::string n, std::string dt, std::string bt,
+		                        std::string u, std::optional<std::string> v,
+		                        std::optional<std::string> co,
+		                        std::optional<std::vector<std::string>> ca )
+
+		  : name( std::move( n ) )
+		  , download_type( std::move( dt ) )
+		  , build_type( std::move( bt ) )
+		  , uri( std::move( u ) )
+		  , version( std::move( v ) )
+		  , custom_options( std::move( co ) )
+		  , cmake_args( std::move( ca ).value_or( std::vector<std::string>( ) ) ) {}
 	};
 
-	static constexpr char const glean_file_item_name[] = "name";
-	static constexpr char const glean_file_item_download_type[] = "download_type";
-	static constexpr char const glean_file_item_build_type[] = "build_type";
-	static constexpr char const glean_file_item_uri[] = "uri";
-	static constexpr char const glean_file_item_version[] = "version";
-	static constexpr char const glean_file_item_custom_options[] =
-	  "custom_options";
+	namespace symbols_glean_file_item {
+		static constexpr char const name[] = "name";
+		static constexpr char const download_type[] = "download_type";
+		static constexpr char const build_type[] = "build_type";
+		static constexpr char const uri[] = "uri";
+		static constexpr char const version[] = "version";
+		static constexpr char const custom_options[] = "custom_options";
+		static constexpr char const cmake_args[] = "cmake_args";
+	} // namespace symbols_glean_file_item
 
 	inline auto describe_json_class( glean_file_item ) {
 		using namespace daw::json;
 
 		return class_description_t<
-		  json_string<glean_file_item_name>,
-		  json_string<glean_file_item_download_type>,
-		  json_string<glean_file_item_build_type>, json_string<glean_file_item_uri>,
-		  json_nullable<json_string<glean_file_item_version>>,
-		  json_nullable<json_string<glean_file_item_custom_options>>>{};
+		  json_string<symbols_glean_file_item::name>,
+		  json_string<symbols_glean_file_item::download_type>,
+		  json_string<symbols_glean_file_item::build_type>,
+		  json_string<symbols_glean_file_item::uri>,
+		  json_nullable<json_string<symbols_glean_file_item::version>>,
+		  json_nullable<json_string<symbols_glean_file_item::custom_options>>,
+		  json_nullable<
+		    json_array<symbols_glean_file_item::cmake_args,
+		               std::vector<std::string>, json_string<no_name>>>>{};
 	}
 
 	struct glean_config_file {
@@ -72,17 +91,20 @@ namespace daw::glean {
 		std::vector<glean_file_item> dependencies;
 	};
 
-	static constexpr char const glean_config_file_provides[] = "provides";
-	static constexpr char const glean_config_file_build_type[] = "build_type";
-	static constexpr char const glean_config_file_dependencies[] = "dependencies";
+	namespace symbols_glean_config_file {
+		static constexpr char const provides[] = "provides";
+		static constexpr char const build_type[] = "build_type";
+		static constexpr char const dependencies[] = "dependencies";
+	} // namespace symbols_glean_config_file
 
 	inline auto describe_json_class( glean_config_file ) {
 		using namespace daw::json;
 
 		return class_description_t<
-		  json_string<glean_config_file_provides>,
-		  json_string<glean_config_file_build_type>,
-		  json_array<glean_config_file_dependencies, std::vector<glean_file_item>,
+		  json_string<symbols_glean_config_file::provides>,
+		  json_string<symbols_glean_config_file::build_type>,
+		  json_array<symbols_glean_config_file::dependencies,
+		             std::vector<glean_file_item>,
 		             json_class<no_name, glean_file_item>>>{};
 	}
 

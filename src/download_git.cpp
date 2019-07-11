@@ -36,8 +36,8 @@ namespace daw::glean {
 			return is_directory( repos / ".git" );
 		}
 
-		action_status git_repos_checkout( fs::path repos,
-		                                  std::string const &version ) {
+		action_status git_repos_checkout( fs::path,
+		                                  std::string const & ) {
 
 			return action_status::success;
 		}

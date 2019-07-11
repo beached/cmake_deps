@@ -29,15 +29,19 @@
 #include "utilities.h"
 
 namespace daw::glean {
+	struct glean_file_item;
+
 	struct build_cmake {
 		static constexpr daw::string_view type_id = "cmake";
 		fs::path m_source_path;
 		fs::path m_build_path;
 		fs::path m_install_prefix;
-		glean_options const * m_opt;
+		glean_options const *m_opt;
+		glean_file_item const *m_dep_item;
 
 		build_cmake( fs::path source_path, fs::path build_path,
-		             fs::path install_prefix, glean_options const & opts ) noexcept;
+		             fs::path install_prefix, glean_options const &opts,
+		             glean_file_item const &dep_item ) noexcept;
 
 		action_status build( daw::glean::build_types bt ) const;
 		action_status install( daw::glean::build_types bt ) const;
