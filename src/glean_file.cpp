@@ -97,7 +97,7 @@ namespace daw::glean {
 				                            build_types_t( build_type,
 				                                           cache_folder_name / "source",
 				                                           cache_folder_name / "build",
-				                                           opts.install_prefix, opts ),
+				                                           opts.install_prefix, opts, true ),
 				                            download_none{}, uri );
 			}( );
 
@@ -125,9 +125,12 @@ namespace daw::glean {
 				auto downloader =
 				  download_types_t( child_dep.download_type, child_dep.uri,
 				                    child_dep.version, dep_folder );
-				auto builder = build_types_t(
-				  child_dep.build_type, dep_cache_folder_name / "source",
-				  dep_cache_folder_name / "build", opts.install_prefix, opts );
+				bool has_glean = exists( dep_folder / "glean.json" );
+
+				auto builder =
+				  build_types_t( child_dep.build_type, dep_cache_folder_name / "source",
+				                 dep_cache_folder_name / "build", opts.install_prefix,
+				                 opts, has_glean );
 
 				auto dep_id = known_deps.add_node( child_dep.name, daw::move( builder ),
 				                                   daw::move( downloader ),
@@ -139,7 +142,7 @@ namespace daw::glean {
 					log_error << "Error downloading\n";
 					exit( EXIT_FAILURE );
 				}
-				if( exists( dep_folder / "glean.json" ) ) {
+				if( has_glean ) {
 					process_config_file( dep_folder / "glean.json", known_deps, opts,
 					                     cur_dep.name( ), child_dep.download_type,
 					                     child_dep.uri );

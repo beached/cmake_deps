@@ -40,23 +40,23 @@ namespace daw::glean {
 		static inline std::variant<BuildTypes...>
 		construct_bt( daw::string_view type, fs::path const &source_path,
 		              fs::path const &build_path, fs::path const &install_prefix,
-		              glean_options const &opts ) {
+		              glean_options const &opts, bool has_glean ) {
 			assert( T::type_id == type );
-			return daw::construct_a<T>( source_path, build_path, install_prefix,
-			                            opts );
+			return daw::construct_a<T>( source_path, build_path, install_prefix, opts,
+			                            has_glean );
 		}
 
 		template<typename T, typename Ts, typename... Ts2>
 		static inline std::variant<BuildTypes...>
 		construct_bt( daw::string_view type, fs::path const &source_path,
 		              fs::path const &build_path, fs::path const &install_prefix,
-		              glean_options const &opts ) {
+		              glean_options const &opts, bool has_glean ) {
 			if( T::type_id == type ) {
 				return daw::construct_a<T>( source_path, build_path, install_prefix,
-				                            opts );
+				                            opts, has_glean );
 			} else {
 				return construct_bt<Ts, Ts2...>( type, source_path, build_path,
-				                                 install_prefix, opts );
+				                                 install_prefix, opts, has_glean );
 			}
 		}
 
@@ -70,9 +70,9 @@ namespace daw::glean {
 		                          fs::path const &source_path,
 		                          fs::path const &build_path,
 		                          fs::path const &install_prefix,
-		                          glean_options const &opts )
-		  : m_value( construct_bt<BuildTypes...>( type, source_path, build_path,
-		                                          install_prefix, opts ) ) {}
+		                          glean_options const &opts, bool has_glean )
+		  : m_value( construct_bt<BuildTypes...>(
+		      type, source_path, build_path, install_prefix, opts, has_glean ) ) {}
 
 		constexpr action_status build( daw::glean::build_types bt,
 		                               glean_file_item const &file_dep ) const {

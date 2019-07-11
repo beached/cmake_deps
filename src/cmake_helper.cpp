@@ -34,19 +34,19 @@ namespace daw::glean {
 	std::vector<std::string>
 	cmake_action_configure::build_args( fs::path build_path,
 	                                    daw::glean::build_types bt ) const {
-		auto inst_prefix = daw::fmt_t( "-DCMAKE_INSTALL_PREFIX:PATH={0}" )(
-		  ( install_prefix / to_string( bt ) ).string( ) );
 
-		auto inst_root = daw::fmt_t( "-DGLEAN_INSTALL_ROOT={0}" )(
-		  ( install_prefix / to_string( bt ) ).string( ) );
+		auto result = std::vector<std::string>( );
+		result.push_back( daw::fmt_t( "-DCMAKE_INSTALL_PREFIX:PATH={0}" )(
+		  ( install_prefix / to_string( bt ) ).string( ) ) );
 
-		auto result =
-		  std::vector<std::string>{std::move( inst_prefix ),
-		                           std::move( inst_root ),
-		                           "-S",
-		                           source_path.string( ),
-		                           "-B",
-		                           ( build_path / to_string( bt ) ).string( )};
+		if( has_glean ) {
+			result.push_back( daw::fmt_t( "-DGLEAN_INSTALL_ROOT={0}" )(
+			  ( install_prefix / to_string( bt ) ).string( ) ) );
+		}
+		result.push_back( "-S" );
+		result.push_back( source_path.string( ) );
+		result.push_back( "-B" );
+		result.push_back( ( build_path / to_string( bt ) ).string( ) );
 
 		result.insert( result.cend( ), custom_arguments.cbegin( ),
 		               custom_arguments.cend( ) );

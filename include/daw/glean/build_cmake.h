@@ -37,12 +37,14 @@ namespace daw::glean {
 		fs::path m_build_path{};
 		fs::path m_install_prefix{};
 		glean_options const *m_opt = nullptr;
+		bool m_has_glean;
 
 		build_cmake( fs::path const &source_path, fs::path const &build_path,
-		             fs::path const &install_prefix,
-		             glean_options const &opts ) noexcept;
+		             fs::path const &install_prefix, glean_options const &opts,
+		             bool has_glean ) noexcept;
 
-		action_status build( daw::glean::build_types bt, glean_file_item const & file_dep ) const;
+		action_status build( daw::glean::build_types bt,
+		                     glean_file_item const &file_dep ) const;
 		action_status install( daw::glean::build_types bt ) const;
 	};
 

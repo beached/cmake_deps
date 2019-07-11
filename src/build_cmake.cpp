@@ -51,11 +51,12 @@ namespace daw::glean {
 	build_cmake::build_cmake( fs::path const &source_path,
 	                          fs::path const &build_path,
 	                          fs::path const &install_prefix,
-	                          glean_options const &opts ) noexcept
+	                          glean_options const &opts, bool has_glean ) noexcept
 	  : m_source_path( source_path )
 	  , m_build_path( build_path )
 	  , m_install_prefix( install_prefix )
-	  , m_opt( &opts ) {}
+	  , m_opt( &opts )
+	  , m_has_glean( has_glean ) {}
 
 	action_status build_cmake::build( daw::glean::build_types bt,
 	                                  glean_file_item const &m_dep_item ) const {
@@ -73,8 +74,9 @@ namespace daw::glean {
 		} else {
 			args.push_back( "-DCMAKE_BUILD_TYPE=Release" );
 		}
+
 		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix,
-		                                          std::move( args ) ),
+		                                          std::move( args ), m_has_glean ),
 		                  m_build_path, bt,
 		                  log_message ) == action_status::failure ) {
 
