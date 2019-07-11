@@ -33,13 +33,6 @@
 
 namespace daw::glean {
 	namespace {
-		void ensure_system( ) noexcept {
-			if( system( nullptr ) == 0 ) {
-				log_error << "Could not call system function\n";
-				exit( EXIT_FAILURE );
-			}
-		}
-
 		boost::program_options::variables_map get_vm( int argc, char **argv ) {
 			auto desc = boost::program_options::options_description( "Options" );
 
@@ -86,15 +79,7 @@ namespace daw::glean {
 			}
 			return vm;
 		}
-	} // namespace
 
-	glean_options::glean_options( int argc, char **argv )
-	  : vm( get_vm( argc, argv ) ) {
-
-		ensure_system( );
-	}
-
-	namespace {
 		template<typename VM>
 		fs::path process_path_opt( VM const &vm, std::string const &name ) {
 			fs::path result;
@@ -119,30 +104,32 @@ namespace daw::glean {
 		}
 	} // namespace
 
-	glean::fs::path glean_options::install_prefix( ) const {
-		auto result = process_path_opt( vm, "prefix" );
-		if( !is_directory( result ) ) {
-			if( exists( result ) ) {
-				glean::fs::remove( result );
-			}
-			glean::fs::create_directory( result );
-		}
-		return result;
-	}
+	glean_options::glean_options( int argc, char **argv ) {
 
-	glean::fs::path glean_options::glean_cache( ) const {
-		auto result = process_path_opt( vm, "cache" );
-		if( !is_directory( result ) ) {
-			if( exists( result ) ) {
-				glean::fs::remove( result );
-			}
-			glean::fs::create_directory( result );
-		}
-		return result;
-	}
+		auto const vm = get_vm( argc, argv );
 
-	daw::glean::build_types glean_options::build_type( ) const {
-		return vm["build_type"].template as<daw::glean::build_types>( );
+		install_prefix = process_path_opt( vm, "prefix" );
+		if( !is_directory( install_prefix ) ) {
+			if( exists( install_prefix ) ) {
+				glean::fs::remove( install_prefix );
+			}
+			glean::fs::create_directory( install_prefix );
+		}
+
+		glean_cache = process_path_opt( vm, "cache" );
+		if( !is_directory( glean_cache ) ) {
+			if( exists( glean_cache ) ) {
+				glean::fs::remove( glean_cache );
+			}
+			glean::fs::create_directory( glean_cache );
+		}
+
+		build_type = vm["build_type"].template as<daw::glean::build_types>( );
+		output_type = vm["output_type"].template as<daw::glean::output_types>( );
+
+		if( !vm["cmake_arg"].empty( ) ) {
+			cmake_args = vm["cmake_arg"].template as<std::vector<std::string>>( );
+		}
 	}
 
 	::daw::glean::logger const &operator<<( ::daw::glean::logger const &os,
@@ -189,17 +176,6 @@ namespace daw::glean {
 			return "debug";
 		}
 		std::abort( );
-	}
-
-	daw::glean::output_types glean_options::output_type( ) const {
-		return vm["output_type"].template as<daw::glean::output_types>( );
-	}
-
-	std::vector<std::string> glean_options::cmake_args( ) const {
-		if( vm["cmake_arg"].empty( ) ) {
-			return {};
-		}
-		return vm["cmake_arg"].template as<std::vector<std::string>>( );
 	}
 
 	std::ostream &operator<<( std::ostream &os, output_types bt ) {

@@ -50,6 +50,11 @@ namespace daw::glean {
 		return action_status::failure;
 	}
 
+	struct git_action_version {
+		std::string version{};
+		std::vector<std::string> build_args( fs::path work_tree ) const;
+	};
+
 	struct git_action_pull {
 		std::vector<std::string> build_args( fs::path work_tree ) const;
 	};

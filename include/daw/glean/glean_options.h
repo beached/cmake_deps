@@ -39,13 +39,12 @@ namespace daw::glean {
 	std::string to_string( output_types bt );
 
 	struct glean_options {
-		boost::program_options::variables_map vm;
-		glean_options( int argc, char **argv );
+		daw::glean::fs::path install_prefix{};
+		daw::glean::fs::path glean_cache{};
+		daw::glean::build_types build_type{};
+		daw::glean::output_types output_type{};
+		std::vector<std::string> cmake_args{};
 
-		daw::glean::fs::path install_prefix( ) const;
-		daw::glean::fs::path glean_cache( ) const;
-		daw::glean::build_types build_type( ) const;
-		daw::glean::output_types output_type( ) const;
-		std::vector<std::string> cmake_args( ) const;
+		glean_options( int argc, char **argv );
 	};
 } // namespace daw::glean

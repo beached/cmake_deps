@@ -48,25 +48,25 @@ namespace daw::glean {
 		return {pos, action_status::failure};
 	}
 
-	build_cmake::build_cmake( fs::path source_path, fs::path build_path,
-	                          fs::path install_prefix, glean_options const &opts,
-	                          glean_file_item const &dep_item ) noexcept
-	  : m_source_path( std::move( source_path ) )
-	  , m_build_path( std::move( build_path ) )
-	  , m_install_prefix( std::move( install_prefix ) )
-	  , m_opt( &opts )
-	  , m_dep_item( &dep_item ) {}
+	build_cmake::build_cmake( fs::path const &source_path,
+	                          fs::path const &build_path,
+	                          fs::path const &install_prefix,
+	                          glean_options const &opts ) noexcept
+	  : m_source_path( source_path )
+	  , m_build_path( build_path )
+	  , m_install_prefix( install_prefix )
+	  , m_opt( &opts ) {}
 
-	action_status build_cmake::build( daw::glean::build_types bt ) const {
+	action_status build_cmake::build( daw::glean::build_types bt,
+	                                  glean_file_item const &m_dep_item ) const {
 		assert( m_opt != nullptr );
-		assert( m_dep_item != nullptr );
 		auto const chdir = change_directory( m_build_path );
 		auto args = std::vector<std::string>( );
-		std::copy_if( m_opt->cmake_args( ).cbegin( ), m_opt->cmake_args( ).cend( ),
+		std::copy_if( m_opt->cmake_args.cbegin( ), m_opt->cmake_args.cend( ),
 		              std::back_inserter( args ),
 		              []( std::string const &s ) { return !s.empty( ); } );
-		std::copy_if( m_dep_item->cmake_args.cbegin( ),
-		              m_dep_item->cmake_args.cend( ), std::back_inserter( args ),
+		std::copy_if( m_dep_item.cmake_args.cbegin( ),
+		              m_dep_item.cmake_args.cend( ), std::back_inserter( args ),
 		              []( std::string const &s ) { return !s.empty( ); } );
 
 		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix,

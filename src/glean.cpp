@@ -50,10 +50,10 @@ namespace {
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
 	auto opts = daw::glean::glean_options( argc, argv );
-	log_message << "glean cache: " << opts.glean_cache( ) << '\n';
-	log_message << "install prefix: " << opts.install_prefix( ) << '\n';
+	log_message << "glean cache: " << opts.glean_cache << '\n';
+	log_message << "install prefix: " << opts.install_prefix << '\n';
 	auto deps = daw::glean::process_config_file( "./glean.json", opts );
-	switch( opts.output_type( ) ) {
+	switch( opts.output_type ) {
 	case daw::glean::output_types::process:
 		daw::glean::process_deps( std::move( deps ), opts );
 		break;

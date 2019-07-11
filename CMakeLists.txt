@@ -94,6 +94,7 @@ set( HEADER_FILES
 set( SOURCE_FILES
 	${SOURCE_FOLDER}/build_cmake.cpp
 	${SOURCE_FOLDER}/cmake_helper.cpp
+	${SOURCE_FOLDER}/dependency.cpp
 	${SOURCE_FOLDER}/download_git.cpp
 	${SOURCE_FOLDER}/download_svn.cpp
 	${SOURCE_FOLDER}/git_helper.cpp

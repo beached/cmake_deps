@@ -38,19 +38,19 @@ namespace daw::glean {
 
 	// Data structure to represent the dependencies
 	struct glean_file_item {
-		std::string name;
-		std::string download_type;
-		std::string build_type;
-		std::string uri;
-		std::optional<std::string> version;
-		std::optional<std::string> custom_options;
-		std::vector<std::string> cmake_args;
+		std::string name{};
+		std::string download_type{};
+		std::string build_type{};
+		std::string uri{};
+		std::string version{};
+		std::string custom_options{};
+		std::vector<std::string> cmake_args{};
 
 		glean_file_item( std::string const &n, std::string const &dt,
-		                        std::string const &bt, std::string const &u,
-		                        std::optional<std::string> const &v,
-		                        std::optional<std::string> const &co,
-		                        std::optional<std::vector<std::string>> const &ca );
+		                 std::string const &bt, std::string const &u,
+		                 std::optional<std::string> const &v,
+		                 std::optional<std::string> const &co,
+		                 std::optional<std::vector<std::string>> const &ca );
 	};
 
 	namespace symbols_glean_file_item {
@@ -79,9 +79,15 @@ namespace daw::glean {
 	}
 
 	struct glean_config_file {
-		std::string provides;
-		std::string build_type;
-		std::vector<glean_file_item> dependencies;
+		std::string provides{};
+		std::string build_type{};
+		std::vector<glean_file_item> dependencies{};
+
+		glean_config_file( std::string const &p, std::string const &b,
+		                   std::vector<glean_file_item> const &d )
+		  : provides( p )
+		  , build_type( b )
+		  , dependencies( d ) {}
 	};
 
 	namespace symbols_glean_config_file {

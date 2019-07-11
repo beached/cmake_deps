@@ -36,32 +36,28 @@ namespace daw::glean {
 	class basic_build_types {
 		std::variant<BuildTypes...> m_value;
 
-		template<typename T, typename... Ts, typename... Args,
-		         daw::enable_if_t<( sizeof...( Ts ) < 1 )> = nullptr>
-		static constexpr std::variant<BuildTypes...>
-		construct_bt( daw::string_view type, Args &&... args ) {
-			if( T::type_id == type ) {
-				if constexpr( std::is_constructible_v<T, Args...> ) {
-					return {T( std::forward<Args>( args )... )};
-				} else {
-					std::abort( );
-				}
-			}
-			std::abort( );
+		template<typename T>
+		static inline std::variant<BuildTypes...>
+		construct_bt( daw::string_view type, fs::path const &source_path,
+		              fs::path const &build_path, fs::path const &install_prefix,
+		              glean_options const &opts ) {
+			assert( T::type_id == type );
+			return daw::construct_a<T>( source_path, build_path, install_prefix,
+			                            opts );
 		}
 
-		template<typename T, typename... Ts, typename... Args,
-		         daw::enable_if_t<( sizeof...( Ts ) > 0 )> = nullptr>
-		static constexpr std::variant<BuildTypes...>
-		construct_bt( daw::string_view type, Args &&... args ) {
+		template<typename T, typename Ts, typename... Ts2>
+		static inline std::variant<BuildTypes...>
+		construct_bt( daw::string_view type, fs::path const &source_path,
+		              fs::path const &build_path, fs::path const &install_prefix,
+		              glean_options const &opts ) {
 			if( T::type_id == type ) {
-				if constexpr( std::is_constructible_v<T, Args...> ) {
-					return {T( std::forward<Args>( args )... )};
-				} else {
-					std::abort( );
-				}
+				return daw::construct_a<T>( source_path, build_path, install_prefix,
+				                            opts );
+			} else {
+				return construct_bt<Ts, Ts2...>( type, source_path, build_path,
+				                                 install_prefix, opts );
 			}
-			return construct_bt<Ts...>( type, std::forward<Args>( args )... );
 		}
 
 	public:
@@ -70,22 +66,25 @@ namespace daw::glean {
 		constexpr basic_build_types( T &&dep )
 		  : m_value( std::forward<T>( dep ) ) {}
 
-		template<typename... Args>
-		constexpr basic_build_types( daw::string_view type, Args &&... args )
-		  : m_value(
-		      construct_bt<BuildTypes...>( type, std::forward<Args>( args )... ) ) {
-		}
+		inline basic_build_types( daw::string_view type,
+		                          fs::path const &source_path,
+		                          fs::path const &build_path,
+		                          fs::path const &install_prefix,
+		                          glean_options const &opts )
+		  : m_value( construct_bt<BuildTypes...>( type, source_path, build_path,
+		                                          install_prefix, opts ) ) {}
 
-		constexpr action_status build( daw::glean::build_types bt ) const {
-			return daw::visit_nt( m_value,
-			                      [bt]( auto const &v ) { return v.build( bt ); } );
+		constexpr action_status build( daw::glean::build_types bt,
+		                               glean_file_item const &file_dep ) const {
+			return daw::visit_nt(
+			  m_value, [&]( auto const &v ) { return v.build( bt, file_dep ); } );
 		}
 
 		constexpr action_status install( daw::glean::build_types bt ) const {
 			return daw::visit_nt( m_value,
 			                      [bt]( auto const &v ) { return v.install( bt ); } );
 		}
-	};
+	}; // namespace daw::glean
 
 	using build_types_t = basic_build_types<build_none, build_cmake>;
 } // namespace daw::glean

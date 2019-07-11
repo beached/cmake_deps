@@ -76,7 +76,7 @@ namespace daw::glean {
 			}
 
 			auto const cache_folder_name =
-			  opts.glean_cache( ) / cfg_file.build_type / cfg_file.provides;
+			  opts.glean_cache / cfg_file.build_type / cfg_file.provides;
 
 			if( !is_directory( cache_folder_name ) ) {
 				fs::create_directories( cache_folder_name / "source" );
@@ -92,11 +92,13 @@ namespace daw::glean {
 
 				std::string const build_type =
 				  is_root ? std::string( "none" ) : cfg_file.build_type;
-				return known_deps.add_node(
-				  cfg_file.provides,
-				  build_types_t( build_type, cache_folder_name / "source",
-				                 cache_folder_name / "build", opts.install_prefix( ), opts ),
-				  download_none{}, uri );
+
+				return known_deps.add_node( cfg_file.provides,
+				                            build_types_t( build_type,
+				                                           cache_folder_name / "source",
+				                                           cache_folder_name / "build",
+				                                           opts.install_prefix, opts ),
+				                            download_none{}, uri );
 			}( );
 
 			if( cfg_file.dependencies.empty( ) or
@@ -112,11 +114,8 @@ namespace daw::glean {
 					continue;
 				}
 
-				if( !child_dep.version ) {
-					child_dep.version = "";
-				}
 				auto const dep_cache_folder_name =
-				  opts.glean_cache( ) / child_dep.build_type / child_dep.name;
+				  opts.glean_cache / child_dep.build_type / child_dep.name;
 
 				if( !is_directory( dep_cache_folder_name ) ) {
 					fs::create_directories( dep_cache_folder_name / "source" );
@@ -125,14 +124,14 @@ namespace daw::glean {
 				auto dep_folder = dep_cache_folder_name / "source";
 				auto downloader =
 				  download_types_t( child_dep.download_type, child_dep.uri,
-				                    *child_dep.version, dep_folder );
+				                    child_dep.version, dep_folder );
 				auto builder = build_types_t(
 				  child_dep.build_type, dep_cache_folder_name / "source",
-				  dep_cache_folder_name / "build", opts.install_prefix( ), opts, child_dep );
+				  dep_cache_folder_name / "build", opts.install_prefix, opts );
 
-				auto dep_id =
-				  known_deps.add_node( child_dep.name, daw::move( builder ),
-				                       daw::move( downloader ), child_dep.uri );
+				auto dep_id = known_deps.add_node( child_dep.name, daw::move( builder ),
+				                                   daw::move( downloader ),
+				                                   child_dep.uri, child_dep );
 				known_deps.add_directed_edge( cur_node_id, dep_id );
 
 				auto &cur_dep = known_deps.get_raw_node( dep_id ).value( );
@@ -187,16 +186,17 @@ namespace daw::glean {
 
 	void process_deps( daw::graph_t<dependency> known_deps,
 	                   glean_options const &opts ) {
-		deps_for_each( std::move( known_deps ), [&]( auto &&cur_dep ) {
-			log_message << "-------------------------------------\n";
-			log_message << "Processing - " << cur_dep.name( ) << '\n';
-			log_message << "-------------------------------------\n\n";
-
-			if( cur_dep.build( opts.build_type( ) ) == action_status::failure ) {
-				// Do error stuff
-			}
-			if( cur_dep.install( opts.build_type( ) ) == action_status::failure ) {
-				// Do error stuff
+		deps_for_each( std::move( known_deps ), [&]( dependency const &cur_dep ) {
+			if( cur_dep.has_file_dep( ) ) {
+				log_message << "-------------------------------------\n";
+				log_message << "Processing - " << cur_dep.name( ) << '\n';
+				log_message << "-------------------------------------\n\n";
+				if( cur_dep.build( opts.build_type ) == action_status::failure ) {
+					// Do error stuff
+				}
+				if( cur_dep.install( opts.build_type ) == action_status::failure ) {
+					// Do error stuff
+				}
 			}
 		} );
 	}
@@ -275,18 +275,19 @@ namespace daw::glean {
 		log_message << " )\n";
 	}
 
-	glean_file_item::glean_file_item(std::string const &n, std::string const &dt, std::string const &bt,
-																	 std::string const &u, std::optional<std::string> const &v,
-																	 std::optional<std::string> const &co,
-																	 std::optional<std::vector<std::string>> const &ca)
+	glean_file_item::glean_file_item(
+	  std::string const &n, std::string const &dt, std::string const &bt,
+	  std::string const &u, std::optional<std::string> const &v,
+	  std::optional<std::string> const &co,
+	  std::optional<std::vector<std::string>> const &ca )
 
-			: name( n )
-			, download_type( dt )
-			, build_type( bt )
-			, uri( u )
-			, version( v )
-			, custom_options( co )
-			, cmake_args( ca.value_or( std::vector<std::string>( ) ) ) {
+	  : name( n )
+	  , download_type( dt )
+	  , build_type( bt )
+	  , uri( u )
+	  , version( v.value_or( std::string( ) ) )
+	  , custom_options( co.value_or( std::string( ) ) )
+	  , cmake_args( ca.value_or( std::vector<std::string>( ) ) ) {
 
 		(void)log_message;
 	}
