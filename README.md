@@ -1,30 +1,53 @@
 # Glean
-Uses cmake's external project as a facility to install project dependencies into a top level location with central caching
+## Dependency management, with a focus on source
 
-By putting a glean.txt file at the top of the project directory and filling it in as follows.  Currently only git repos are supported but more soon
+Define your projects dependencies in a simple JSON file.  Currently, git and cmake are supported with partial svn support.  
 
-glean.txt
+A project an express their dependencies in a `glean.json` file in the root of their project.  It has a format like
+
+```JSON
+{
+	"provides": "glean",
+	"build_type": "cmake",
+	"dependencies": [ 
+		{
+			"name": "header_libraries",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/header_libraries",
+			"version": "tag_branch_or_revision"
+		},
+		{
+			"name": "libtemp_file",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/libtemp_file"
+		},
+		{
+			"name": "daw_json_link",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/daw_json_link"
+		},
+		{
+			"name": "utf_range",
+			"download_type": "git",
+			"build_type": "cmake",
+			"uri": "https://github.com/beached/utf_range"
+		}
+	]
+}
+```
+This will dowload each of the dependencies and recursively scan for a glean.json file.  Currently, duplicates are not supported and take the first one seen.
+
+The inside a cmake project one can put something along the lines of 
+```
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+	set( GLEAN_CACHE "${CMAKE_SOURCE_DIR}/.glean/debug" )
+else( )
+	set( GLEAN_CACHE "${CMAKE_SOURCE_DIR}/.glean/release" )
+endif( )
+include_directories( SYSTEM "${GLEAN_CACHE}/include" )
+link_directories( "${GLEAN_CACHE}/lib" )
 
 ```
-project_name=Glean
-    type=git
-    uri=https://github.com/beached/glean.git
-    branch=master
-```
-Blank spaced and lines where the first non-whitespace character is a # are ignored. The tabulation is for show and not necessary but each section must start with a project_name key followed by the other keys.  The other keys can be in any order.
-
-If branch is omitted it defaults to master.  The value for project_name must be a valid part of a filename and cannot use characters not allowed in a filename
-
-From the same directory as glean.txt run glean and it will create a folder called glean_files.  Commonly one would add something like the following to a CMakeLists.txt to make the headers and libraries available.
-
-```
-link_directories( "${CMAKE_SOURCE_DIR}/glean_files/lib" )
-include_directories( SYSTEM "${CMAKE_SOURCE_DIR}/glean_files/include" )
-```
-
-By default a config file in the home folder( %USERPROFILE% on Windows and $HOME on Linux/Mac...) is creted with the name .glean.config.  It has two parameters, currently, called cache_folder and cmake_binary.  The default file is as follows:
-```
-cache_folder=$HOME/.glean_cache
-cmake_binary=cmake
-```
-Where home will be the expanded $HOME or %USERPROFILE% environment variables.  Unknown keys are ignored but cause a warning.
