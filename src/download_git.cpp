@@ -38,16 +38,28 @@ namespace daw::glean {
 
 		action_status git_repos_checkout( fs::path repos,
 		                                  std::string const &version ) {
-			if( version.empty( ) ) {
-				return action_status::success;
-			}
 			auto const chdir = change_directory( repos );
-			return git_runner( git_action_version{version}, repos, log_message );
+			auto result = git_runner( git_action_reset( ), repos, log_message );
+			if( result == action_status::success ) {
+				if( version.empty( ) ) {
+					result = git_runner( git_action_version{"origin/master"}, repos,
+					                     log_message );
+				} else {
+					result =
+					  git_runner( git_action_version{version}, repos, log_message );
+				}
+			}
+			return result;
 		}
 
 		action_status git_repos_update( fs::path repos ) {
 			auto const chdir = change_directory( repos );
-			return git_runner( git_action_pull{}, repos, log_message );
+			// Clean out any changes
+			auto result = git_runner( git_action_reset( ), repos, log_message );
+			if( result == action_status::success ) {
+				result = git_runner( git_action_pull{}, repos, log_message );
+			}
+			return result;
 		}
 
 		action_status git_repos_clone( std::string const &remote_repos,
@@ -62,15 +74,15 @@ namespace daw::glean {
 	} // namespace
 
 	action_status download_git::download( ) const {
-		action_status result = [&]( ) {
-			if( is_git_repos( m_local ) ) {
-				return git_repos_update( m_local );
-			}
-			return git_repos_clone( m_remote, m_local );
-		}( );
-		if( result == action_status::failure ) {
-			return result;
+		action_status result = action_status::failure;
+		if( is_git_repos( m_local ) ) {
+			result = git_repos_update( m_local );
+		} else {
+			result = git_repos_clone( m_remote, m_local );
 		}
-		return git_repos_checkout( m_local, m_version );
+		if( result == action_status::success ) {
+			return git_repos_checkout( m_local, m_version );
+		}
+		return result;
 	}
 } // namespace daw::glean

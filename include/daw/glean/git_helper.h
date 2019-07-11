@@ -55,6 +55,10 @@ namespace daw::glean {
 		std::vector<std::string> build_args( fs::path work_tree ) const;
 	};
 
+	struct git_action_reset {
+		std::vector<std::string> build_args( fs::path work_tree ) const;
+	};
+
 	struct git_action_pull {
 		std::vector<std::string> build_args( fs::path work_tree ) const;
 	};

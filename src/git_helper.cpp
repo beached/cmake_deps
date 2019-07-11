@@ -31,7 +31,8 @@ namespace daw::glean {
 		return {"pull", "--ff-only"};
 	}
 
-	std::vector<std::string> git_action_clone::build_args( fs::path work_tree ) const {
+	std::vector<std::string>
+	git_action_clone::build_args( fs::path work_tree ) const {
 		std::vector<std::string> result = {"clone"};
 		if( recurse_submodules ) {
 			result.push_back( "--recurse-submodules" );
@@ -42,6 +43,10 @@ namespace daw::glean {
 	}
 
 	std::vector<std::string> git_action_version::build_args( fs::path ) const {
-		return {"reset", "--hard", version};
+		return {"checkout", version};
+	}
+
+	std::vector<std::string> git_action_reset::build_args( fs::path ) const {
+		return {"reset", "--hard"};
 	}
 } // namespace daw::glean
