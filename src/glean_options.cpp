@@ -48,7 +48,7 @@ namespace daw::glean {
 			  "build_type",
 			  boost::program_options::value<::daw::glean::build_types>( )
 			    ->default_value( ::daw::glean::build_types::release ),
-			  "type of build" )(
+			  "type of build(release, debug)" )(
 			  "output_type",
 			  boost::program_options::value<::daw::glean::output_types>( )
 			    ->default_value( ::daw::glean::output_types::process ),

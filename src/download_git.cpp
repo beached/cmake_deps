@@ -42,7 +42,7 @@ namespace daw::glean {
 			auto result = git_runner( git_action_reset( ), repos, log_message );
 			if( result == action_status::success ) {
 				if( version.empty( ) ) {
-					result = git_runner( git_action_version{"origin/master"}, repos,
+					result = git_runner( git_action_version{"master"}, repos,
 					                     log_message );
 				} else {
 					result =
