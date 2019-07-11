@@ -68,7 +68,7 @@ namespace daw::glean {
 		std::copy_if( m_dep_item.cmake_args.cbegin( ),
 		              m_dep_item.cmake_args.cend( ), std::back_inserter( args ),
 		              []( std::string const &s ) { return !s.empty( ); } );
-		if( m_opt->output_type == build_types::release ) {
+		if( m_opt->build_type == ::daw::glean::build_types::debug ) {
 			args.push_back( "-DCMAKE_BUILD_TYPE=Debug" );
 		} else {
 			args.push_back( "-DCMAKE_BUILD_TYPE=Release" );
