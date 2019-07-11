@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.0.2 )
 
 project( glean_prj )
 
-find_package( Boost 1.62.0 COMPONENTS program_options filesystem REQUIRED )
+find_package( Boost 1.62.0 COMPONENTS program_options iostreams filesystem REQUIRED )
 find_package( Threads REQUIRED )
 
 enable_testing( )

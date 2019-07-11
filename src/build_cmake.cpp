@@ -62,12 +62,13 @@ namespace daw::glean {
 		assert( m_dep_item != nullptr );
 		auto const chdir = change_directory( m_build_path );
 		auto args = std::vector<std::string>( );
-		if( !m_opt->cmake_args( ).empty( ) ) {
-			args.insert( args.cend( ), m_opt->cmake_args( ).cbegin( ),
-			             m_opt->cmake_args( ).cend( ) );
-		}
-		args.insert( args.cend( ), m_dep_item->cmake_args.cbegin( ),
-		             m_dep_item->cmake_args.cend( ) );
+		std::copy_if( m_opt->cmake_args( ).cbegin( ), m_opt->cmake_args( ).cend( ),
+		              std::back_inserter( args ),
+		              []( std::string const &s ) { return !s.empty( ); } );
+		std::copy_if( m_dep_item->cmake_args.cbegin( ),
+		              m_dep_item->cmake_args.cend( ), std::back_inserter( args ),
+		              []( std::string const &s ) { return !s.empty( ); } );
+
 		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix,
 		                                          std::move( args ) ),
 		                  m_build_path, bt,

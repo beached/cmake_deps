@@ -46,18 +46,11 @@ namespace daw::glean {
 		std::optional<std::string> custom_options;
 		std::vector<std::string> cmake_args;
 
-		inline glean_file_item( std::string n, std::string dt, std::string bt,
-		                        std::string u, std::optional<std::string> v,
-		                        std::optional<std::string> co,
-		                        std::optional<std::vector<std::string>> ca )
-
-		  : name( std::move( n ) )
-		  , download_type( std::move( dt ) )
-		  , build_type( std::move( bt ) )
-		  , uri( std::move( u ) )
-		  , version( std::move( v ) )
-		  , custom_options( std::move( co ) )
-		  , cmake_args( std::move( ca ).value_or( std::vector<std::string>( ) ) ) {}
+		glean_file_item( std::string const &n, std::string const &dt,
+		                        std::string const &bt, std::string const &u,
+		                        std::optional<std::string> const &v,
+		                        std::optional<std::string> const &co,
+		                        std::optional<std::vector<std::string>> const &ca );
 	};
 
 	namespace symbols_glean_file_item {

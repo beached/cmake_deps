@@ -274,4 +274,20 @@ namespace daw::glean {
 		}
 		log_message << " )\n";
 	}
+
+	glean_file_item::glean_file_item(std::string const &n, std::string const &dt, std::string const &bt,
+																	 std::string const &u, std::optional<std::string> const &v,
+																	 std::optional<std::string> const &co,
+																	 std::optional<std::vector<std::string>> const &ca)
+
+			: name( n )
+			, download_type( dt )
+			, build_type( bt )
+			, uri( u )
+			, version( v )
+			, custom_options( co )
+			, cmake_args( ca.value_or( std::vector<std::string>( ) ) ) {
+
+		(void)log_message;
+	}
 } // namespace daw::glean
