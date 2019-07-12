@@ -3,25 +3,25 @@
 	"build_type": "cmake",
 	"dependencies": [ 
 		{
-			"name": "header_libraries",
+			"provides": "header_libraries",
 			"download_type": "git",
 			"build_type": "cmake",
 			"uri": "https://github.com/beached/header_libraries"
 		},
 		{
-			"name": "libtemp_file",
+			"provides": "libtemp_file",
 			"download_type": "git",
 			"build_type": "cmake",
 			"uri": "https://github.com/beached/libtemp_file"
 		},
 		{
-			"name": "daw_json_link",
+			"provides": "daw_json_link",
 			"download_type": "git",
 			"build_type": "cmake",
 			"uri": "https://github.com/beached/daw_json_link"
 		},
 		{
-			"name": "utf_range",
+			"provides": "utf_range",
 			"download_type": "git",
 			"build_type": "cmake",
 			"uri": "https://github.com/beached/utf_range"

@@ -32,27 +32,22 @@
 namespace daw::glean {
 	dependency::dependency( std::string const &name,
 	                        build_types_t const &build_type,
-	                        download_types_t const &download_type,
 	                        std::string const &uri )
 	  : m_build_type( build_type )
-	  , m_download_type( download_type )
 	  , m_name( name )
 	  , m_uri( uri ) {}
 
 	dependency::dependency( std::string const &name,
 	                        build_types_t const &build_type,
-	                        download_types_t const &download_type,
 	                        std::string const &uri,
 	                        glean_file_item const &file_dep )
 	  : m_build_type( build_type )
-	  , m_download_type( download_type )
 	  , m_name( name )
 	  , m_uri( uri )
 	  , m_file_dep( std::make_unique<glean_file_item>( file_dep ) ) {}
 
 	dependency::dependency( const dependency &other )
 	  : m_build_type( other.m_build_type )
-	  , m_download_type( other.m_download_type )
 	  , m_name( other.m_name )
 	  , m_uri( other.m_uri )
 	  , m_file_dep( other.m_file_dep
@@ -61,7 +56,6 @@ namespace daw::glean {
 
 	dependency &dependency::operator=( const dependency &other ) {
 		m_build_type = other.m_build_type;
-		m_download_type = other.m_download_type;
 		m_name = other.m_name;
 		m_uri = other.m_uri;
 		m_file_dep = other.m_file_dep
@@ -94,10 +88,6 @@ namespace daw::glean {
 		return m_build_type.install( bt );
 	}
 
-	action_status dependency::download( ) const {
-		return m_download_type.download( );
-	}
-
 	std::vector<std::string> dependency::dep_names( ) const {
 		std::abort( );
 		//		return {};
@@ -109,10 +99,6 @@ namespace daw::glean {
 
 	int dependency::compare( dependency const &rhs ) const noexcept {
 		return m_name.compare( rhs.m_name );
-	}
-
-	download_types_t dependency::download_type( ) const noexcept {
-		return m_download_type;
 	}
 
 	bool dependency::has_file_dep( ) const noexcept {

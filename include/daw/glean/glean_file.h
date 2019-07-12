@@ -38,7 +38,7 @@ namespace daw::glean {
 
 	// Data structure to represent the dependencies
 	struct glean_file_item {
-		std::string name{};
+		std::string provides{};
 		std::string download_type{};
 		std::string build_type{};
 		std::string uri{};
@@ -54,7 +54,7 @@ namespace daw::glean {
 	};
 
 	namespace symbols_glean_file_item {
-		static constexpr char const name[] = "name";
+		static constexpr char const provides[] = "provides";
 		static constexpr char const download_type[] = "download_type";
 		static constexpr char const build_type[] = "build_type";
 		static constexpr char const uri[] = "uri";
@@ -67,7 +67,7 @@ namespace daw::glean {
 		using namespace daw::json;
 
 		return class_description_t<
-		  json_string<symbols_glean_file_item::name>,
+		  json_string<symbols_glean_file_item::provides>,
 		  json_string<symbols_glean_file_item::download_type>,
 		  json_string<symbols_glean_file_item::build_type>,
 		  json_string<symbols_glean_file_item::uri>,

@@ -33,15 +33,13 @@ namespace daw::glean {
 
 	struct build_cmake {
 		static constexpr daw::string_view type_id = "cmake";
-		fs::path m_source_path{};
-		fs::path m_build_path{};
+		fs::path m_cache_path{};
 		fs::path m_install_prefix{};
 		glean_options const *m_opt = nullptr;
 		bool m_has_glean;
 
-		build_cmake( fs::path const &source_path, fs::path const &build_path,
-		             fs::path const &install_prefix, glean_options const &opts,
-		             bool has_glean ) noexcept;
+		build_cmake( fs::path const &cache_path, fs::path const &install_prefix,
+		             glean_options const &opts, bool has_glean ) noexcept;
 
 		action_status build( daw::glean::build_types bt,
 		                     glean_file_item const &file_dep ) const;

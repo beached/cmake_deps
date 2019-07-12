@@ -39,10 +39,10 @@ namespace daw::glean {
 		constexpr static daw::string_view type_id = "git";
 
 		inline download_git( std::string remote, std::string version,
-		                     fs::path local )
+		                     fs::path const &cache_folder )
 		  : m_remote( std::move( remote ) )
 		  , m_version( std::move( version ) )
-		  , m_local( std::move( local ) ) {}
+		  , m_local( cache_folder / "source" ) {}
 
 		action_status download( ) const;
 	};

@@ -48,12 +48,10 @@ namespace daw::glean {
 		return {pos, action_status::failure};
 	}
 
-	build_cmake::build_cmake( fs::path const &source_path,
-	                          fs::path const &build_path,
+	build_cmake::build_cmake( fs::path const &cache_path,
 	                          fs::path const &install_prefix,
 	                          glean_options const &opts, bool has_glean ) noexcept
-	  : m_source_path( source_path )
-	  , m_build_path( build_path )
+	  : m_cache_path( cache_path )
 	  , m_install_prefix( install_prefix )
 	  , m_opt( &opts )
 	  , m_has_glean( has_glean ) {}
@@ -61,7 +59,7 @@ namespace daw::glean {
 	action_status build_cmake::build( daw::glean::build_types bt,
 	                                  glean_file_item const &m_dep_item ) const {
 		assert( m_opt != nullptr );
-		auto const chdir = change_directory( m_build_path );
+		auto const chdir = change_directory( m_cache_path / "build" );
 		auto args = std::vector<std::string>( );
 		std::copy_if( m_opt->cmake_args.cbegin( ), m_opt->cmake_args.cend( ),
 		              std::back_inserter( args ),
@@ -75,19 +73,21 @@ namespace daw::glean {
 			args.push_back( "-DCMAKE_BUILD_TYPE=Release" );
 		}
 
-		if( cmake_runner( cmake_action_configure( m_source_path, m_install_prefix,
+		if( cmake_runner( cmake_action_configure( m_cache_path / "source",
+		                                          m_install_prefix,
 		                                          std::move( args ), m_has_glean ),
-		                  m_build_path, bt,
+		                  m_cache_path / "build", bt,
 		                  log_message ) == action_status::failure ) {
 
 			return action_status::failure;
 		}
-		return cmake_runner( cmake_action_build( ), m_build_path, bt, log_message );
+		return cmake_runner( cmake_action_build( ), m_cache_path / "build", bt,
+		                     log_message );
 	}
 
 	action_status build_cmake::install( daw::glean::build_types bt ) const {
-		auto const chdir = change_directory( m_build_path );
-		return cmake_runner( cmake_action_install( ), m_build_path, bt,
+		auto const chdir = change_directory( m_cache_path / "build" );
+		return cmake_runner( cmake_action_install( ), m_cache_path / "build", bt,
 		                     log_message );
 	}
 } // namespace daw::glean

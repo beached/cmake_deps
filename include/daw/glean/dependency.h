@@ -36,33 +36,31 @@ namespace daw::glean {
 
 	class dependency {
 		build_types_t m_build_type;
-		download_types_t m_download_type;
 		std::string m_name;
 		std::string m_uri;
 		std::unique_ptr<glean_file_item> m_file_dep{};
 
 	public:
 		dependency( std::string const &name, build_types_t const &build_type,
-								download_types_t const &download_type, std::string const &uri);
+		            std::string const &uri );
 
 		dependency( std::string const &name, build_types_t const &build_type,
-		            download_types_t const &download_type, std::string const &uri, glean_file_item const & file_dep );
+		            std::string const &uri, glean_file_item const &file_dep );
 
-		dependency( dependency const & other );
-		dependency & operator=( dependency const & other );
+		dependency( dependency const &other );
+		dependency &operator=( dependency const &other );
 		~dependency( );
 		dependency( dependency && ) noexcept = default;
-		dependency & operator=( dependency && other ) noexcept = default;
+		dependency &operator=( dependency &&other ) noexcept = default;
+
 		std::string const &name( ) const noexcept;
 		std::string const &uri( ) const noexcept;
 		action_status build( ::daw::glean::build_types bt ) const;
 		fs::path glean_file( ) const;
 		action_status install( ::daw::glean::build_types bt ) const;
-		action_status download( ) const;
 		std::vector<std::string> dep_names( ) const;
 		size_t dep_count( ) const noexcept;
 		int compare( dependency const &rhs ) const noexcept;
-		download_types_t download_type( ) const noexcept;
 		glean_file_item const &file_dep( ) const noexcept;
 		bool has_file_dep( ) const noexcept;
 	};

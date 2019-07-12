@@ -38,25 +38,24 @@ namespace daw::glean {
 
 		template<typename T>
 		static inline std::variant<BuildTypes...>
-		construct_bt( daw::string_view type, fs::path const &source_path,
-		              fs::path const &build_path, fs::path const &install_prefix,
-		              glean_options const &opts, bool has_glean ) {
+		construct_bt( daw::string_view type, fs::path const &cache_path,
+		              fs::path const &install_prefix, glean_options const &opts,
+		              bool has_glean ) {
 			assert( T::type_id == type );
-			return daw::construct_a<T>( source_path, build_path, install_prefix, opts,
-			                            has_glean );
+			return daw::construct_a<T>( cache_path, install_prefix, opts, has_glean );
 		}
 
 		template<typename T, typename Ts, typename... Ts2>
 		static inline std::variant<BuildTypes...>
-		construct_bt( daw::string_view type, fs::path const &source_path,
-		              fs::path const &build_path, fs::path const &install_prefix,
-		              glean_options const &opts, bool has_glean ) {
+		construct_bt( daw::string_view type, fs::path const &cache_path,
+		              fs::path const &install_prefix, glean_options const &opts,
+		              bool has_glean ) {
 			if( T::type_id == type ) {
-				return daw::construct_a<T>( source_path, build_path, install_prefix,
-				                            opts, has_glean );
+				return daw::construct_a<T>( cache_path, install_prefix, opts,
+				                            has_glean );
 			} else {
-				return construct_bt<Ts, Ts2...>( type, source_path, build_path,
-				                                 install_prefix, opts, has_glean );
+				return construct_bt<Ts, Ts2...>( type, cache_path, install_prefix, opts,
+				                                 has_glean );
 			}
 		}
 
@@ -66,13 +65,11 @@ namespace daw::glean {
 		constexpr basic_build_types( T &&dep )
 		  : m_value( std::forward<T>( dep ) ) {}
 
-		inline basic_build_types( daw::string_view type,
-		                          fs::path const &source_path,
-		                          fs::path const &build_path,
+		inline basic_build_types( daw::string_view type, fs::path const &cache_path,
 		                          fs::path const &install_prefix,
 		                          glean_options const &opts, bool has_glean )
-		  : m_value( construct_bt<BuildTypes...>(
-		      type, source_path, build_path, install_prefix, opts, has_glean ) ) {}
+		  : m_value( construct_bt<BuildTypes...>( type, cache_path, install_prefix,
+		                                          opts, has_glean ) ) {}
 
 		constexpr action_status build( daw::glean::build_types bt,
 		                               glean_file_item const &file_dep ) const {

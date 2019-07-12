@@ -37,26 +37,68 @@
 
 namespace daw::glean {
 	namespace {
-		namespace impl {
-			template<typename T>
-			struct find_dep_by_name_t {
-				T *m_deps;
+		template<typename T>
+		struct find_dep_by_name_t {
+			T *m_deps;
 
-				constexpr find_dep_by_name_t( T &deps ) noexcept
-				  : m_deps( &deps ) {}
+			constexpr find_dep_by_name_t( T &deps ) noexcept
+			  : m_deps( &deps ) {}
 
-				constexpr std::optional<daw::node_id_t>
-				operator( )( daw::string_view name ) const {
-					auto result = m_deps->find( [name]( auto const &cur_node ) {
-						return cur_node.value( ).name( ) == name;
-					} );
-					if( result.empty( ) ) {
-						return std::nullopt;
-					}
-					return result.front( );
+			constexpr std::optional<daw::node_id_t>
+			operator( )( daw::string_view name ) const {
+				auto result = m_deps->find( [name]( auto const &cur_node ) {
+					return cur_node.value( ).name( ) == name;
+				} );
+				if( result.empty( ) ) {
+					return std::nullopt;
 				}
-			};
-		} // namespace impl
+				return result.front( );
+			}
+		};
+
+		void validate_config_file( glean_config_file const &cfg_file,
+		                           fs::path const &config_file_path,
+		                           daw::string_view provides ) {
+			if( cfg_file.provides != provides ) {
+				log_error << "Expected that '" << config_file_path << "' provides '"
+				          << provides << "' but '" << cfg_file.provides << "' found\n";
+				exit( EXIT_FAILURE );
+			}
+		}
+
+		void ensure_cache_folder_structure( fs::path const &cache_folder_name ) {
+			if( !is_directory( cache_folder_name ) ) {
+				fs::create_directories( cache_folder_name / "source" );
+				fs::create_directory( cache_folder_name / "build" );
+			}
+		}
+
+		template<typename T>
+		daw::node_id_t get_add_node( find_dep_by_name_t<T> const &find_dep_by_name,
+		                             glean_config_file const &cfg_file,
+		                             glean_options const &opts,
+		                             graph_t<dependency> &known_deps,
+		                             fs::path const &cache_folder_name,
+		                             bool is_root, daw::string_view uri ) {
+			if( auto tmp = find_dep_by_name( cfg_file.provides ); tmp ) {
+				return *tmp;
+			}
+			// New node
+
+			std::string const build_type =
+			  is_root ? std::string( "none" ) : cfg_file.build_type;
+
+			return known_deps.add_node( cfg_file.provides,
+			                            build_types_t( build_type, cache_folder_name,
+			                                           opts.install_prefix, opts,
+			                                           true ),
+			                            uri );
+		}
+
+		template<typename Dep>
+		fs::path cache_folder( glean_options const &opts, Dep const &dep ) {
+			return opts.glean_cache / dep.build_type / dep.provides;
+		}
 
 		daw::node_id_t process_config_file( fs::path const &config_file_path,
 		                                    daw::graph_t<dependency> &known_deps,
@@ -66,86 +108,61 @@ namespace daw::glean {
 		                                    daw::string_view uri,
 		                                    bool is_root = false ) {
 
-			auto cfg_file = daw::json::from_json<glean_config_file>(
+			auto const cfg_file = daw::json::from_json<glean_config_file>(
 			  daw::read_file( config_file_path.c_str( ) ) );
 
-			if( cfg_file.provides != provides ) {
-				log_error << "Expected that '" << config_file_path << "' provides '"
-				          << provides << "' but '" << cfg_file.provides << "' found\n";
-				exit( EXIT_FAILURE );
-			}
+			validate_config_file( cfg_file, config_file_path, provides );
 
-			auto const cache_folder_name =
-			  opts.glean_cache / cfg_file.build_type / cfg_file.provides;
+			auto const cache_folder_name = cache_folder( opts, cfg_file );
 
-			if( !is_directory( cache_folder_name ) ) {
-				fs::create_directories( cache_folder_name / "source" );
-				fs::create_directory( cache_folder_name / "build" );
-			}
-			auto const find_dep_by_name = impl::find_dep_by_name_t( known_deps );
+			ensure_cache_folder_structure( cache_folder_name );
 
-			auto cur_node_id = [&]( ) {
-				if( auto tmp = find_dep_by_name( cfg_file.provides ); tmp ) {
-					return *tmp;
-				}
-				// New node
+			auto const find_dep_by_name = find_dep_by_name_t( known_deps );
 
-				std::string const build_type =
-				  is_root ? std::string( "none" ) : cfg_file.build_type;
-
-				return known_deps.add_node( cfg_file.provides,
-				                            build_types_t( build_type,
-				                                           cache_folder_name / "source",
-				                                           cache_folder_name / "build",
-				                                           opts.install_prefix, opts, true ),
-				                            download_none{}, uri );
-			}( );
+			auto cur_node_id =
+			  get_add_node( find_dep_by_name, cfg_file, opts, known_deps,
+			                cache_folder_name, is_root, uri );
 
 			if( cfg_file.dependencies.empty( ) or
 			    !known_deps.get_node( cur_node_id ).outgoing_edges( ).empty( ) ) {
 				return cur_node_id;
 			}
 
-			for( glean_file_item &child_dep : cfg_file.dependencies ) {
-				if( auto dep_id = find_dep_by_name( child_dep.name ); dep_id ) {
+			for( glean_file_item const &child_dep : cfg_file.dependencies ) {
+				if( auto dep_id = find_dep_by_name( child_dep.provides ); dep_id ) {
 					// Child exists in graph
 					// Add it as a dependency of current node
+					// TODO, handle merging of differences
 					known_deps.add_directed_edge( cur_node_id, *dep_id );
 					continue;
 				}
 
-				auto const dep_cache_folder_name =
-				  opts.glean_cache / child_dep.build_type / child_dep.name;
+				auto const dep_cache_folder = cache_folder( opts, child_dep );
+				ensure_cache_folder_structure( dep_cache_folder );
 
-				if( !is_directory( dep_cache_folder_name ) ) {
-					fs::create_directories( dep_cache_folder_name / "source" );
-					fs::create_directory( dep_cache_folder_name / "build" );
-				}
-				auto dep_folder = dep_cache_folder_name / "source";
-				auto downloader =
-				  download_types_t( child_dep.download_type, child_dep.uri,
-				                    child_dep.version, dep_folder );
-				bool has_glean = exists( dep_folder / "glean.json" );
+				if( download_types_t( child_dep.download_type, child_dep.uri,
+				                      child_dep.version, dep_cache_folder )
+				      .download( ) == action_status::failure ) {
 
-				auto builder =
-				  build_types_t( child_dep.build_type, dep_cache_folder_name / "source",
-				                 dep_cache_folder_name / "build", opts.install_prefix,
-				                 opts, has_glean );
-
-				auto dep_id = known_deps.add_node( child_dep.name, daw::move( builder ),
-				                                   daw::move( downloader ),
-				                                   child_dep.uri, child_dep );
-				known_deps.add_directed_edge( cur_node_id, dep_id );
-
-				auto &cur_dep = known_deps.get_raw_node( dep_id ).value( );
-				if( cur_dep.download( ) != action_status::success ) {
 					log_error << "Error downloading\n";
 					exit( EXIT_FAILURE );
 				}
+
+				bool const has_glean =
+				  exists( dep_cache_folder / "source" / "glean.json" );
+
+				auto builder = build_types_t( child_dep.build_type, dep_cache_folder,
+				                              opts.install_prefix, opts, has_glean );
+
+				auto dep_id = known_deps.add_node(
+				  child_dep.provides, daw::move( builder ), child_dep.uri, child_dep );
+				known_deps.add_directed_edge( cur_node_id, dep_id );
+
+				auto const &cur_dep = known_deps.get_raw_node( dep_id ).value( );
 				if( has_glean ) {
-					process_config_file( dep_folder / "glean.json", known_deps, opts,
-					                     cur_dep.name( ), child_dep.download_type,
-					                     child_dep.uri );
+					process_config_file( dep_cache_folder / "source" / "glean.json",
+					                     known_deps, opts, cur_dep.name( ),
+					                     child_dep.download_type, child_dep.uri );
 				}
 			}
 			return cur_node_id;
@@ -212,7 +229,6 @@ namespace daw::glean {
 			std::vector<std::string> depends_on{};
 		};
 		auto deps = std::vector<dep_t>( );
-		bool has_unsupported = false;
 
 		auto leaf_ids = known_deps.find_leaves( );
 		auto const find_name = [&kd]( node_id_t id ) {
@@ -222,30 +238,22 @@ namespace daw::glean {
 			for( auto leaf_id : leaf_ids ) {
 				auto &cur_node = known_deps.get_raw_node( leaf_id );
 				auto &cur_dep = cur_node.value( );
-				auto const &type_id = cur_dep.download_type( ).type_id( );
-				if( type_id == "git" and !cur_dep.name( ).empty( ) ) {
-					auto dep = dep_t{std::string( cur_dep.name( ) ),
-					                 std::string( cur_dep.uri( ) )};
-					for( auto child_id : kd.get_node( leaf_id ).outgoing_edges( ) ) {
-						auto cur_name = find_name( child_id );
-						if( !cur_name.empty( ) ) {
-							dep.depends_on.push_back( cur_name );
-						}
+
+				auto dep =
+				  dep_t{std::string( cur_dep.name( ) ), std::string( cur_dep.uri( ) )};
+				for( auto child_id : kd.get_node( leaf_id ).outgoing_edges( ) ) {
+					auto cur_name = find_name( child_id );
+					if( !cur_name.empty( ) ) {
+						dep.depends_on.push_back( cur_name );
 					}
-					deps.push_back( std::move( dep ) );
-				} else if( type_id != "none" ) {
-					has_unsupported = true;
 				}
+				deps.push_back( std::move( dep ) );
+
 				known_deps.remove_node( leaf_id );
 			}
 			leaf_ids = known_deps.find_leaves( );
 		}
 
-		if( has_unsupported ) {
-			log_error << "Warning: unsupported download type(s) detected.  currently "
-			             "only git "
-			             "supported\n";
-		}
 		log_message << "\ninclude( ExternalProject )\n";
 		// need to go backwards so that cmake has correct order
 		for( auto const &cur_dep : deps ) {
@@ -279,12 +287,12 @@ namespace daw::glean {
 	}
 
 	glean_file_item::glean_file_item(
-	  std::string const &n, std::string const &dt, std::string const &bt,
+	  std::string const &p, std::string const &dt, std::string const &bt,
 	  std::string const &u, std::optional<std::string> const &v,
 	  std::optional<std::string> const &co,
 	  std::optional<std::vector<std::string>> const &ca )
 
-	  : name( n )
+	  : provides( p )
 	  , download_type( dt )
 	  , build_type( bt )
 	  , uri( u )
