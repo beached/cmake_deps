@@ -97,11 +97,67 @@ namespace daw::glean {
 			return opts.glean_cache / dep.build_type / dep.provides;
 		}
 
+		void download_node( glean_file_item const &child_dep,
+		                    fs::path const &cache_folder ) {
+
+			if( download_types_t( child_dep.download_type, child_dep.uri,
+			                      child_dep.version, cache_folder )
+			      .download( ) == action_status::failure ) {
+
+				log_error << "Error downloading\n";
+				exit( EXIT_FAILURE );
+			}
+		}
+
+		bool is_glean_project( fs::path cache_folder ) {
+			return exists( cache_folder / "source" / "glean.json" );
+		}
+
 		daw::node_id_t process_config_file( fs::path const &config_file_path,
 		                                    daw::graph_t<dependency> &known_deps,
 		                                    glean_options const &opts,
 		                                    daw::string_view provides,
-		                                    bool is_root = false ) {
+		                                    bool is_root = false );
+
+		template<typename T>
+		void process_dependency( daw::graph_t<dependency> &known_deps,
+		                         glean_options const &opts,
+		                         glean_file_item const &child_dep,
+		                         find_dep_by_name_t<T> const &find_dep_by_name, node_id_t cur_node_id ) {
+			if( auto dep_id = find_dep_by_name( child_dep.provides ); dep_id ) {
+				// Child exists in graph
+				// Add it as a dependency of current node
+				// TODO, handle merging of differences
+				known_deps.add_directed_edge( cur_node_id, *dep_id );
+				return;
+			}
+
+			auto const dep_cache_folder = cache_folder( opts, child_dep );
+			ensure_cache_folder_structure( dep_cache_folder );
+
+			download_node( child_dep, dep_cache_folder );
+
+			bool const has_glean = is_glean_project( dep_cache_folder );
+
+			auto builder = build_types_t( child_dep.build_type, dep_cache_folder,
+			                              opts.install_prefix, opts, has_glean );
+
+			auto dep_id = known_deps.add_node( child_dep.provides,
+			                                   daw::move( builder ), child_dep );
+			known_deps.add_directed_edge( cur_node_id, dep_id );
+
+			auto const &cur_dep = known_deps.get_raw_node( dep_id ).value( );
+			if( has_glean ) {
+				process_config_file( dep_cache_folder / "source" / "glean.json",
+				                     known_deps, opts, cur_dep.name( ) );
+			}
+		}
+
+		daw::node_id_t process_config_file( fs::path const &config_file_path,
+		                                    daw::graph_t<dependency> &known_deps,
+		                                    glean_options const &opts,
+		                                    daw::string_view provides,
+		                                    bool is_root ) {
 
 			auto const cfg_file = daw::json::from_json<glean_config_file>(
 			  daw::read_file( config_file_path.c_str( ) ) );
@@ -123,41 +179,9 @@ namespace daw::glean {
 			}
 
 			for( glean_file_item const &child_dep : cfg_file.dependencies ) {
-				if( auto dep_id = find_dep_by_name( child_dep.provides ); dep_id ) {
-					// Child exists in graph
-					// Add it as a dependency of current node
-					// TODO, handle merging of differences
-					known_deps.add_directed_edge( cur_node_id, *dep_id );
-					continue;
-				}
-
-				auto const dep_cache_folder = cache_folder( opts, child_dep );
-				ensure_cache_folder_structure( dep_cache_folder );
-
-				if( download_types_t( child_dep.download_type, child_dep.uri,
-				                      child_dep.version, dep_cache_folder )
-				      .download( ) == action_status::failure ) {
-
-					log_error << "Error downloading\n";
-					exit( EXIT_FAILURE );
-				}
-
-				bool const has_glean =
-				  exists( dep_cache_folder / "source" / "glean.json" );
-
-				auto builder = build_types_t( child_dep.build_type, dep_cache_folder,
-				                              opts.install_prefix, opts, has_glean );
-
-				auto dep_id = known_deps.add_node( child_dep.provides,
-				                                   daw::move( builder ), child_dep );
-				known_deps.add_directed_edge( cur_node_id, dep_id );
-
-				auto const &cur_dep = known_deps.get_raw_node( dep_id ).value( );
-				if( has_glean ) {
-					process_config_file( dep_cache_folder / "source" / "glean.json",
-					                     known_deps, opts, cur_dep.name( ) );
-				}
+				process_dependency( known_deps, opts, child_dep, find_dep_by_name, cur_node_id );
 			}
+
 			return cur_node_id;
 		}
 
