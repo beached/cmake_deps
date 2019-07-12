@@ -104,7 +104,6 @@ namespace daw::glean {
 		                                    daw::graph_t<dependency> &known_deps,
 		                                    glean_options const &opts,
 		                                    daw::string_view provides,
-		                                    daw::string_view download_type,
 		                                    daw::string_view uri,
 		                                    bool is_root = false ) {
 
@@ -162,7 +161,7 @@ namespace daw::glean {
 				if( has_glean ) {
 					process_config_file( dep_cache_folder / "source" / "glean.json",
 					                     known_deps, opts, cur_dep.name( ),
-					                     child_dep.download_type, child_dep.uri );
+					                     child_dep.uri );
 				}
 			}
 			return cur_node_id;
@@ -199,7 +198,7 @@ namespace daw::glean {
 		  daw::read_file( config_file_path.c_str( ) ) );
 
 		process_config_file( config_file_path, known_deps, opts, cfg_file.provides,
-		                     "none", "", true );
+		                     "", true );
 
 		return known_deps;
 	}
