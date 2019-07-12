@@ -123,7 +123,8 @@ namespace daw::glean {
 		void process_dependency( daw::graph_t<dependency> &known_deps,
 		                         glean_options const &opts,
 		                         glean_file_item const &child_dep,
-		                         find_dep_by_name_t<T> const &find_dep_by_name, node_id_t cur_node_id ) {
+		                         find_dep_by_name_t<T> const &find_dep_by_name,
+		                         node_id_t cur_node_id ) {
 			if( auto dep_id = find_dep_by_name( child_dep.provides ); dep_id ) {
 				// Child exists in graph
 				// Add it as a dependency of current node
@@ -170,18 +171,19 @@ namespace daw::glean {
 
 			auto const find_dep_by_name = find_dep_by_name_t( known_deps );
 
-			auto cur_node_id = get_add_node( find_dep_by_name, cfg_file, opts,
-			                                 known_deps, cache_folder_name, is_root );
+			auto const cur_node_id =
+			  get_add_node( find_dep_by_name, cfg_file, opts, known_deps,
+			                cache_folder_name, is_root );
 
-			if( cfg_file.dependencies.empty( ) or
-			    !known_deps.get_node( cur_node_id ).outgoing_edges( ).empty( ) ) {
-				return cur_node_id;
+			if( !(
+			      cfg_file.dependencies.empty( ) or
+			      !known_deps.get_node( cur_node_id ).outgoing_edges( ).empty( ) ) ) {
+
+				for( glean_file_item const &child_dep : cfg_file.dependencies ) {
+					process_dependency( known_deps, opts, child_dep, find_dep_by_name,
+					                    cur_node_id );
+				}
 			}
-
-			for( glean_file_item const &child_dep : cfg_file.dependencies ) {
-				process_dependency( known_deps, opts, child_dep, find_dep_by_name, cur_node_id );
-			}
-
 			return cur_node_id;
 		}
 
@@ -241,9 +243,11 @@ namespace daw::glean {
 	void cmake_deps( daw::graph_t<dependency> const &kd ) {
 		daw::graph_t<dependency> known_deps = kd;
 		struct dep_t {
-			std::string name;
-			std::string uri;
+			dependency const *data;
 			std::vector<std::string> depends_on{};
+
+			dep_t( dependency const &d ) noexcept
+			  : data( &d ) {}
 		};
 		auto deps = std::vector<dep_t>( );
 
@@ -256,8 +260,7 @@ namespace daw::glean {
 				auto &cur_node = known_deps.get_raw_node( leaf_id );
 				auto &cur_dep = cur_node.value( );
 				if( cur_dep.has_file_dep( ) ) {
-					auto dep = dep_t{std::string( cur_dep.name( ) ),
-					                 std::string( cur_dep.file_dep( ).uri )};
+					auto dep = dep_t( cur_dep );
 					for( auto child_id : kd.get_node( leaf_id ).outgoing_edges( ) ) {
 						auto cur_name = find_name( child_id );
 						if( !cur_name.empty( ) ) {
@@ -275,7 +278,7 @@ namespace daw::glean {
 		// need to go backwards so that cmake has correct order
 		for( auto const &cur_dep : deps ) {
 			log_message << "externalproject_add(\n";
-			log_message << "  " << cur_dep.name << "_prj\n";
+			log_message << "  " << cur_dep.data->name( ) << "_prj\n";
 			if( !cur_dep.depends_on.empty( ) ) {
 				log_message << "  DEPENDS";
 				for( auto const &child : cur_dep.depends_on ) {
@@ -283,10 +286,12 @@ namespace daw::glean {
 				}
 				log_message << '\n';
 			}
-			log_message << "  GIT_REPOSITORY \"" << cur_dep.uri << "\"\n";
+			log_message << "  GIT_REPOSITORY \"" << cur_dep.data->file_dep( ).uri
+			            << "\"\n";
 			log_message << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/"
-			            << cur_dep.name << "\"\n";
-			log_message << "  GIT_TAG \"master\"\n"; // TODO use version
+			            << cur_dep.data->name( ) << "\"\n";
+			log_message << "  GIT_TAG \"" << cur_dep.data->file_dep( ).version
+			            << "\"\n"; // TODO use version
 			log_message << "  INSTALL_DIR \"${CMAKE_BINARY_DIR}/install\"\n";
 			log_message << "  CMAKE_ARGS "
 			               "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install "
@@ -298,25 +303,8 @@ namespace daw::glean {
 		log_message << "link_directories( \"${CMAKE_BINARY_DIR}/install/lib\" )\n";
 		log_message << "set( DEP_PROJECT_DEPS";
 		for( auto const &dep : deps ) {
-			log_message << ' ' << dep.name << "_prj";
+			log_message << ' ' << dep.data->name( ) << "_prj";
 		}
 		log_message << " )\n";
-	}
-
-	glean_file_item::glean_file_item(
-	  std::string const &p, std::string const &dt, std::string const &bt,
-	  std::string const &u, std::optional<std::string> const &v,
-	  std::optional<std::string> const &co,
-	  std::optional<std::vector<std::string>> const &ca )
-
-	  : provides( p )
-	  , download_type( dt )
-	  , build_type( bt )
-	  , uri( u )
-	  , version( v.value_or( std::string( ) ) )
-	  , custom_options( co.value_or( std::string( ) ) )
-	  , cmake_args( ca.value_or( std::vector<std::string>( ) ) ) {
-
-		(void)log_message;
 	}
 } // namespace daw::glean
