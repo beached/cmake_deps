@@ -31,25 +31,20 @@
 
 namespace daw::glean {
 	dependency::dependency( std::string const &name,
-	                        build_types_t const &build_type,
-	                        std::string const &uri )
+	                        build_types_t const &build_type )
 	  : m_build_type( build_type )
-	  , m_name( name )
-	  , m_uri( uri ) {}
+	  , m_name( name ) {}
 
 	dependency::dependency( std::string const &name,
 	                        build_types_t const &build_type,
-	                        std::string const &uri,
 	                        glean_file_item const &file_dep )
 	  : m_build_type( build_type )
 	  , m_name( name )
-	  , m_uri( uri )
 	  , m_file_dep( std::make_unique<glean_file_item>( file_dep ) ) {}
 
 	dependency::dependency( const dependency &other )
 	  : m_build_type( other.m_build_type )
 	  , m_name( other.m_name )
-	  , m_uri( other.m_uri )
 	  , m_file_dep( other.m_file_dep
 	                  ? std::make_unique<glean_file_item>( *other.m_file_dep )
 	                  : std::unique_ptr<glean_file_item>( ) ) {}
@@ -57,7 +52,6 @@ namespace daw::glean {
 	dependency &dependency::operator=( const dependency &other ) {
 		m_build_type = other.m_build_type;
 		m_name = other.m_name;
-		m_uri = other.m_uri;
 		m_file_dep = other.m_file_dep
 		               ? std::make_unique<glean_file_item>( *other.m_file_dep )
 		               : std::unique_ptr<glean_file_item>( );
@@ -68,10 +62,6 @@ namespace daw::glean {
 
 	std::string const &dependency::name( ) const noexcept {
 		return m_name;
-	}
-
-	std::string const &dependency::uri( ) const noexcept {
-		return m_uri;
 	}
 
 	action_status dependency::build( ::daw::glean::build_types bt ) const {

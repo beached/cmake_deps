@@ -74,12 +74,11 @@ namespace daw::glean {
 		}
 
 		template<typename T>
-		daw::node_id_t get_add_node( find_dep_by_name_t<T> const &find_dep_by_name,
-		                             glean_config_file const &cfg_file,
-		                             glean_options const &opts,
-		                             graph_t<dependency> &known_deps,
-		                             fs::path const &cache_folder_name,
-		                             bool is_root, daw::string_view uri ) {
+		daw::node_id_t
+		get_add_node( find_dep_by_name_t<T> const &find_dep_by_name,
+		              glean_config_file const &cfg_file, glean_options const &opts,
+		              graph_t<dependency> &known_deps,
+		              fs::path const &cache_folder_name, bool is_root ) {
 			if( auto tmp = find_dep_by_name( cfg_file.provides ); tmp ) {
 				return *tmp;
 			}
@@ -88,11 +87,9 @@ namespace daw::glean {
 			std::string const build_type =
 			  is_root ? std::string( "none" ) : cfg_file.build_type;
 
-			return known_deps.add_node( cfg_file.provides,
-			                            build_types_t( build_type, cache_folder_name,
-			                                           opts.install_prefix, opts,
-			                                           true ),
-			                            uri );
+			return known_deps.add_node(
+			  cfg_file.provides, build_types_t( build_type, cache_folder_name,
+			                                    opts.install_prefix, opts, true ) );
 		}
 
 		template<typename Dep>
@@ -104,7 +101,6 @@ namespace daw::glean {
 		                                    daw::graph_t<dependency> &known_deps,
 		                                    glean_options const &opts,
 		                                    daw::string_view provides,
-		                                    daw::string_view uri,
 		                                    bool is_root = false ) {
 
 			auto const cfg_file = daw::json::from_json<glean_config_file>(
@@ -118,9 +114,8 @@ namespace daw::glean {
 
 			auto const find_dep_by_name = find_dep_by_name_t( known_deps );
 
-			auto cur_node_id =
-			  get_add_node( find_dep_by_name, cfg_file, opts, known_deps,
-			                cache_folder_name, is_root, uri );
+			auto cur_node_id = get_add_node( find_dep_by_name, cfg_file, opts,
+			                                 known_deps, cache_folder_name, is_root );
 
 			if( cfg_file.dependencies.empty( ) or
 			    !known_deps.get_node( cur_node_id ).outgoing_edges( ).empty( ) ) {
@@ -153,15 +148,14 @@ namespace daw::glean {
 				auto builder = build_types_t( child_dep.build_type, dep_cache_folder,
 				                              opts.install_prefix, opts, has_glean );
 
-				auto dep_id = known_deps.add_node(
-				  child_dep.provides, daw::move( builder ), child_dep.uri, child_dep );
+				auto dep_id = known_deps.add_node( child_dep.provides,
+				                                   daw::move( builder ), child_dep );
 				known_deps.add_directed_edge( cur_node_id, dep_id );
 
 				auto const &cur_dep = known_deps.get_raw_node( dep_id ).value( );
 				if( has_glean ) {
 					process_config_file( dep_cache_folder / "source" / "glean.json",
-					                     known_deps, opts, cur_dep.name( ),
-					                     child_dep.uri );
+					                     known_deps, opts, cur_dep.name( ) );
 				}
 			}
 			return cur_node_id;
@@ -198,7 +192,7 @@ namespace daw::glean {
 		  daw::read_file( config_file_path.c_str( ) ) );
 
 		process_config_file( config_file_path, known_deps, opts, cfg_file.provides,
-		                     "", true );
+		                     true );
 
 		return known_deps;
 	}
@@ -237,17 +231,17 @@ namespace daw::glean {
 			for( auto leaf_id : leaf_ids ) {
 				auto &cur_node = known_deps.get_raw_node( leaf_id );
 				auto &cur_dep = cur_node.value( );
-
-				auto dep =
-				  dep_t{std::string( cur_dep.name( ) ), std::string( cur_dep.uri( ) )};
-				for( auto child_id : kd.get_node( leaf_id ).outgoing_edges( ) ) {
-					auto cur_name = find_name( child_id );
-					if( !cur_name.empty( ) ) {
-						dep.depends_on.push_back( cur_name );
+				if( cur_dep.has_file_dep( ) ) {
+					auto dep = dep_t{std::string( cur_dep.name( ) ),
+					                 std::string( cur_dep.file_dep( ).uri )};
+					for( auto child_id : kd.get_node( leaf_id ).outgoing_edges( ) ) {
+						auto cur_name = find_name( child_id );
+						if( !cur_name.empty( ) ) {
+							dep.depends_on.push_back( cur_name );
+						}
 					}
+					deps.push_back( std::move( dep ) );
 				}
-				deps.push_back( std::move( dep ) );
-
 				known_deps.remove_node( leaf_id );
 			}
 			leaf_ids = known_deps.find_leaves( );

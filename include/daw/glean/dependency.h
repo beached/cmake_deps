@@ -37,15 +37,13 @@ namespace daw::glean {
 	class dependency {
 		build_types_t m_build_type;
 		std::string m_name;
-		std::string m_uri;
-		std::unique_ptr<glean_file_item> m_file_dep{};
+		std::unique_ptr<glean_file_item const> m_file_dep{};
 
 	public:
-		dependency( std::string const &name, build_types_t const &build_type,
-		            std::string const &uri );
+		dependency( std::string const &name, build_types_t const &build_type );
 
 		dependency( std::string const &name, build_types_t const &build_type,
-		            std::string const &uri, glean_file_item const &file_dep );
+		            glean_file_item const &file_dep );
 
 		dependency( dependency const &other );
 		dependency &operator=( dependency const &other );
@@ -54,7 +52,6 @@ namespace daw::glean {
 		dependency &operator=( dependency &&other ) noexcept = default;
 
 		std::string const &name( ) const noexcept;
-		std::string const &uri( ) const noexcept;
 		action_status build( ::daw::glean::build_types bt ) const;
 		fs::path glean_file( ) const;
 		action_status install( ::daw::glean::build_types bt ) const;
