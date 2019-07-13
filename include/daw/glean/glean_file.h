@@ -22,79 +22,13 @@
 
 #pragma once
 
-#include <optional>
-#include <string>
-#include <variant>
-#include <vector>
-
 #include <daw/daw_graph.h>
-#include <daw/json/daw_json_link.h>
 
-#include "build_types.h"
 #include "dependency.h"
-#include "download_types.h"
+#include "glean_options.h"
+#include "utilities.h"
 
 namespace daw::glean {
-
-	// Data structure to represent the dependencies
-	struct glean_file_item {
-		std::string provides{};
-		std::string download_type{};
-		std::string build_type{};
-		std::string uri{};
-		std::string version{};
-		std::string custom_options{};
-		std::vector<std::string> cmake_args{};
-	};
-
-	namespace symbols_glean_file_item {
-		static constexpr char const provides[] = "provides";
-		static constexpr char const download_type[] = "download_type";
-		static constexpr char const build_type[] = "build_type";
-		static constexpr char const uri[] = "uri";
-		static constexpr char const version[] = "version";
-		static constexpr char const custom_options[] = "custom_options";
-		static constexpr char const cmake_args[] = "cmake_args";
-	} // namespace symbols_glean_file_item
-
-	inline auto describe_json_class( glean_file_item ) {
-		using namespace daw::json;
-
-		return class_description_t<
-		  json_string<symbols_glean_file_item::provides>,
-		  json_string<symbols_glean_file_item::download_type>,
-		  json_string<symbols_glean_file_item::build_type>,
-		  json_string<symbols_glean_file_item::uri>,
-		  json_nullable<json_string<symbols_glean_file_item::version>>,
-		  json_nullable<json_string<symbols_glean_file_item::custom_options>>,
-		  json_nullable<
-		    json_array<symbols_glean_file_item::cmake_args,
-		               std::vector<std::string>, json_string<no_name>>>>{};
-	}
-
-	struct glean_config_file {
-		std::string provides{};
-		std::string build_type{};
-		std::vector<glean_file_item> dependencies{};
-	};
-
-	namespace symbols_glean_config_file {
-		static constexpr char const provides[] = "provides";
-		static constexpr char const build_type[] = "build_type";
-		static constexpr char const dependencies[] = "dependencies";
-	} // namespace symbols_glean_config_file
-
-	inline auto describe_json_class( glean_config_file ) {
-		using namespace daw::json;
-
-		return class_description_t<
-		  json_string<symbols_glean_config_file::provides>,
-		  json_string<symbols_glean_config_file::build_type>,
-		  json_array<symbols_glean_config_file::dependencies,
-		             std::vector<glean_file_item>,
-		             json_class<no_name, glean_file_item>>>{};
-	}
-
 	daw::graph_t<dependency>
 	process_config_file( fs::path const &config_file_path,
 	                     glean_options const &opts );

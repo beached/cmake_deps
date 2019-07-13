@@ -32,6 +32,7 @@
 #include "daw/glean/dependency.h"
 #include "daw/glean/download_types.h"
 #include "daw/glean/glean_file.h"
+#include "daw/glean/glean_file_item.h"
 #include "daw/glean/glean_options.h"
 #include "daw/glean/logging.h"
 

@@ -22,24 +22,23 @@
 
 #pragma once
 
-#include <vector>
+#include <optional>
 #include <string>
 #include <utility>
-
-#include <daw/daw_copiable_unique_ptr.h>
+#include <vector>
 
 #include "action_status.h"
 #include "build_types.h"
 #include "download_types.h"
 #include "glean_options.h"
+#include "glean_file_item.h"
 
 namespace daw::glean {
-	struct glean_file_item;
 
 	struct dependency {
 		struct item_t {
 			build_types_t build_type;
-			daw::copiable_unique_ptr<glean_file_item const> file_dep{};
+			std::optional<glean_file_item> file_dep{};
 		};
 
 	private:

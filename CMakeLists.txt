@@ -80,6 +80,7 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw/glean/git_helper.h
 	${HEADER_FOLDER}/daw/glean/glean_config.h
 	${HEADER_FOLDER}/daw/glean/glean_file.h
+	${HEADER_FOLDER}/daw/glean/glean_file_item.h
 	${HEADER_FOLDER}/daw/glean/glean_options.h
 	${HEADER_FOLDER}/daw/glean/logging.h
 	${HEADER_FOLDER}/daw/glean/proc.h

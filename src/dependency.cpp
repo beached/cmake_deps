@@ -21,15 +21,13 @@
 // SOFTWARE.
 
 #include <cstdint>
-#include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
-#include <daw/daw_copiable_unique_ptr.h>
-
 #include "daw/glean/action_status.h"
 #include "daw/glean/dependency.h"
-#include "daw/glean/glean_file.h"
+#include "daw/glean/glean_file_item.h"
 #include "daw/glean/utilities.h"
 
 namespace daw::glean {
@@ -51,9 +49,7 @@ namespace daw::glean {
 	                        build_types_t const &build_type,
 	                        glean_file_item const &file_dep )
 	  : m_name( name )
-	  , m_alternatives{
-	      {build_type,
-	       daw::make_copiable_unique_ptr<glean_file_item const>( file_dep )}} {}
+	  , m_alternatives{{build_type, file_dep}} {}
 
 	std::string const &dependency::name( ) const noexcept {
 		return m_name;

@@ -27,6 +27,7 @@
 #include "daw/glean/build_cmake.h"
 #include "daw/glean/cmake_helper.h"
 #include "daw/glean/glean_file.h"
+#include "daw/glean/glean_file_item.h"
 #include "daw/glean/glean_options.h"
 #include "daw/glean/logging.h"
 #include "daw/glean/proc.h"

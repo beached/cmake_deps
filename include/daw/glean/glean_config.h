@@ -27,6 +27,7 @@
 #include <daw/json/daw_json_link.h>
 #include <daw/temp_file.h>
 
+#include "glean_file_item.h"
 #include "utilities.h"
 
 namespace daw::glean {

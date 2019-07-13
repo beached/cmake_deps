@@ -24,6 +24,8 @@
 
 #include <boost/program_options/variables_map.hpp>
 #include <iosfwd>
+#include <string>
+#include <vector>
 
 #include "utilities.h"
 
