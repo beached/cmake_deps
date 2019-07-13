@@ -6,7 +6,7 @@
 			"provides": "header_libraries",
 			"download_type": "git",
 			"build_type": "cmake",
-			"uri": "https://github.com/beached/header_libraries"
+			"uri": "https://github.com/beached/header_libraries.git"
 		},
 		{
 			"provides": "libtemp_file",

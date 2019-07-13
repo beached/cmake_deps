@@ -109,8 +109,12 @@ namespace daw::glean {
 			if( auto node_id = find_dep_by_name( child_dep.provides ); node_id ) {
 				auto const &dep = known_deps.get_raw_node( *node_id ).value( );
 				for( auto const &alt : dep.alternatives( ) ) {
-					if( child_dep.download_type == alt.file_dep->download_type and
-					    child_dep.uri == alt.file_dep->uri ) {
+					if( !alt.file_dep ) {
+						continue;
+					}
+					auto const &tmp = *alt.file_dep;
+					if( child_dep.download_type == tmp.download_type and
+					    child_dep.uri == tmp.uri ) {
 						return action_status::success;
 					}
 				}
@@ -312,30 +316,28 @@ namespace daw::glean {
 
 	void cmake_deps( daw::graph_t<dependency> const &kd ) {
 		log_message << "\ninclude( ExternalProject )\n";
-		kd.visit( []( auto &&... ) { return true; },
-		          [&]( auto &&cur_node ) {
-			          dependency const &cur_dep = cur_node.value( );
-			          if( !cur_dep.has_file_dep( ) ) {
-				          return;
-			          }
+		kd.visit( [&]( auto &&cur_node ) {
+			dependency const &cur_dep = cur_node.value( );
+			if( !cur_dep.has_file_dep( ) ) {
+				return;
+			}
 
-			          output_cmake_item(
-			            cur_dep.name( ), cur_dep.file_dep( ),
-			            get_dependency_names( kd, cur_node.outgoing_edges( ) ) );
-		          } );
+			output_cmake_item(
+			  cur_dep.name( ), cur_dep.file_dep( ),
+			  get_dependency_names( kd, cur_node.outgoing_edges( ) ) );
+		} );
 		log_message << "include_directories( SYSTEM "
 		               "\"${CMAKE_BINARY_DIR}/install/include\" )\n";
 		log_message << "link_directories( \"${CMAKE_BINARY_DIR}/install/lib\" )\n";
 		log_message << "set( DEP_PROJECT_DEPS";
 
-		kd.visit( []( auto &&... ) { return true; },
-		          [&]( auto &&cur_node ) {
-			          dependency const &cur_dep = cur_node.value( );
-			          if( !cur_dep.has_file_dep( ) ) {
-				          return;
-			          }
-			          log_message << ' ' << cur_dep.name( ) << "_prj";
-		          } );
+		kd.visit( [&]( auto &&cur_node ) {
+			dependency const &cur_dep = cur_node.value( );
+			if( !cur_dep.has_file_dep( ) ) {
+				return;
+			}
+			log_message << ' ' << cur_dep.name( ) << "_prj";
+		} );
 		log_message << " )\n";
 	}
 } // namespace daw::glean
