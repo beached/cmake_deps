@@ -290,12 +290,27 @@ namespace daw::glean {
 			               "-DGLEAN_INSTALL_ROOT=${CMAKE_BINARY_DIR}/install\n";
 			log_message << ")\n\n";
 		}
+
+		template<typename Edges>
+		std::vector<std::string>
+		get_dependency_names( ::daw::graph_t<dependency> const &kd,
+		                      Edges const &edges ) {
+
+			auto const find_name = [&kd]( node_id_t id ) {
+				return kd.get_raw_node( id ).value( ).name( );
+			};
+			auto depends_on = std::vector<std::string>{};
+			for( auto const &child_id : edges ) {
+				auto cur_name = find_name( child_id );
+				if( !cur_name.empty( ) ) {
+					depends_on.push_back( cur_name );
+				}
+			}
+			return depends_on;
+		}
 	} // namespace
 
 	void cmake_deps( daw::graph_t<dependency> const &kd ) {
-		auto const find_name = [&kd]( node_id_t id ) {
-			return kd.get_raw_node( id ).value( ).name( );
-		};
 		log_message << "\ninclude( ExternalProject )\n";
 		kd.visit( []( auto &&... ) { return true; },
 		          [&]( auto &&cur_node ) {
@@ -303,15 +318,10 @@ namespace daw::glean {
 			          if( !cur_dep.has_file_dep( ) ) {
 				          return;
 			          }
-			          auto depends_on = std::vector<std::string>{};
-			          for( auto child_id : cur_node.outgoing_edges( ) ) {
-				          auto cur_name = find_name( child_id );
-				          if( !cur_name.empty( ) ) {
-					          depends_on.push_back( cur_name );
-				          }
-			          }
-			          output_cmake_item( cur_dep.name( ), cur_dep.file_dep( ),
-			                             depends_on );
+
+			          output_cmake_item(
+			            cur_dep.name( ), cur_dep.file_dep( ),
+			            get_dependency_names( kd, cur_node.outgoing_edges( ) ) );
 		          } );
 		log_message << "include_directories( SYSTEM "
 		               "\"${CMAKE_BINARY_DIR}/install/include\" )\n";
