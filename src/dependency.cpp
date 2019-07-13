@@ -23,6 +23,9 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
+
+#include <daw/daw_copiable_unique_ptr.h>
 
 #include "daw/glean/action_status.h"
 #include "daw/glean/dependency.h"
@@ -30,59 +33,51 @@
 #include "daw/glean/utilities.h"
 
 namespace daw::glean {
+
+	dependency::item_t const &dependency::alt( ) const {
+		return m_alternatives[m_index];
+	}
+
+	dependency::item_t &dependency::alt( ) {
+		return m_alternatives[m_index];
+	}
+
 	dependency::dependency( std::string const &name,
 	                        build_types_t const &build_type )
-	  : m_build_type( build_type )
-	  , m_name( name ) {}
+	  : m_name( name )
+	  , m_alternatives{{build_type}} {}
 
 	dependency::dependency( std::string const &name,
 	                        build_types_t const &build_type,
 	                        glean_file_item const &file_dep )
-	  : m_build_type( build_type )
-	  , m_name( name )
-	  , m_file_dep( std::make_unique<glean_file_item>( file_dep ) ) {}
-
-	dependency::dependency( const dependency &other )
-	  : m_build_type( other.m_build_type )
-	  , m_name( other.m_name )
-	  , m_file_dep( other.m_file_dep
-	                  ? std::make_unique<glean_file_item>( *other.m_file_dep )
-	                  : std::unique_ptr<glean_file_item>( ) ) {}
-
-	dependency &dependency::operator=( const dependency &other ) {
-		m_build_type = other.m_build_type;
-		m_name = other.m_name;
-		m_file_dep = other.m_file_dep
-		               ? std::make_unique<glean_file_item>( *other.m_file_dep )
-		               : std::unique_ptr<glean_file_item>( );
-		return *this;
-	}
-
-	dependency::~dependency( ) {}
+	  : m_name( name )
+	  , m_alternatives{
+	      {build_type,
+	       daw::make_copiable_unique_ptr<glean_file_item const>( file_dep )}} {}
 
 	std::string const &dependency::name( ) const noexcept {
 		return m_name;
 	}
 
 	action_status dependency::build( ::daw::glean::build_types bt ) const {
-		assert( m_file_dep != nullptr );
-		return m_build_type.build( bt, *m_file_dep );
+		assert( alt( ).file_dep );
+		return alt( ).build_type.build( bt, *( alt( ).file_dep ) );
 	}
 
 	action_status dependency::install( ::daw::glean::build_types bt ) const {
-		return m_build_type.install( bt );
+		return alt( ).build_type.install( bt );
 	}
 
 	bool dependency::has_file_dep( ) const noexcept {
-		return static_cast<bool>( m_file_dep );
+		return static_cast<bool>( alt( ).file_dep );
 	}
 
 	glean_file_item const &dependency::file_dep( ) const noexcept {
-		assert( m_file_dep != nullptr );
-		return *m_file_dep;
+		assert( alt( ).file_dep );
+		return *( alt( ).file_dep );
 	}
 
-	std::vector<dependency> &dependency::alternatives( ) {
+	std::vector<dependency::item_t> &dependency::alternatives( ) {
 		return m_alternatives;
 	}
 } // namespace daw::glean

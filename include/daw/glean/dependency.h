@@ -22,9 +22,11 @@
 
 #pragma once
 
+#include <vector>
 #include <string>
 #include <utility>
-#include <vector>
+
+#include <daw/daw_copiable_unique_ptr.h>
 
 #include "action_status.h"
 #include "build_types.h"
@@ -34,11 +36,19 @@
 namespace daw::glean {
 	struct glean_file_item;
 
-	class dependency {
-		build_types_t m_build_type;
+	struct dependency {
+		struct item_t {
+			build_types_t build_type;
+			daw::copiable_unique_ptr<glean_file_item const> file_dep{};
+		};
+
+	private:
 		std::string m_name;
-		std::unique_ptr<glean_file_item const> m_file_dep{};
-		std::vector<dependency> m_alternatives{};
+		std::vector<item_t> m_alternatives{};
+		size_t m_index = 0;
+
+		item_t const &alt( ) const;
+		item_t &alt( );
 
 	public:
 		dependency( std::string const &name, build_types_t const &build_type );
@@ -46,17 +56,11 @@ namespace daw::glean {
 		dependency( std::string const &name, build_types_t const &build_type,
 		            glean_file_item const &file_dep );
 
-		dependency( dependency const &other );
-		dependency &operator=( dependency const &other );
-		~dependency( );
-		dependency( dependency && ) noexcept = default;
-		dependency &operator=( dependency &&other ) noexcept = default;
-
 		std::string const &name( ) const noexcept;
 		action_status build( ::daw::glean::build_types bt ) const;
 		action_status install( ::daw::glean::build_types bt ) const;
 		glean_file_item const &file_dep( ) const noexcept;
 		bool has_file_dep( ) const noexcept;
-		std::vector<dependency> &alternatives( );
+		std::vector<item_t> &alternatives( );
 	};
 } // namespace daw::glean

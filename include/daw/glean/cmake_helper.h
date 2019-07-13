@@ -23,6 +23,7 @@
 #pragma once
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <daw/daw_utility.h>
@@ -55,20 +56,12 @@ namespace daw::glean {
 	struct cmake_action_configure {
 		fs::path source_path;
 		fs::path install_prefix;
-		std::vector<std::string> custom_arguments{};
+		std::vector<std::string> custom_arguments;
 		bool has_glean;
 
-		inline cmake_action_configure( fs::path source, fs::path install ) noexcept
-		  : source_path( source )
-		  , install_prefix( install ) {}
-
-		inline cmake_action_configure( fs::path source, fs::path install,
-		                               std::vector<std::string> custom,
-		                               bool hasglean ) noexcept
-		  : source_path( source )
-		  , install_prefix( install )
-		  , custom_arguments( std::move( custom ) )
-		  , has_glean( hasglean ) {}
+		cmake_action_configure( fs::path source, fs::path install,
+		                        std::vector<std::string> custom,
+		                        bool hasglean ) noexcept;
 
 		std::vector<std::string> build_args( fs::path build_path,
 		                                     daw::glean::build_types bt ) const;

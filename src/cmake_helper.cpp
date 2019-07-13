@@ -53,6 +53,14 @@ namespace daw::glean {
 		return result;
 	}
 
+	cmake_action_configure::cmake_action_configure(
+	  fs::path source, fs::path install, std::vector<std::string> custom,
+	  bool hasglean ) noexcept
+	  : source_path( std::move( source ) )
+	  , install_prefix( std::move( install ) )
+	  , custom_arguments( std::move( custom ) )
+	  , has_glean( hasglean ) {}
+
 	std::vector<std::string>
 	cmake_action_build::build_args( fs::path build_path,
 	                                daw::glean::build_types bt ) const {
