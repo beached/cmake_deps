@@ -30,8 +30,8 @@
 #include "action_status.h"
 #include "build_types.h"
 #include "download_types.h"
-#include "glean_options.h"
 #include "glean_file_item.h"
+#include "glean_options.h"
 
 namespace daw::glean {
 
@@ -60,6 +60,7 @@ namespace daw::glean {
 		action_status install( ::daw::glean::build_types bt ) const;
 		glean_file_item const &file_dep( ) const noexcept;
 		bool has_file_dep( ) const noexcept;
-		std::vector<item_t> &alternatives( );
+		std::vector<item_t> &alternatives( ) noexcept;
+		std::vector<item_t> const &alternatives( ) const noexcept;
 	};
 } // namespace daw::glean

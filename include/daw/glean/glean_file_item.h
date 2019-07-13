@@ -37,6 +37,18 @@ namespace daw::glean {
 		std::string version{};
 		std::string custom_options{};
 		std::vector<std::string> cmake_args{};
+
+	private:
+		inline decltype( auto ) to_tuple( ) const noexcept {
+			return std::tie( provides, download_type, build_type, uri, version,
+			                 custom_options, cmake_args );
+		}
+
+	public:
+		inline friend bool operator==( glean_file_item const &lhs,
+		                               glean_file_item const &rhs ) noexcept {
+			return lhs.to_tuple( ) == rhs.to_tuple( );
+		}
 	};
 
 	namespace symbols_glean_file_item {

@@ -98,8 +98,23 @@ namespace daw::glean {
 			return opts.glean_cache / dep.build_type / dep.provides;
 		}
 
-		void download_node( glean_file_item const &child_dep,
-		                    fs::path const &cache_folder ) {
+		template<typename T>
+		action_status
+		download_node( glean_file_item const &child_dep,
+		               fs::path const &cache_folder,
+		               ::daw::graph_t<dependency> const &known_deps,
+		               find_dep_by_name_t<T> const &find_dep_by_name ) {
+
+			// Check if we have downloaded this resource already
+			if( auto node_id = find_dep_by_name( child_dep.provides ); node_id ) {
+				auto const &dep = known_deps.get_raw_node( *node_id ).value( );
+				for( auto const &alt : dep.alternatives( ) ) {
+					if( child_dep.download_type == alt.file_dep->download_type and
+					    child_dep.uri == alt.file_dep->uri ) {
+						return action_status::success;
+					}
+				}
+			}
 
 			if( download_types_t( child_dep.download_type, child_dep.uri,
 			                      child_dep.version, cache_folder )
@@ -108,15 +123,14 @@ namespace daw::glean {
 				log_error << "Error downloading\n";
 				exit( EXIT_FAILURE );
 			}
+			return action_status::success;
 		}
 
 		bool is_glean_project( fs::path cache_folder ) {
 			return exists( cache_folder / "source" / "glean.json" );
 		}
 
-		void merge_nodes( dependency &existing_node, dependency &new_node ) {
-
-		}
+		void merge_nodes( dependency &existing_node, dependency &new_node ) {}
 
 		daw::node_id_t process_config_file( fs::path const &config_file_path,
 		                                    daw::graph_t<dependency> &known_deps,
@@ -135,7 +149,8 @@ namespace daw::glean {
 			auto const dep_cache_folder = cache_folder( opts, child_dep );
 			ensure_cache_folder_structure( dep_cache_folder );
 
-			download_node( child_dep, dep_cache_folder );
+			download_node( child_dep, dep_cache_folder, known_deps,
+			               find_dep_by_name );
 
 			bool const has_glean = is_glean_project( dep_cache_folder );
 
@@ -248,71 +263,69 @@ namespace daw::glean {
 		} );
 	}
 
-	void cmake_deps( daw::graph_t<dependency> const &kd ) {
-		daw::graph_t<dependency> known_deps = kd;
-		struct dep_t {
-			dependency const *data;
-			std::vector<std::string> depends_on{};
-
-			dep_t( dependency const &d ) noexcept
-			  : data( &d ) {}
-		};
-		auto deps = std::vector<dep_t>( );
-
-		auto leaf_ids = known_deps.find_leaves( );
-		auto const find_name = [&kd]( node_id_t id ) {
-			return kd.get_raw_node( id ).value( ).name( );
-		};
-		while( !leaf_ids.empty( ) ) {
-			for( auto leaf_id : leaf_ids ) {
-				auto &cur_node = known_deps.get_raw_node( leaf_id );
-				auto &cur_dep = cur_node.value( );
-				if( cur_dep.has_file_dep( ) ) {
-					auto dep = dep_t( cur_dep );
-					for( auto child_id : kd.get_node( leaf_id ).outgoing_edges( ) ) {
-						auto cur_name = find_name( child_id );
-						if( !cur_name.empty( ) ) {
-							dep.depends_on.push_back( cur_name );
-						}
-					}
-					deps.push_back( std::move( dep ) );
-				}
-				known_deps.remove_node( leaf_id );
-			}
-			leaf_ids = known_deps.find_leaves( );
-		}
-
-		log_message << "\ninclude( ExternalProject )\n";
-		// need to go backwards so that cmake has correct order
-		for( auto const &cur_dep : deps ) {
+	namespace {
+		void output_cmake_item( std::string const &name,
+		                        glean_file_item const &fdep,
+		                        std::vector<std::string> depends ) {
 			log_message << "externalproject_add(\n";
-			log_message << "  " << cur_dep.data->name( ) << "_prj\n";
-			if( !cur_dep.depends_on.empty( ) ) {
+			log_message << "  " << name << "_prj\n";
+
+			if( !depends.empty( ) ) {
 				log_message << "  DEPENDS";
-				for( auto const &child : cur_dep.depends_on ) {
+				for( auto const &child : depends ) {
 					log_message << ' ' << child << "_prj";
 				}
 				log_message << '\n';
 			}
-			log_message << "  GIT_REPOSITORY \"" << cur_dep.data->file_dep( ).uri
+			log_message << "  GIT_REPOSITORY \"" << fdep.uri << "\"\n";
+			log_message << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/" << name
 			            << "\"\n";
-			log_message << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/"
-			            << cur_dep.data->name( ) << "\"\n";
-			log_message << "  GIT_TAG \"" << cur_dep.data->file_dep( ).version
-			            << "\"\n"; // TODO use version
+
+			if( !fdep.version.empty( ) ) {
+				log_message << "  GIT_TAG \"" << fdep.version << "\"\n";
+			}
 			log_message << "  INSTALL_DIR \"${CMAKE_BINARY_DIR}/install\"\n";
 			log_message << "  CMAKE_ARGS "
 			               "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install "
 			               "-DGLEAN_INSTALL_ROOT=${CMAKE_BINARY_DIR}/install\n";
 			log_message << ")\n\n";
 		}
+	} // namespace
+
+	void cmake_deps( daw::graph_t<dependency> const &kd ) {
+		auto const find_name = [&kd]( node_id_t id ) {
+			return kd.get_raw_node( id ).value( ).name( );
+		};
+		log_message << "\ninclude( ExternalProject )\n";
+		kd.visit( []( auto &&... ) { return true; },
+		          [&]( auto &&cur_node ) {
+			          dependency const &cur_dep = cur_node.value( );
+			          if( !cur_dep.has_file_dep( ) ) {
+				          return;
+			          }
+			          auto depends_on = std::vector<std::string>{};
+			          for( auto child_id : cur_node.outgoing_edges( ) ) {
+				          auto cur_name = find_name( child_id );
+				          if( !cur_name.empty( ) ) {
+					          depends_on.push_back( cur_name );
+				          }
+			          }
+			          output_cmake_item( cur_dep.name( ), cur_dep.file_dep( ),
+			                             depends_on );
+		          } );
 		log_message << "include_directories( SYSTEM "
 		               "\"${CMAKE_BINARY_DIR}/install/include\" )\n";
 		log_message << "link_directories( \"${CMAKE_BINARY_DIR}/install/lib\" )\n";
 		log_message << "set( DEP_PROJECT_DEPS";
-		for( auto const &dep : deps ) {
-			log_message << ' ' << dep.data->name( ) << "_prj";
-		}
+
+		kd.visit( []( auto &&... ) { return true; },
+		          [&]( auto &&cur_node ) {
+			          dependency const &cur_dep = cur_node.value( );
+			          if( !cur_dep.has_file_dep( ) ) {
+				          return;
+			          }
+			          log_message << ' ' << cur_dep.name( ) << "_prj";
+		          } );
 		log_message << " )\n";
 	}
 } // namespace daw::glean

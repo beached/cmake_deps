@@ -33,10 +33,12 @@
 namespace daw::glean {
 
 	dependency::item_t const &dependency::alt( ) const {
+		assert( m_alternatives.size( ) > m_index );
 		return m_alternatives[m_index];
 	}
 
 	dependency::item_t &dependency::alt( ) {
+		assert( m_alternatives.size( ) > m_index );
 		return m_alternatives[m_index];
 	}
 
@@ -73,7 +75,11 @@ namespace daw::glean {
 		return *( alt( ).file_dep );
 	}
 
-	std::vector<dependency::item_t> &dependency::alternatives( ) {
+	std::vector<dependency::item_t> &dependency::alternatives( ) noexcept {
+		return m_alternatives;
+	}
+
+	std::vector<dependency::item_t> const &dependency::alternatives( ) const noexcept {
 		return m_alternatives;
 	}
 } // namespace daw::glean
