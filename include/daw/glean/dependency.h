@@ -38,6 +38,7 @@ namespace daw::glean {
 		build_types_t m_build_type;
 		std::string m_name;
 		std::unique_ptr<glean_file_item const> m_file_dep{};
+		std::vector<dependency> m_alternatives{};
 
 	public:
 		dependency( std::string const &name, build_types_t const &build_type );
@@ -60,11 +61,8 @@ namespace daw::glean {
 		int compare( dependency const &rhs ) const noexcept;
 		glean_file_item const &file_dep( ) const noexcept;
 		bool has_file_dep( ) const noexcept;
+		std::vector<dependency> & alternatives( );
 	};
-
-	bool operator==( dependency const &lhs, dependency const &rhs ) noexcept;
-	bool operator!=( dependency const &lhs, dependency const &rhs ) noexcept;
-	bool operator<( dependency const &lhs, dependency const &rhs ) noexcept;
 } // namespace daw::glean
 
 namespace std {

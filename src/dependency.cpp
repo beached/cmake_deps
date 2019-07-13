@@ -100,15 +100,7 @@ namespace daw::glean {
 		return *m_file_dep;
 	}
 
-	bool operator==( dependency const &lhs, dependency const &rhs ) noexcept {
-		return lhs.compare( rhs ) == 0;
-	}
-
-	bool operator!=( dependency const &lhs, dependency const &rhs ) noexcept {
-		return lhs.compare( rhs ) != 0;
-	}
-
-	bool operator<( dependency const &lhs, dependency const &rhs ) noexcept {
-		return lhs.compare( rhs ) < 0;
+	std::vector<dependency> &dependency::alternatives( ) {
+		return m_alternatives;
 	}
 } // namespace daw::glean

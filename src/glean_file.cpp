@@ -113,6 +113,10 @@ namespace daw::glean {
 			return exists( cache_folder / "source" / "glean.json" );
 		}
 
+		void merge_nodes( dependency &existing_node, dependency &new_node ) {
+
+		}
+
 		daw::node_id_t process_config_file( fs::path const &config_file_path,
 		                                    daw::graph_t<dependency> &known_deps,
 		                                    glean_options const &opts,
@@ -125,13 +129,7 @@ namespace daw::glean {
 		                         glean_file_item const &child_dep,
 		                         find_dep_by_name_t<T> const &find_dep_by_name,
 		                         node_id_t cur_node_id ) {
-			if( auto dep_id = find_dep_by_name( child_dep.provides ); dep_id ) {
-				// Child exists in graph
-				// Add it as a dependency of current node
-				// TODO, handle merging of differences
-				known_deps.add_directed_edge( cur_node_id, *dep_id );
-				return;
-			}
+			auto existing_dep_id = find_dep_by_name( child_dep.provides );
 
 			auto const dep_cache_folder = cache_folder( opts, child_dep );
 			ensure_cache_folder_structure( dep_cache_folder );
@@ -143,8 +141,17 @@ namespace daw::glean {
 			auto builder = build_types_t( child_dep.build_type, dep_cache_folder,
 			                              opts.install_prefix, opts, has_glean );
 
-			auto dep_id = known_deps.add_node( child_dep.provides,
-			                                   daw::move( builder ), child_dep );
+			auto new_node =
+			  dependency( child_dep.provides, daw::move( builder ), child_dep );
+			auto dep_id = [&]( ) {
+				if( existing_dep_id ) {
+					auto &existing_node = known_deps.get_raw_node( *existing_dep_id );
+					merge_nodes( existing_node.value( ), new_node );
+					return *existing_dep_id;
+				} else {
+					return known_deps.add_node( daw::move( new_node ) );
+				}
+			}( );
 			known_deps.add_directed_edge( cur_node_id, dep_id );
 
 			auto const &cur_dep = known_deps.get_raw_node( dep_id ).value( );
