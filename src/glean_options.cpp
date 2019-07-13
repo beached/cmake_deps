@@ -56,7 +56,10 @@ namespace daw::glean {
 			  "cmake_arg",
 			  boost::program_options::value<std::vector<std::string>>( )
 			    ->multitoken( ),
-			  "additional commandline arguments to pass to cmake(1 per cmake_arg)" );
+			  "additional commandline arguments to pass to cmake(1 per cmake_arg)" )(
+			  "use_first_dependency",
+			  boost::program_options::value<bool>( )->default_value( false ),
+			  "use the first dependency that provides a resource" );
 
 			auto vm = boost::program_options::variables_map( );
 			try {
@@ -126,6 +129,7 @@ namespace daw::glean {
 
 		build_type = vm["build_type"].template as<daw::glean::build_types>( );
 		output_type = vm["output_type"].template as<daw::glean::output_types>( );
+		use_first = vm["use_first_dependency"].template as<bool>( );
 
 		if( !vm["cmake_arg"].empty( ) ) {
 			cmake_args = vm["cmake_arg"].template as<std::vector<std::string>>( );

@@ -25,6 +25,7 @@
 #include <string>
 #include <unordered_set>
 
+#include <daw/daw_graph_algorithm.h>
 #include <daw/daw_read_file.h>
 #include <daw/json/daw_json_link.h>
 
@@ -103,11 +104,14 @@ namespace daw::glean {
 		download_node( glean_file_item const &child_dep,
 		               fs::path const &cache_folder,
 		               ::daw::graph_t<dependency> const &known_deps,
-		               find_dep_by_name_t<T> const &find_dep_by_name ) {
+		               find_dep_by_name_t<T> const &find_dep_by_name, glean_options const & opts ) {
 
 			// Check if we have downloaded this resource already
 			if( auto node_id = find_dep_by_name( child_dep.provides ); node_id ) {
 				auto const &dep = known_deps.get_raw_node( *node_id ).value( );
+				if( opts.use_first ) {
+					return action_status::success;
+				}
 				for( auto const &alt : dep.alternatives( ) ) {
 					if( !alt.file_dep ) {
 						continue;
@@ -154,7 +158,7 @@ namespace daw::glean {
 			ensure_cache_folder_structure( dep_cache_folder );
 
 			download_node( child_dep, dep_cache_folder, known_deps,
-			               find_dep_by_name );
+			               find_dep_by_name, opts );
 
 			bool const has_glean = is_glean_project( dep_cache_folder );
 
@@ -213,21 +217,6 @@ namespace daw::glean {
 			}
 			return cur_node_id;
 		}
-
-		template<typename Function>
-		void deps_for_each( daw::graph_t<dependency> known_deps, Function func ) {
-			auto leaf_ids = known_deps.find_leaves( );
-			while( !leaf_ids.empty( ) ) {
-				for( auto leaf_id : leaf_ids ) {
-					auto &cur_node = known_deps.get_raw_node( leaf_id );
-					auto &cur_dep = cur_node.value( );
-					func( cur_dep );
-					known_deps.remove_node( leaf_id );
-				}
-				leaf_ids = known_deps.find_leaves( );
-			}
-			daw::exception::postcondition_check( known_deps.empty( ) );
-		}
 	} // namespace
 
 	daw::graph_t<dependency>
@@ -252,9 +241,10 @@ namespace daw::glean {
 
 	void process_deps( daw::graph_t<dependency> known_deps,
 	                   glean_options const &opts ) {
-		deps_for_each( std::move( known_deps ), [&]( dependency const &cur_dep ) {
+		daw::topological_sorted_walk_rev( known_deps, [&opts]( auto const &node ) {
+			auto const &cur_dep = node.value( );
 			if( cur_dep.has_file_dep( ) ) {
-				log_message << "-------------------------------------\n";
+				log_message << "\n-------------------------------------\n";
 				log_message << "Processing - " << cur_dep.name( ) << '\n';
 				log_message << "-------------------------------------\n\n";
 				if( cur_dep.build( opts.build_type ) == action_status::failure ) {
@@ -315,13 +305,17 @@ namespace daw::glean {
 	} // namespace
 
 	void cmake_deps( daw::graph_t<dependency> const &kd ) {
+		if( kd.find_roots( ).size( ) != 1U ) {
+			log_error << "There should only ever be 1 root in the graph\n";
+			std::abort( );
+		}
 		log_message << "\ninclude( ExternalProject )\n";
-		kd.visit( [&]( auto &&cur_node ) {
-			dependency const &cur_dep = cur_node.value( );
+
+		daw::topological_sorted_walk_rev( kd, [&]( auto const &cur_node ) {
+			auto const &cur_dep = cur_node.value( );
 			if( !cur_dep.has_file_dep( ) ) {
 				return;
 			}
-
 			output_cmake_item(
 			  cur_dep.name( ), cur_dep.file_dep( ),
 			  get_dependency_names( kd, cur_node.outgoing_edges( ) ) );

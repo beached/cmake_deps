@@ -46,6 +46,7 @@ namespace daw::glean {
 		daw::glean::build_types build_type{};
 		daw::glean::output_types output_type{};
 		std::vector<std::string> cmake_args{};
+		bool use_first = false;
 
 		glean_options( int argc, char **argv );
 	};
