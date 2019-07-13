@@ -54,23 +54,9 @@ namespace daw::glean {
 
 		std::string const &name( ) const noexcept;
 		action_status build( ::daw::glean::build_types bt ) const;
-		fs::path glean_file( ) const;
 		action_status install( ::daw::glean::build_types bt ) const;
-		std::vector<std::string> dep_names( ) const;
-		size_t dep_count( ) const noexcept;
-		int compare( dependency const &rhs ) const noexcept;
 		glean_file_item const &file_dep( ) const noexcept;
 		bool has_file_dep( ) const noexcept;
-		std::vector<dependency> & alternatives( );
+		std::vector<dependency> &alternatives( );
 	};
 } // namespace daw::glean
-
-namespace std {
-	template<>
-	struct hash<daw::glean::dependency> {
-		inline size_t operator( )( ::daw::glean::dependency const &value ) const
-		  noexcept {
-			return std::hash<std::string>{}( value.name( ) );
-		}
-	};
-} // namespace std

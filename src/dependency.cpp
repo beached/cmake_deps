@@ -69,26 +69,8 @@ namespace daw::glean {
 		return m_build_type.build( bt, *m_file_dep );
 	}
 
-	fs::path dependency::glean_file( ) const {
-		std::abort( );
-		//		return {};
-	}
-
 	action_status dependency::install( ::daw::glean::build_types bt ) const {
 		return m_build_type.install( bt );
-	}
-
-	std::vector<std::string> dependency::dep_names( ) const {
-		std::abort( );
-		//		return {};
-	}
-
-	size_t dependency::dep_count( ) const noexcept {
-		return dep_names( ).size( );
-	}
-
-	int dependency::compare( dependency const &rhs ) const noexcept {
-		return m_name.compare( rhs.m_name );
 	}
 
 	bool dependency::has_file_dep( ) const noexcept {
