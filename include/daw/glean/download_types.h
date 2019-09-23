@@ -22,12 +22,11 @@
 
 #pragma once
 
-#include <string>
 #include <utility>
 #include <variant>
-#include <vector>
 
 #include <daw/daw_enable_if.h>
+#include <daw/daw_string_view.h>
 #include <daw/daw_traits.h>
 #include <daw/daw_visit.h>
 
@@ -39,51 +38,42 @@
 namespace daw::glean {
 	template<typename... DownloadTypes>
 	class basic_download_types {
+		static_assert( sizeof...( DownloadTypes ) > 0 );
+
 		using variant_t = std::variant<DownloadTypes...>;
 		variant_t m_value;
 
-		template<typename T, typename... Args>
-		static constexpr variant_t construct_dt( daw::string_view type,
-		                                         Args &&... args ) {
-
+		template<typename T>
+		static constexpr variant_t construct_dt( daw::string_view type ) {
 			if( T::type_id == type ) {
-				if constexpr( std::is_constructible_v<T, Args...> ) {
-					return {T( std::forward<Args>( args )... )};
-				} else {
-					std::abort( );
-				}
+				return daw::construct_a<T>( );
 			}
 			std::abort( );
 		}
 
-		template<typename T, typename... Ts, typename... Args,
-		         daw::enable_if_t<( sizeof...( Ts ) > 0 )> = nullptr>
-		static constexpr variant_t construct_dt( daw::string_view type,
-		                                         Args &&... args ) {
+		template<typename T, typename... Ts,
+		         daw::enable_when_t<( sizeof...( Ts ) > 0 )> = nullptr>
+		static constexpr variant_t construct_dt( daw::string_view type ) {
 			if( T::type_id == type ) {
-				if constexpr( std::is_constructible_v<T, Args...> ) {
-					return {T( std::forward<Args>( args )... )};
-				} else {
-					std::abort( );
-				}
+				return daw::construct_a<T>( );
 			}
-			return construct_dt<Ts...>( type, std::forward<Args>( args )... );
+			return construct_dt<Ts...>( type );
 		}
 
 	public:
-		template<typename T, daw::enable_if_t<daw::traits::is_one_of_v<
+		template<typename T, daw::enable_when_t<daw::traits::is_one_of_v<
 		                       daw::remove_cvref_t<T>, DownloadTypes...>> = nullptr>
 		constexpr basic_download_types( T &&dep )
 		  : m_value( std::forward<T>( dep ) ) {}
 
-		template<typename... Args>
-		constexpr basic_download_types( daw::string_view type, Args &&... args )
-		  : m_value( construct_dt<DownloadTypes...>(
-		      type, std::forward<Args>( args )... ) ) {}
+		constexpr basic_download_types( daw::string_view type )
+		  : m_value( construct_dt<DownloadTypes...>( type ) ) {}
 
-		constexpr action_status download( ) const {
-			return daw::visit_nt( m_value,
-			                      []( auto const &v ) { return v.download( ); } );
+		inline action_status download( glean_file_item const &dep,
+		                               fs::path const &cache_folder ) const {
+			return daw::visit_nt( m_value, [&]( auto const &v ) {
+				return v.download( dep, cache_folder );
+			} );
 		}
 
 		constexpr daw::string_view type_id( ) const noexcept {

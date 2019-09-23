@@ -86,6 +86,7 @@ set( HEADER_FILES
 	${HEADER_FOLDER}/daw/glean/proc.h
 	${HEADER_FOLDER}/daw/glean/svn_helper.h
 	${HEADER_FOLDER}/daw/glean/utilities.h
+	${HEADER_FOLDER}/daw/glean/impl/build_types_impl.h
 )
 
 set( SOURCE_FILES

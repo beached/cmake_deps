@@ -22,18 +22,16 @@
 
 #pragma once
 
-#include <daw/daw_string_view.h>
-
 #include "action_status.h"
+#include "glean_file_item.h"
+#include "utilities.h"
 
 namespace daw::glean {
 	struct download_none {
 		constexpr static daw::string_view type_id = "none";
 
-		template<typename... Ignored>
-		constexpr download_none( Ignored &&... ) noexcept {}
-
-		constexpr action_status download( ) const {
+		constexpr action_status download( glean_file_item const &,
+		                                  fs::path const & ) const {
 			return action_status::success;
 		}
 	};

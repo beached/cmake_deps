@@ -55,15 +55,7 @@ int main( int argc, char **argv ) {
 	log_message << "glean cache: " << opts.glean_cache << '\n';
 	log_message << "install prefix: " << opts.install_prefix << '\n';
 	auto deps = daw::glean::process_config_file( "./glean.json", opts );
-	::daw::topological_sorted_walk(
-	  deps,
-	  []( auto const &node ) {
-	  	auto const & dep = node.value( );
-		  std::cout << dep.name( );
-	  },
-	  []( auto const &lhs, auto const &rhs ) {
-		  return lhs.value( ).name( ) > rhs.value( ).name( );
-	  } );
+
 	switch( opts.output_type ) {
 	case daw::glean::output_types::process:
 		daw::glean::process_deps( std::move( deps ), opts );

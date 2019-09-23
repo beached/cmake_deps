@@ -33,7 +33,7 @@ namespace daw::glean {
 	process_config_file( fs::path const &config_file_path,
 	                     glean_options const &opts );
 
-	void process_deps( daw::graph_t<dependency> known_deps,
+	void process_deps( daw::graph_t<dependency> const &known_deps,
 	                   glean_options const &opts );
 
 	void cmake_deps( daw::graph_t<dependency> const &known_deps );

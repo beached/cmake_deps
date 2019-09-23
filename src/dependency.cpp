@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "daw/glean/action_status.h"
@@ -42,15 +43,13 @@ namespace daw::glean {
 		return m_alternatives[m_index];
 	}
 
-	dependency::dependency( std::string const &name,
-	                        build_types_t const &build_type )
-	  : m_name( name )
+	dependency::dependency( std::string name, build_types_t const &build_type )
+	  : m_name( std::move( name ) )
 	  , m_alternatives{{build_type}} {}
 
-	dependency::dependency( std::string const &name,
-	                        build_types_t const &build_type,
+	dependency::dependency( std::string name, build_types_t const &build_type,
 	                        glean_file_item const &file_dep )
-	  : m_name( name )
+	  : m_name( std::move( name ) )
 	  , m_alternatives{{build_type, file_dep}} {}
 
 	std::string const &dependency::name( ) const noexcept {
@@ -79,7 +78,12 @@ namespace daw::glean {
 		return m_alternatives;
 	}
 
-	std::vector<dependency::item_t> const &dependency::alternatives( ) const noexcept {
+	std::vector<dependency::item_t> const &dependency::alternatives( ) const
+	  noexcept {
 		return m_alternatives;
+	}
+
+	void dependency::add_alternative( glean_file_item const &gfi ) {
+		m_alternatives.emplace_back( build_types_t( gfi.build_type.c_str( ) ), gfi );
 	}
 } // namespace daw::glean

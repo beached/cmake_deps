@@ -35,8 +35,8 @@
 
 namespace daw::glean {
 
-	struct dependency {
-		struct item_t {
+	struct [[nodiscard]] dependency {
+		struct [[nodiscard]] item_t {
 			build_types_t build_type;
 			std::optional<glean_file_item> file_dep{};
 		};
@@ -50,17 +50,18 @@ namespace daw::glean {
 		item_t &alt( );
 
 	public:
-		dependency( std::string const &name, build_types_t const &build_type );
+		dependency( std::string name, build_types_t const &build_type );
 
-		dependency( std::string const &name, build_types_t const &build_type,
+		dependency( std::string name, build_types_t const &build_type,
 		            glean_file_item const &file_dep );
 
-		std::string const &name( ) const noexcept;
-		action_status build( ::daw::glean::build_types bt ) const;
-		action_status install( ::daw::glean::build_types bt ) const;
-		glean_file_item const &file_dep( ) const noexcept;
-		bool has_file_dep( ) const noexcept;
-		std::vector<item_t> &alternatives( ) noexcept;
-		std::vector<item_t> const &alternatives( ) const noexcept;
+		[[nodiscard]] std::string const &name( ) const noexcept;
+		[[nodiscard]] action_status build( ::daw::glean::build_types bt ) const;
+		[[nodiscard]] action_status install( ::daw::glean::build_types bt ) const;
+		[[nodiscard]] glean_file_item const &file_dep( ) const noexcept;
+		[[nodiscard]] bool has_file_dep( ) const noexcept;
+		[[nodiscard]] std::vector<item_t> &alternatives( ) noexcept;
+		[[nodiscard]] std::vector<item_t> const &alternatives( ) const noexcept;
+		void add_alternative( glean_file_item const & gfi );
 	};
 } // namespace daw::glean

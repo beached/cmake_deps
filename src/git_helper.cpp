@@ -27,26 +27,26 @@
 #include "daw/glean/utilities.h"
 
 namespace daw::glean {
-	std::vector<std::string> git_action_pull::build_args( fs::path ) const {
+	std::vector<std::string> git_action_pull::build_args( const fs::path& ) const {
 		return {"pull", "--ff-only"};
 	}
 
 	std::vector<std::string>
-	git_action_clone::build_args( fs::path work_tree ) const {
+	git_action_clone::build_args( const fs::path& work_tree ) const {
 		std::vector<std::string> result = {"clone"};
 		if( recurse_submodules ) {
-			result.push_back( "--recurse-submodules" );
+			result.emplace_back("--recurse-submodules" );
 		}
 		result.push_back( remote_uri );
 		result.push_back( work_tree.string( ) );
 		return result;
 	}
 
-	std::vector<std::string> git_action_version::build_args( fs::path ) const {
+	std::vector<std::string> git_action_version::build_args( const fs::path& ) const {
 		return {"checkout", version};
 	}
 
-	std::vector<std::string> git_action_reset::build_args( fs::path ) const {
+	std::vector<std::string> git_action_reset::build_args( const fs::path& ) const {
 		return {"reset", "--hard"};
 	}
 } // namespace daw::glean

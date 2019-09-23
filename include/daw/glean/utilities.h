@@ -22,7 +22,7 @@
 
 #pragma once
 
-#if __has_include( <filesystem> ) and defined( __cpp_lib_filesystem )
+#if __has_include( <filesystem> ) and defined( __cpp_lib_filesystem ) and not __APPLE_CC__
 #define DAW_HAS_STDFILESYSTEM
 #include <filesystem>
 #else
@@ -103,55 +103,4 @@ namespace daw::glean {
 			throw glean_exception( ss.str( ) );
 		}
 	}
-
-	/*
-	class curl_t {
-	  CURL *ptr;
-
-	public:
-	  inline curl_t( ) noexcept {
-	    {
-	      std::lock_guard<std::mutex> lock( impl::get_curl_t_init_mutex( ) );
-	      curl_global_init( CURL_GLOBAL_DEFAULT );
-	    }
-	    ptr = curl_easy_init( );
-	  }
-
-	  inline ~curl_t( ) noexcept {
-	    close( );
-	  }
-
-	  inline curl_t( curl_t &&other ) noexcept
-	    : ptr( std::exchange( other.ptr, nullptr ) ) {}
-
-	  inline curl_t &operator=( curl_t &&rhs ) noexcept {
-	    if( this != &rhs ) {
-	      close( );
-	      ptr = std::exchange( rhs.ptr, nullptr );
-	    }
-	    return *this;
-	  }
-
-	  curl_t( curl_t const & ) = delete;
-	  curl_t &operator=( curl_t const & ) = delete;
-
-	  inline void close( ) noexcept {
-	    if( auto tmp = std::exchange( ptr, nullptr ); tmp ) {
-	      try {
-	        curl_easy_cleanup( tmp );
-	        std::lock_guard<std::mutex> lock( impl::get_curl_t_init_mutex( ) );
-	        curl_global_cleanup( );
-	      } catch( ... ) {}
-	    }
-	  }
-
-	  inline operator CURL *( ) const noexcept {
-	    return ptr;
-	  }
-
-	  inline explicit operator bool( ) const noexcept {
-	    return ptr;
-	  }
-	}; // curl_t
-	*/
 } // namespace daw::glean

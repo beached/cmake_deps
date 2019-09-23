@@ -32,18 +32,18 @@
 
 namespace daw::glean {
 	namespace {
-		bool is_git_repos( fs::path repos ) {
+		bool is_git_repos( const fs::path& repos ) {
 			return is_directory( repos / ".git" );
 		}
 
-		action_status git_repos_checkout( fs::path repos,
+		action_status git_repos_checkout( const fs::path& repos,
 		                                  std::string const &version ) {
 			auto const chdir = change_directory( repos );
 			auto result = git_runner( git_action_reset( ), repos, log_message );
 			if( result == action_status::success ) {
 				if( version.empty( ) ) {
-					result = git_runner( git_action_version{"master"}, repos,
-					                     log_message );
+					result =
+					  git_runner( git_action_version{"master"}, repos, log_message );
 				} else {
 					result =
 					  git_runner( git_action_version{version}, repos, log_message );
@@ -52,7 +52,7 @@ namespace daw::glean {
 			return result;
 		}
 
-		action_status git_repos_update( fs::path repos ) {
+		action_status git_repos_update( const fs::path& repos ) {
 			auto const chdir = change_directory( repos );
 			// Clean out any changes
 			auto result = git_runner( git_action_reset( ), repos, log_message );
@@ -68,21 +68,23 @@ namespace daw::glean {
 			auto git_action = git_action_clone( );
 			git_action.remote_uri = remote_repos;
 
-			return git_runner( git_action, repos, log_message );
+			return git_runner( git_action, std::move(repos), log_message );
 		}
 
 	} // namespace
 
-	action_status download_git::download( ) const {
+	action_status download_git::download( glean_file_item const &dep,
+	                                      fs::path const &cache_folder ) const {
 		action_status result = action_status::failure;
+		/*
 		if( is_git_repos( m_local ) ) {
-			result = git_repos_update( m_local );
+		  result = git_repos_update( m_local );
 		} else {
-			result = git_repos_clone( m_remote, m_local );
+		  result = git_repos_clone( m_remote, m_local );
 		}
 		if( result == action_status::success ) {
-			return git_repos_checkout( m_local, m_version );
-		}
+		  return git_repos_checkout( m_local, m_version );
+		}*/
 		return result;
 	}
 } // namespace daw::glean

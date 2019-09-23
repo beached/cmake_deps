@@ -25,6 +25,7 @@
 #include <string>
 #include <unordered_set>
 
+#include <daw/daw_graph.h>
 #include <daw/daw_graph_algorithm.h>
 #include <daw/daw_read_file.h>
 #include <daw/json/daw_json_link.h>
@@ -59,10 +60,10 @@ namespace daw::glean {
 		};
 
 		void validate_config_file( glean_config_file const &cfg_file,
-		                           fs::path const &config_file_path,
+		                           fs::path const &cfg_file_path,
 		                           daw::string_view provides ) {
 			if( cfg_file.provides != provides ) {
-				log_error << "Expected that '" << config_file_path << "' provides '"
+				log_error << "Expected that '" << cfg_file_path << "' provides '"
 				          << provides << "' but '" << cfg_file.provides << "' found\n";
 				exit( EXIT_FAILURE );
 			}
@@ -75,149 +76,166 @@ namespace daw::glean {
 			}
 		}
 
+		fs::path cache_folder( glean_options const &opts,
+		                       glean_file_item const &dep ) {
+			auto const dep_hash =
+			  std::to_string( std::hash<glean_file_item>{}( dep ) );
+			return opts.glean_cache / dep.provides / dep_hash;
+		}
+
 		template<typename T>
-		daw::node_id_t
-		get_add_node( find_dep_by_name_t<T> const &find_dep_by_name,
-		              glean_config_file const &cfg_file, glean_options const &opts,
-		              graph_t<dependency> &known_deps,
-		              fs::path const &cache_folder_name, bool is_root ) {
+		auto merge_cfg_item( find_dep_by_name_t<T> const &find_dep_by_name,
+		                     glean_file_item const &cfg_file,
+		                     glean_options const &opts,
+		                     graph_t<dependency> &known_deps,
+		                     fs::path const &cache_folder_name ) {
+
+			struct result_t {
+				bool is_new{};
+				::daw::node_id_t node_id{};
+
+				operator bool( ) const noexcept {
+					return is_new;
+				}
+			};
 			if( auto tmp = find_dep_by_name( cfg_file.provides ); tmp ) {
-				return *tmp;
+				// We already exist by name, lets see if we are the same
+				auto &old_node = known_deps.get_raw_node( *tmp );
+				if( old_node.value( ).file_dep( ) != cfg_file ) {
+					old_node.value( ).add_alternative( cfg_file );
+					return result_t{true, *tmp};
+				}
+				return result_t{false, *tmp};
 			}
 			// New node
-
-			std::string const build_type =
-			  is_root ? std::string( "none" ) : cfg_file.build_type;
-
-			return known_deps.add_node(
-			  cfg_file.provides, build_types_t( build_type, cache_folder_name,
-			                                    opts.install_prefix, opts, true ) );
-		}
-
-		template<typename Dep>
-		fs::path cache_folder( glean_options const &opts, Dep const &dep ) {
-			return opts.glean_cache / dep.build_type / dep.provides;
-		}
-
-		template<typename T>
-		action_status
-		download_node( glean_file_item const &child_dep,
-		               fs::path const &cache_folder,
-		               ::daw::graph_t<dependency> const &known_deps,
-		               find_dep_by_name_t<T> const &find_dep_by_name, glean_options const & opts ) {
-
-			// Check if we have downloaded this resource already
-			if( auto node_id = find_dep_by_name( child_dep.provides ); node_id ) {
-				auto const &dep = known_deps.get_raw_node( *node_id ).value( );
-				if( opts.use_first ) {
-					return action_status::success;
-				}
-				for( auto const &alt : dep.alternatives( ) ) {
-					if( !alt.file_dep ) {
-						continue;
-					}
-					auto const &tmp = *alt.file_dep;
-					if( child_dep.download_type == tmp.download_type and
-					    child_dep.uri == tmp.uri ) {
-						return action_status::success;
-					}
-				}
-			}
-
-			if( download_types_t( child_dep.download_type, child_dep.uri,
-			                      child_dep.version, cache_folder )
-			      .download( ) == action_status::failure ) {
-
-				log_error << "Error downloading\n";
-				exit( EXIT_FAILURE );
-			}
-			return action_status::success;
-		}
-
-		bool is_glean_project( fs::path cache_folder ) {
-			return exists( cache_folder / "source" / "glean.json" );
-		}
-
-		void merge_nodes( dependency &existing_node, dependency &new_node ) {}
-
-		daw::node_id_t process_config_file( fs::path const &config_file_path,
-		                                    daw::graph_t<dependency> &known_deps,
-		                                    glean_options const &opts,
-		                                    daw::string_view provides,
-		                                    bool is_root = false );
-
-		template<typename T>
-		void process_dependency( daw::graph_t<dependency> &known_deps,
-		                         glean_options const &opts,
-		                         glean_file_item const &child_dep,
-		                         find_dep_by_name_t<T> const &find_dep_by_name,
-		                         node_id_t cur_node_id ) {
-			auto existing_dep_id = find_dep_by_name( child_dep.provides );
-
-			auto const dep_cache_folder = cache_folder( opts, child_dep );
-			ensure_cache_folder_structure( dep_cache_folder );
-
-			download_node( child_dep, dep_cache_folder, known_deps,
-			               find_dep_by_name, opts );
-
-			bool const has_glean = is_glean_project( dep_cache_folder );
-
-			auto builder = build_types_t( child_dep.build_type, dep_cache_folder,
-			                              opts.install_prefix, opts, has_glean );
-
-			auto new_node =
-			  dependency( child_dep.provides, daw::move( builder ), child_dep );
-			auto dep_id = [&]( ) {
-				if( existing_dep_id ) {
-					auto &existing_node = known_deps.get_raw_node( *existing_dep_id );
-					merge_nodes( existing_node.value( ), new_node );
-					return *existing_dep_id;
-				} else {
-					return known_deps.add_node( daw::move( new_node ) );
-				}
-			}( );
-			known_deps.add_directed_edge( cur_node_id, dep_id );
-
-			auto const &cur_dep = known_deps.get_raw_node( dep_id ).value( );
-			if( has_glean ) {
-				process_config_file( dep_cache_folder / "source" / "glean.json",
-				                     known_deps, opts, cur_dep.name( ) );
-			}
-		}
-
-		daw::node_id_t process_config_file( fs::path const &config_file_path,
-		                                    daw::graph_t<dependency> &known_deps,
-		                                    glean_options const &opts,
-		                                    daw::string_view provides,
-		                                    bool is_root ) {
-
-			auto const cfg_file = daw::json::from_json<glean_config_file>(
-			  daw::read_file( config_file_path.c_str( ) ) );
-
-			validate_config_file( cfg_file, config_file_path, provides );
-
-			auto const cache_folder_name = cache_folder( opts, cfg_file );
-
-			ensure_cache_folder_structure( cache_folder_name );
-
-			auto const find_dep_by_name = find_dep_by_name_t( known_deps );
-
-			auto const cur_node_id =
-			  get_add_node( find_dep_by_name, cfg_file, opts, known_deps,
-			                cache_folder_name, is_root );
-
-			if( !(
-			      cfg_file.dependencies.empty( ) or
-			      !known_deps.get_node( cur_node_id ).outgoing_edges( ).empty( ) ) ) {
-
-				for( glean_file_item const &child_dep : cfg_file.dependencies ) {
-					process_dependency( known_deps, opts, child_dep, find_dep_by_name,
-					                    cur_node_id );
-				}
-			}
-			return cur_node_id;
+			return result_t{true,
+			                known_deps.add_node(
+			                  cfg_file.provides,
+			                  build_types_t( cfg_file.build_type, cache_folder_name,
+			                                 opts.install_prefix, opts, true ),
+			                  cfg_file )};
 		}
 	} // namespace
+
+	action_status downloader( glean_file_item const &child_dep,
+	                          fs::path const &cache_path ) {
+		if( download_types_t( child_dep.download_type )
+		      .download( child_dep, cache_path ) == action_status::failure ) {
+
+			log_error << "Error downloading\n";
+			exit( EXIT_FAILURE );
+		}
+		return action_status::success;
+	}
+
+	action_status download_node( glean_file_item const &child_dep,
+	                             fs::path const &cache_folder,
+	                             ::daw::graph_t<dependency> const &known_deps,
+	                             glean_options const &opts ) {
+
+		// Check if we have downloaded this resource already
+		auto const find_dep_by_name = find_dep_by_name_t( known_deps );
+		if( auto node_id = find_dep_by_name( child_dep.provides ); node_id ) {
+			auto const &dep = known_deps.get_raw_node( *node_id ).value( );
+			if( opts.use_first ) {
+				return action_status::success;
+			}
+			for( auto const &alt : dep.alternatives( ) ) {
+				if( !alt.file_dep ) {
+					continue;
+				}
+				auto const &tmp = *alt.file_dep;
+				if( child_dep.download_type == tmp.download_type and
+				    child_dep.uri == tmp.uri ) {
+					return action_status::success;
+				}
+			}
+		}
+		return downloader( child_dep, cache_folder );
+	}
+
+	bool is_glean_project( fs::path cache_root ) {
+		return exists( cache_root / "source" / "glean.json" );
+	}
+
+	void merge_nodes( dependency &existing_node, dependency &&new_node ) {}
+
+	::daw::node_id_t process_config_item( ::daw::graph_t<dependency> &known_deps,
+	                                      glean_options const &opts,
+	                                      glean_file_item const &child_item,
+	                                      ::daw::node_id_t parent_id );
+
+	template<typename T>
+	void process_dependency( daw::graph_t<dependency> &known_deps,
+	                         glean_options const &opts,
+	                         glean_file_item const &child_dep,
+	                         find_dep_by_name_t<T> const &find_dep_by_name,
+	                         node_id_t parent_node_id ) {
+
+		auto existing_dep_id = find_dep_by_name( child_dep.provides );
+
+		auto const dep_cache_folder = cache_folder( opts, child_dep );
+		ensure_cache_folder_structure( dep_cache_folder );
+
+		download_node( child_dep, dep_cache_folder, known_deps, opts );
+
+		bool const has_glean = is_glean_project( dep_cache_folder );
+
+		auto builder = build_types_t( child_dep.build_type, dep_cache_folder,
+		                              opts.install_prefix, opts, has_glean );
+
+		auto new_node =
+		  dependency( child_dep.provides, daw::move( builder ), child_dep );
+		auto const dep_id = [&]( ) {
+			if( existing_dep_id ) {
+				auto &existing_node = known_deps.get_raw_node( *existing_dep_id );
+				merge_nodes( existing_node.value( ), std::move( new_node ) );
+				return *existing_dep_id;
+			} else {
+				return known_deps.add_node( daw::move( new_node ) );
+			}
+		}( );
+		known_deps.add_directed_edge( parent_node_id, dep_id );
+
+		if( has_glean ) {
+			process_config_item( known_deps, opts, child_dep, dep_id );
+		}
+	}
+
+	::daw::node_id_t process_config_item( ::daw::graph_t<dependency> &known_deps,
+	                                      glean_options const &opts,
+	                                      glean_file_item const &child_item,
+	                                      ::daw::node_id_t parent_id ) {
+
+		auto const cache_root = cache_folder( opts, child_item );
+		ensure_cache_folder_structure( cache_root );
+
+		auto const find_dep_by_name = find_dep_by_name_t( known_deps );
+
+		auto const id = merge_cfg_item( find_dep_by_name, child_item, opts,
+		                                known_deps, cache_root );
+
+		if( !id.is_new ) {
+			return id.node_id;
+		}
+		auto const glean_cfg_file = cache_root / "source" / "glean.json";
+		if( !exists( glean_cfg_file ) ) {
+			return id.node_id;
+		}
+		auto const glean_cfg_data = ::daw::json::from_json<glean_config_file>(
+		  ::daw::read_file( glean_cfg_file.c_str( ) ) );
+
+		validate_config_file( glean_cfg_data, glean_cfg_file, child_item.provides );
+
+		if( glean_cfg_data.dependencies.empty( ) or !id.is_new ) {
+			return id.node_id;
+		}
+		for( glean_file_item const &child_dep : glean_cfg_data.dependencies ) {
+			process_dependency( known_deps, opts, child_dep, find_dep_by_name,
+			                    id.node_id );
+		}
+		return id.node_id;
+	}
 
 	daw::graph_t<dependency>
 	process_config_file( fs::path const &config_file_path,
@@ -233,28 +251,37 @@ namespace daw::glean {
 		auto const cfg_file = daw::json::from_json<glean_config_file>(
 		  daw::read_file( config_file_path.c_str( ) ) );
 
-		process_config_file( config_file_path, known_deps, opts, cfg_file.provides,
-		                     true );
+		auto const root_node_id = known_deps.add_node(
+		  cfg_file.provides,
+		  build_types_t( "none", "", opts.install_prefix, opts, false ) );
 
+		for( glean_file_item const &dep : cfg_file.dependencies ) {
+			auto child_id =
+			  process_config_item( known_deps, opts, dep, root_node_id );
+
+			known_deps.add_directed_edge( root_node_id, child_id );
+		}
 		return known_deps;
 	}
 
-	void process_deps( daw::graph_t<dependency> known_deps,
+	void process_deps( daw::graph_t<dependency> const &known_deps,
 	                   glean_options const &opts ) {
-		daw::topological_sorted_walk_rev( known_deps, [&opts]( auto const &node ) {
-			auto const &cur_dep = node.value( );
-			if( cur_dep.has_file_dep( ) ) {
-				log_message << "\n-------------------------------------\n";
-				log_message << "Processing - " << cur_dep.name( ) << '\n';
-				log_message << "-------------------------------------\n\n";
-				if( cur_dep.build( opts.build_type ) == action_status::failure ) {
-					// Do error stuff
-				}
-				if( cur_dep.install( opts.build_type ) == action_status::failure ) {
-					// Do error stuff
-				}
-			}
-		} );
+
+		::daw::reverse_topological_sorted_walk(
+		  known_deps, [&opts]( auto const &node ) {
+			  auto const &cur_dep = node.value( );
+			  if( cur_dep.has_file_dep( ) ) {
+				  log_message << "\n-------------------------------------\n";
+				  log_message << "Processing - " << cur_dep.name( ) << '\n';
+				  log_message << "-------------------------------------\n\n";
+				  if( cur_dep.build( opts.build_type ) == action_status::failure ) {
+					  // Do error stuff
+				  }
+				  if( cur_dep.install( opts.build_type ) == action_status::failure ) {
+					  // Do error stuff
+				  }
+			  }
+		  } );
 	}
 
 	namespace {
@@ -302,6 +329,7 @@ namespace daw::glean {
 			}
 			return depends_on;
 		}
+
 	} // namespace
 
 	void cmake_deps( daw::graph_t<dependency> const &kd ) {
@@ -311,7 +339,7 @@ namespace daw::glean {
 		}
 		log_message << "\ninclude( ExternalProject )\n";
 
-		daw::topological_sorted_walk_rev( kd, [&]( auto const &cur_node ) {
+		::daw::reverse_topological_sorted_walk( kd, [&]( auto const &cur_node ) {
 			auto const &cur_dep = cur_node.value( );
 			if( !cur_dep.has_file_dep( ) ) {
 				return;

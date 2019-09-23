@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 //
-// Copyright (c) 2016-2019 Darrell Wright
+// Copyright (c) 2019 Darrell Wright
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files( the "Software" ), to
@@ -20,39 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <daw/daw_exception.h>
-#include <daw/daw_read_file.h>
-#include <daw/daw_string_view.h>
-#include <daw/temp_file.h>
+#pragma once
 
-#include "daw/glean/glean_config.h"
-#include "daw/glean/utilities.h"
+#include <daw/daw_traits.h>
+#include <daw/daw_utility.h>
 
-namespace daw::glean {
-	fs::path get_home( ) {
-		auto home = std::getenv( "USERPROFILE" );
-		if( !home ) {
-			home = std::getenv( "HOME" );
-		}
-		daw::exception::postcondition_check<std::runtime_error>(
-		  home, "Could not determine home folder" );
-		return home;
-	}
+namespace daw::glean::impl {
+	template<typename T, typename... Args>
+	using has_build_method_detect =
+	  decltype( std::declval<T>( ).build( std::declval<Args>( )... ) );
 
-	glean_config get_config( ) {
-		auto config_file = []( ) -> fs::path {
-			auto const env_var = std::getenv( "GLEAN_CONFIG" );
-			if( env_var ) {
-				return {env_var};
-			} else {
-				return get_home( ) / ".glean.config";
-			}
-		}( );
-		if( exists( config_file ) ) {
-			return daw::json::from_json<glean_config>(
-			  daw::read_file( config_file.c_str( ) ) );
-		} else {
-			return {};
-		}
-	}
-} // namespace daw::glean
+	template<typename T, typename... Args>
+	inline constexpr bool has_build_method_v =
+	  daw::is_detected_v<has_build_method_detect, T, Args...>;
+
+	template<typename T, typename... Args>
+	using has_install_method_detect =
+	  decltype( std::declval<T>( ).install( std::declval<Args>( )... ) );
+
+	template<typename T, typename... Args>
+	inline constexpr bool has_install_method_v =
+	  daw::is_detected_v<has_install_method_detect, T, Args...>;
+
+	template<typename T, typename... Args>
+	using can_construct_build_type_detect =
+	  decltype( daw::construct_a<T>( std::declval<Args>( )... ) );
+
+	template<typename T, typename... Args>
+	inline constexpr bool can_construct_build_type_v =
+	  daw::is_detected_v<can_construct_build_type_detect, T, Args...>;
+} // namespace daw::glean::impl

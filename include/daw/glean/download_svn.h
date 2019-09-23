@@ -22,28 +22,15 @@
 
 #pragma once
 
-#include <string>
-
-#include <daw/daw_string_view.h>
-
 #include "action_status.h"
+#include "glean_file_item.h"
 #include "utilities.h"
 
 namespace daw::glean {
-	class download_svn {
-		std::string m_remote;
-		std::string m_version;
-		fs::path m_local;
-
-	public:
+	struct download_svn {
 		constexpr static daw::string_view type_id = "svn";
 
-		inline download_svn( std::string remote, std::string version,
-		                     fs::path local )
-		  : m_remote( std::move( remote ) )
-		  , m_version( std::move( version ) )
-		  , m_local( std::move( local ) ) {}
-
-		action_status download( ) const;
+		action_status download( glean_file_item const &dep,
+		                        fs::path const &source_folder ) const;
 	};
 } // namespace daw::glean

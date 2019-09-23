@@ -27,6 +27,8 @@
 
 #include <daw/json/daw_json_link.h>
 
+#include "utilities.h"
+
 namespace daw::glean {
 	// Data structure to represent the dependencies
 	struct glean_file_item {
@@ -48,6 +50,16 @@ namespace daw::glean {
 		inline friend bool operator==( glean_file_item const &lhs,
 		                               glean_file_item const &rhs ) noexcept {
 			return lhs.to_tuple( ) == rhs.to_tuple( );
+		}
+
+		inline friend bool operator!=( glean_file_item const &lhs,
+		                               glean_file_item const &rhs ) noexcept {
+			return lhs.to_tuple( ) != rhs.to_tuple( );
+		}
+
+		inline fs::path cache_folder( fs::path const &cache_base_folder ) const {
+			auto uri_hash = std::to_string( std::hash<std::string>{}( uri ) );
+			return cache_base_folder / uri_hash;
 		}
 	};
 
@@ -99,3 +111,13 @@ namespace daw::glean {
 		             json_class<no_name, glean_file_item>>>{};
 	}
 } // namespace daw::glean
+
+namespace std {
+	template<>
+	struct hash<::daw::glean::glean_file_item> {
+		inline size_t operator( )( ::daw::glean::glean_file_item const &g ) const {
+			return ::std::hash<::std::string>{}( g.provides + g.download_type +
+			                                     g.uri );
+		}
+	};
+} // namespace std
