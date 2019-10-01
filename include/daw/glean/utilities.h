@@ -86,10 +86,10 @@ namespace daw::glean {
 	using glean_exception = std::runtime_error;
 
 	inline void verify_folder( fs::path const &path ) {
-		if( !exists( path ) ) {
+		if( not exists( path ) ) {
 			create_directories( path );
 		}
-		if( !exists( path ) || !is_directory( path ) ) {
+		if( not exists( path ) or not is_directory( path ) ) {
 			auto ss = std::stringstream( );
 			ss << "Could not create folder (" << path << ") or is not a directory";
 			throw glean_exception( ss.str( ) );
@@ -97,7 +97,7 @@ namespace daw::glean {
 	}
 
 	inline void verify_file( fs::path const &f ) {
-		if( exists( f ) && !is_regular_file( f ) ) {
+		if( exists( f ) and not is_regular_file( f ) ) {
 			auto ss = std::stringstream( );
 			ss << "File already exists but isn't a file (" << f << ")";
 			throw glean_exception( ss.str( ) );

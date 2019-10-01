@@ -53,7 +53,7 @@ namespace daw::glean {
 		/*
 			auto const process_pipe = [&]( auto &&p ) -> bool {
 				auto line = std::string( );
-				if( !p or !std::getline( p, line ) or line.empty( ) ) {
+				if( not p or not std::getline( p, line ) or line.empty( ) ) {
 					return false;
 				}
 				line += '\n';

@@ -31,7 +31,7 @@
 namespace daw::glean {
 	fs::path get_home( ) {
 		auto home = std::getenv( "USERPROFILE" );
-		if( !home ) {
+		if( not home ) {
 			home = std::getenv( "HOME" );
 		}
 		daw::exception::postcondition_check<std::runtime_error>(

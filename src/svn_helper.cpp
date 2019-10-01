@@ -28,12 +28,12 @@
 
 namespace daw::glean {
 	std::vector<std::string>
-	svn_action_update::build_args( const fs::path& work_tree ) const {
+	svn_action_update::build_args( fs::path const &work_tree ) const {
 		return {"update", work_tree.string( )};
 	}
 
 	std::vector<std::string>
-	svn_action_checkout::build_args( const fs::path& work_tree ) const {
+	svn_action_checkout::build_args( fs::path const &work_tree ) const {
 		return {"checkout", remote_uri, work_tree.string( )};
 	}
 } // namespace daw::glean

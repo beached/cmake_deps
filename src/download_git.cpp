@@ -32,11 +32,11 @@
 
 namespace daw::glean {
 	namespace {
-		bool is_git_repos( const fs::path& repos ) {
+		bool is_git_repos( fs::path const &repos ) {
 			return is_directory( repos / ".git" );
 		}
 
-		action_status git_repos_checkout( const fs::path& repos,
+		action_status git_repos_checkout( fs::path const &repos,
 		                                  std::string const &version ) {
 			auto const chdir = change_directory( repos );
 			auto result = git_runner( git_action_reset( ), repos, log_message );
@@ -52,7 +52,7 @@ namespace daw::glean {
 			return result;
 		}
 
-		action_status git_repos_update( const fs::path& repos ) {
+		action_status git_repos_update( fs::path const &repos ) {
 			auto const chdir = change_directory( repos );
 			// Clean out any changes
 			auto result = git_runner( git_action_reset( ), repos, log_message );
@@ -68,7 +68,7 @@ namespace daw::glean {
 			auto git_action = git_action_clone( );
 			git_action.remote_uri = remote_repos;
 
-			return git_runner( git_action, std::move(repos), log_message );
+			return git_runner( git_action, std::move( repos ), log_message );
 		}
 
 	} // namespace

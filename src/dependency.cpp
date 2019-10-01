@@ -84,6 +84,9 @@ namespace daw::glean {
 	}
 
 	void dependency::add_alternative( glean_file_item const &gfi ) {
-		m_alternatives.emplace_back( build_types_t( gfi.build_type.c_str( ) ), gfi );
+		// TODO fix build_none
+		auto bt = build_types_t( build_none( ) );
+		auto i = item_t{bt, gfi};
+		m_alternatives.push_back( ::daw::move( i ) );
 	}
 } // namespace daw::glean

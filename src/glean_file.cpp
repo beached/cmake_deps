@@ -70,7 +70,7 @@ namespace daw::glean {
 		}
 
 		void ensure_cache_folder_structure( fs::path const &cache_folder_name ) {
-			if( !is_directory( cache_folder_name ) ) {
+			if( not is_directory( cache_folder_name ) ) {
 				fs::create_directories( cache_folder_name / "source" );
 				fs::create_directory( cache_folder_name / "build" );
 			}
@@ -141,7 +141,7 @@ namespace daw::glean {
 				return action_status::success;
 			}
 			for( auto const &alt : dep.alternatives( ) ) {
-				if( !alt.file_dep ) {
+				if( not alt.file_dep ) {
 					continue;
 				}
 				auto const &tmp = *alt.file_dep;
@@ -215,11 +215,11 @@ namespace daw::glean {
 		auto const id = merge_cfg_item( find_dep_by_name, child_item, opts,
 		                                known_deps, cache_root );
 
-		if( !id.is_new ) {
+		if( not id.is_new ) {
 			return id.node_id;
 		}
 		auto const glean_cfg_file = cache_root / "source" / "glean.json";
-		if( !exists( glean_cfg_file ) ) {
+		if( not exists( glean_cfg_file ) ) {
 			return id.node_id;
 		}
 		auto const glean_cfg_data = ::daw::json::from_json<glean_config_file>(
@@ -227,7 +227,7 @@ namespace daw::glean {
 
 		validate_config_file( glean_cfg_data, glean_cfg_file, child_item.provides );
 
-		if( glean_cfg_data.dependencies.empty( ) or !id.is_new ) {
+		if( glean_cfg_data.dependencies.empty( ) or not id.is_new ) {
 			return id.node_id;
 		}
 		for( glean_file_item const &child_dep : glean_cfg_data.dependencies ) {
@@ -241,7 +241,7 @@ namespace daw::glean {
 	process_config_file( fs::path const &config_file_path,
 	                     glean_options const &opts ) {
 
-		if( !exists( config_file_path ) ) {
+		if( not exists( config_file_path ) ) {
 			log_error << "Could not find config file '" << config_file_path << "'\n";
 			exit( EXIT_FAILURE );
 		}
@@ -291,7 +291,7 @@ namespace daw::glean {
 			log_message << "externalproject_add(\n";
 			log_message << "  " << name << "_prj\n";
 
-			if( !depends.empty( ) ) {
+			if( not depends.empty( ) ) {
 				log_message << "  DEPENDS";
 				for( auto const &child : depends ) {
 					log_message << ' ' << child << "_prj";
@@ -302,7 +302,7 @@ namespace daw::glean {
 			log_message << "  SOURCE_DIR \"${CMAKE_BINARY_DIR}/dependencies/" << name
 			            << "\"\n";
 
-			if( !fdep.version.empty( ) ) {
+			if( not fdep.version.empty( ) ) {
 				log_message << "  GIT_TAG \"" << fdep.version << "\"\n";
 			}
 			log_message << "  INSTALL_DIR \"${CMAKE_BINARY_DIR}/install\"\n";
@@ -323,7 +323,7 @@ namespace daw::glean {
 			auto depends_on = std::vector<std::string>{};
 			for( auto const &child_id : edges ) {
 				auto cur_name = find_name( child_id );
-				if( !cur_name.empty( ) ) {
+				if( not cur_name.empty( ) ) {
 					depends_on.push_back( cur_name );
 				}
 			}
@@ -341,7 +341,7 @@ namespace daw::glean {
 
 		::daw::reverse_topological_sorted_walk( kd, [&]( auto const &cur_node ) {
 			auto const &cur_dep = cur_node.value( );
-			if( !cur_dep.has_file_dep( ) ) {
+			if( not cur_dep.has_file_dep( ) ) {
 				return;
 			}
 			output_cmake_item(
@@ -355,7 +355,7 @@ namespace daw::glean {
 
 		kd.visit( [&]( auto &&cur_node ) {
 			dependency const &cur_dep = cur_node.value( );
-			if( !cur_dep.has_file_dep( ) ) {
+			if( not cur_dep.has_file_dep( ) ) {
 				return;
 			}
 			log_message << ' ' << cur_dep.name( ) << "_prj";

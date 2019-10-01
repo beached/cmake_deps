@@ -22,7 +22,6 @@
 
 #include <boost/program_options.hpp>
 #include <cstdlib>
-#include <iostream>
 #include <sstream>
 
 #include "daw/glean/build_types.h"
@@ -86,8 +85,8 @@ namespace daw::glean {
 		template<typename VM>
 		fs::path process_path_opt( VM const &vm, std::string const &name ) {
 			fs::path result;
-			if( vm.count( name.c_str( ) ) ) {
-				result = vm[name.c_str( )].template as<glean::fs::path>( );
+			if( vm.count( name ) ) {
+				result = vm[name].template as<glean::fs::path>( );
 			} else {
 				auto ss = std::stringstream( );
 				ss << result;
@@ -95,7 +94,7 @@ namespace daw::glean {
 				exit( EXIT_FAILURE );
 			}
 			if( exists( result ) ) {
-				if( !is_directory( result ) ) {
+				if( not is_directory( result ) ) {
 					auto ss = std::stringstream( );
 					ss << result;
 					log_error << name << " folder (" << ss.str( )
@@ -112,7 +111,7 @@ namespace daw::glean {
 		auto const vm = get_vm( argc, argv );
 
 		install_prefix = process_path_opt( vm, "prefix" );
-		if( !is_directory( install_prefix ) ) {
+		if( not is_directory( install_prefix ) ) {
 			if( exists( install_prefix ) ) {
 				glean::fs::remove( install_prefix );
 			}
@@ -120,7 +119,7 @@ namespace daw::glean {
 		}
 
 		glean_cache = process_path_opt( vm, "cache" );
-		if( !is_directory( glean_cache ) ) {
+		if( not is_directory( glean_cache ) ) {
 			if( exists( glean_cache ) ) {
 				glean::fs::remove( glean_cache );
 			}
@@ -131,7 +130,7 @@ namespace daw::glean {
 		output_type = vm["output_type"].template as<daw::glean::output_types>( );
 		use_first = vm["use_first_dependency"].template as<bool>( );
 
-		if( !vm["cmake_arg"].empty( ) ) {
+		if( not vm["cmake_arg"].empty( ) ) {
 			cmake_args = vm["cmake_arg"].template as<std::vector<std::string>>( );
 		}
 	}
@@ -164,7 +163,7 @@ namespace daw::glean {
 	std::istream &operator>>( std::istream &is, build_types &bt ) {
 		std::string tmp{};
 		is >> tmp;
-		if( !tmp.empty( ) and ( ( tmp[0] == 'd' ) or ( tmp[0] == 'D' ) ) ) {
+		if( not tmp.empty( ) and ( ( tmp[0] == 'd' ) or ( tmp[0] == 'D' ) ) ) {
 			bt = build_types::debug;
 		} else {
 			bt = build_types::release;
@@ -197,7 +196,7 @@ namespace daw::glean {
 	std::istream &operator>>( std::istream &is, output_types &bt ) {
 		std::string tmp{};
 		is >> tmp;
-		if( !tmp.empty( ) and ( ( tmp[0] == 'c' ) or ( tmp[0] == 'C' ) ) ) {
+		if( not tmp.empty( ) and ( ( tmp[0] == 'c' ) or ( tmp[0] == 'C' ) ) ) {
 			bt = output_types::cmake;
 		} else {
 			bt = output_types::process;

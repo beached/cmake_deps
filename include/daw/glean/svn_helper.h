@@ -51,12 +51,12 @@ namespace daw::glean {
 	}
 
 	struct svn_action_update {
-		std::vector<std::string> build_args( const fs::path& work_tree ) const;
+		std::vector<std::string> build_args( fs::path const &work_tree ) const;
 	};
 
 	struct svn_action_checkout {
 		std::string remote_uri{};
 
-		std::vector<std::string> build_args( const fs::path& work_tree ) const;
+		std::vector<std::string> build_args( fs::path const &work_tree ) const;
 	};
 } // namespace daw::glean

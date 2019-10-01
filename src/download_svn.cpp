@@ -32,12 +32,12 @@
 
 namespace daw::glean {
 	namespace {
-		bool is_svn_repos( const fs::path& repos ) {
+		bool is_svn_repos( fs::path const &repos ) {
 			return is_directory( repos / ".svn" );
 		}
 
 		action_status svn_repos_update( fs::path repos ) {
-			return svn_runner( svn_action_update{}, std::move(repos), log_message );
+			return svn_runner( svn_action_update{}, std::move( repos ), log_message );
 		}
 
 		action_status svn_repos_checkout( std::string const &remote_repos,
@@ -46,7 +46,7 @@ namespace daw::glean {
 			auto svn_action = svn_action_checkout( );
 			svn_action.remote_uri = remote_repos;
 
-			return svn_runner( svn_action, std::move(repos), log_message );
+			return svn_runner( svn_action, std::move( repos ), log_message );
 		}
 
 	} // namespace
@@ -55,7 +55,7 @@ namespace daw::glean {
 	                                      fs::path const &cache_folder ) const {
 		/*
 		if( is_svn_repos( m_local ) ) {
-			return svn_repos_update( m_local );
+		  return svn_repos_update( m_local );
 		}
 		return svn_repos_checkout( m_remote, m_local );
 		 */

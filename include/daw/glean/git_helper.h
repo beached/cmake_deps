@@ -52,21 +52,21 @@ namespace daw::glean {
 
 	struct git_action_version {
 		std::string version{};
-		std::vector<std::string> build_args( const fs::path& work_tree ) const;
+		std::vector<std::string> build_args( fs::path const &work_tree ) const;
 	};
 
 	struct git_action_reset {
-		std::vector<std::string> build_args( const fs::path& work_tree ) const;
+		std::vector<std::string> build_args( fs::path const &work_tree ) const;
 	};
 
 	struct git_action_pull {
-		std::vector<std::string> build_args( const fs::path& work_tree ) const;
+		std::vector<std::string> build_args( fs::path const &work_tree ) const;
 	};
 
 	struct git_action_clone {
 		std::string remote_uri{};
 		bool recurse_submodules = true;
 
-		std::vector<std::string> build_args( const fs::path& work_tree ) const;
+		std::vector<std::string> build_args( fs::path const &work_tree ) const;
 	};
 } // namespace daw::glean

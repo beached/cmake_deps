@@ -35,11 +35,11 @@
 namespace {
 	daw::glean::glean_config setup_config( ) {
 		auto config = daw::glean::get_config( );
-		if( !exists( config.cache_folder ) ) {
+		if( not exists( config.cache_folder ) ) {
 			create_directory( config.cache_folder );
 		}
-		if( !exists( config.cache_folder ) or
-		    !is_directory( config.cache_folder ) ) {
+		if( not exists( config.cache_folder ) or
+		    not is_directory( config.cache_folder ) ) {
 			std::stringstream ss{};
 			ss << "Cache root (" << config.cache_folder
 			   << ") does not exist or is not a directory";

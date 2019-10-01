@@ -64,10 +64,10 @@ namespace daw::glean {
 		auto args = std::vector<std::string>( );
 		std::copy_if( m_opt->cmake_args.cbegin( ), m_opt->cmake_args.cend( ),
 		              std::back_inserter( args ),
-		              []( std::string const &s ) { return !s.empty( ); } );
+		              []( std::string const &s ) { return not s.empty( ); } );
 		std::copy_if( m_dep_item.cmake_args.cbegin( ),
 		              m_dep_item.cmake_args.cend( ), std::back_inserter( args ),
-		              []( std::string const &s ) { return !s.empty( ); } );
+		              []( std::string const &s ) { return not s.empty( ); } );
 		if( m_opt->build_type == ::daw::glean::build_types::debug ) {
 			args.push_back( "-DCMAKE_BUILD_TYPE=Debug" );
 		} else {
