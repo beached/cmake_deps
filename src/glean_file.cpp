@@ -84,11 +84,11 @@ namespace daw::glean {
 		}
 
 		template<typename T>
-		auto merge_cfg_item( find_dep_by_name_t<T> const &find_dep_by_name,
-		                     glean_file_item const &cfg_file,
-		                     glean_options const &opts,
-		                     graph_t<dependency> &known_deps,
-		                     fs::path const &cache_folder_name ) {
+		[[nodiscard]] auto
+		merge_cfg_item( find_dep_by_name_t<T> const &find_dep_by_name,
+		                glean_file_item const &cfg_file, glean_options const &opts,
+		                graph_t<dependency> &known_deps,
+		                fs::path const &cache_folder_name ) {
 
 			struct result_t {
 				bool is_new{};
@@ -117,8 +117,8 @@ namespace daw::glean {
 		}
 	} // namespace
 
-	action_status downloader( glean_file_item const &child_dep,
-	                          fs::path const &cache_path ) {
+	[[nodiscard]] action_status downloader( glean_file_item const &child_dep,
+	                                        fs::path const &cache_path ) {
 		if( download_types_t( child_dep.download_type )
 		      .download( child_dep, cache_path ) == action_status::failure ) {
 
@@ -128,10 +128,10 @@ namespace daw::glean {
 		return action_status::success;
 	}
 
-	action_status download_node( glean_file_item const &child_dep,
-	                             fs::path const &cache_folder,
-	                             ::daw::graph_t<dependency> const &known_deps,
-	                             glean_options const &opts ) {
+	[[nodiscard]] action_status
+	download_node( glean_file_item const &child_dep, fs::path const &cache_folder,
+	               ::daw::graph_t<dependency> const &known_deps,
+	               glean_options const &opts ) {
 
 		// Check if we have downloaded this resource already
 		auto const find_dep_by_name = find_dep_by_name_t( known_deps );
@@ -154,7 +154,7 @@ namespace daw::glean {
 		return downloader( child_dep, cache_folder );
 	}
 
-	bool is_glean_project( fs::path cache_root ) {
+	[[nodiscard]] bool is_glean_project( fs::path cache_root ) {
 		return exists( cache_root / "source" / "glean.json" );
 	}
 
@@ -166,18 +166,21 @@ namespace daw::glean {
 	                                      ::daw::node_id_t parent_id );
 
 	template<typename T>
-	void process_dependency( daw::graph_t<dependency> &known_deps,
-	                         glean_options const &opts,
-	                         glean_file_item const &child_dep,
-	                         find_dep_by_name_t<T> const &find_dep_by_name,
-	                         node_id_t parent_node_id ) {
+	[[nodiscard]] action_status process_dependency(
+	  daw::graph_t<dependency> &known_deps, glean_options const &opts,
+	  glean_file_item const &child_dep,
+	  find_dep_by_name_t<T> const &find_dep_by_name, node_id_t parent_node_id ) {
 
 		auto existing_dep_id = find_dep_by_name( child_dep.provides );
 
 		auto const dep_cache_folder = cache_folder( opts, child_dep );
 		ensure_cache_folder_structure( dep_cache_folder );
 
-		download_node( child_dep, dep_cache_folder, known_deps, opts );
+		if( download_node( child_dep, dep_cache_folder, known_deps, opts ) ==
+		      action_status::failure and
+		    not child_dep.is_optional ) {
+			return action_status::failure;
+		}
 
 		bool const has_glean = is_glean_project( dep_cache_folder );
 
@@ -198,14 +201,14 @@ namespace daw::glean {
 		known_deps.add_directed_edge( parent_node_id, dep_id );
 
 		if( has_glean ) {
-			process_config_item( known_deps, opts, child_dep, dep_id );
+			(void)process_config_item( known_deps, opts, child_dep, dep_id );
 		}
+		return action_status::success;
 	}
 
-	::daw::node_id_t process_config_item( ::daw::graph_t<dependency> &known_deps,
-	                                      glean_options const &opts,
-	                                      glean_file_item const &child_item,
-	                                      ::daw::node_id_t parent_id ) {
+	[[nodiscard]] ::daw::node_id_t process_config_item(
+	  ::daw::graph_t<dependency> &known_deps, glean_options const &opts,
+	  glean_file_item const &child_item, ::daw::node_id_t parent_id ) {
 
 		auto const cache_root = cache_folder( opts, child_item );
 		ensure_cache_folder_structure( cache_root );
@@ -219,11 +222,15 @@ namespace daw::glean {
 			return id.node_id;
 		}
 		auto const glean_cfg_file = cache_root / "source" / "glean.json";
+		if( is_empty( cache_root / "source" ) ) {
+			downloader( child_item, cache_root );
+		}
 		if( not exists( glean_cfg_file ) ) {
 			return id.node_id;
 		}
+
 		auto const glean_cfg_data = ::daw::json::from_json<glean_config_file>(
-		  ::daw::read_file( glean_cfg_file.c_str( ) ) );
+		  ::daw::read_file( glean_cfg_file.c_str( ) ).value( ) );
 
 		validate_config_file( glean_cfg_data, glean_cfg_file, child_item.provides );
 
@@ -231,13 +238,13 @@ namespace daw::glean {
 			return id.node_id;
 		}
 		for( glean_file_item const &child_dep : glean_cfg_data.dependencies ) {
-			process_dependency( known_deps, opts, child_dep, find_dep_by_name,
-			                    id.node_id );
+			(void)process_dependency( known_deps, opts, child_dep, find_dep_by_name,
+			                          id.node_id );
 		}
 		return id.node_id;
 	}
 
-	daw::graph_t<dependency>
+	[[nodiscard]] daw::graph_t<dependency>
 	process_config_file( fs::path const &config_file_path,
 	                     glean_options const &opts ) {
 
@@ -249,7 +256,7 @@ namespace daw::glean {
 		auto known_deps = daw::graph_t<dependency>( );
 
 		auto const cfg_file = daw::json::from_json<glean_config_file>(
-		  daw::read_file( config_file_path.c_str( ) ) );
+		  daw::read_file( config_file_path.c_str( ) ).value( ) );
 
 		auto const root_node_id = known_deps.add_node(
 		  cfg_file.provides,
@@ -313,7 +320,7 @@ namespace daw::glean {
 		}
 
 		template<typename Edges>
-		std::vector<std::string>
+		[[nodiscard]] std::vector<std::string>
 		get_dependency_names( ::daw::graph_t<dependency> const &kd,
 		                      Edges const &edges ) {
 

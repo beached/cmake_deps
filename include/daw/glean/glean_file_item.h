@@ -39,11 +39,12 @@ namespace daw::glean {
 		std::string version{};
 		std::string custom_options{};
 		std::vector<std::string> cmake_args{};
+		bool is_optional = false;
 
 	private:
 		inline decltype( auto ) to_tuple( ) const noexcept {
 			return std::tie( provides, download_type, build_type, uri, version,
-			                 custom_options, cmake_args );
+			                 custom_options, cmake_args, is_optional );
 		}
 
 	public:
@@ -71,6 +72,7 @@ namespace daw::glean {
 		static constexpr char const version[] = "version";
 		static constexpr char const custom_options[] = "custom_options";
 		static constexpr char const cmake_args[] = "cmake_args";
+		static constexpr char const is_optional[] = "is_optional";
 	} // namespace symbols_glean_file_item
 
 	inline auto describe_json_class( glean_file_item ) {
@@ -83,9 +85,9 @@ namespace daw::glean {
 		  json_string<symbols_glean_file_item::uri>,
 		  json_nullable<json_string<symbols_glean_file_item::version>>,
 		  json_nullable<json_string<symbols_glean_file_item::custom_options>>,
-		  json_nullable<
-		    json_array<symbols_glean_file_item::cmake_args,
-		               std::vector<std::string>, json_string<no_name>>>>{};
+		  json_nullable<json_array<symbols_glean_file_item::cmake_args,
+		                           std::vector<std::string>, json_string<no_name>>>,
+		  json_nullable<json_bool<symbols_glean_file_item::is_optional>>>{};
 	}
 
 	struct glean_config_file {

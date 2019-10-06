@@ -31,6 +31,6 @@ namespace daw::glean {
 		constexpr static daw::string_view type_id = "git";
 
 		action_status download( glean_file_item const &dep,
-		                        fs::path const &source_folder ) const;
+		                        fs::path const &repos ) const;
 	};
 } // namespace daw::glean

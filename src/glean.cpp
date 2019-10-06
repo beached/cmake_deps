@@ -49,6 +49,15 @@ namespace {
 	}
 } // namespace
 
+// Embed git version from define into binary.
+// This is really cool when you have a working version
+// but don't know what tag/commit it was from
+extern "C" char const GIT_VERSION[];
+#ifndef SOURCE_CONTROL_REVISION
+#error "SOURCE_CONTROL_REVSION must be defined"
+#endif
+char const GIT_VERSION[] = SOURCE_CONTROL_REVISION;
+
 int main( int argc, char **argv ) {
 	auto const config = setup_config( );
 	auto opts = daw::glean::glean_options( argc, argv );
@@ -58,7 +67,14 @@ int main( int argc, char **argv ) {
 
 	switch( opts.output_type ) {
 	case daw::glean::output_types::process:
-		daw::glean::process_deps( std::move( deps ), opts );
+		if( opts.build_type == ::daw::glean::build_types::all ) {
+			opts.build_type = ::daw::glean::build_types::debug;
+			daw::glean::process_deps( std::move( deps ), opts );
+			opts.build_type = ::daw::glean::build_types::release;
+			daw::glean::process_deps( std::move( deps ), opts );
+		} else {
+			daw::glean::process_deps( std::move( deps ), opts );
+		}
 		break;
 	case daw::glean::output_types::cmake:
 		daw::glean::cmake_deps( std::move( deps ) );

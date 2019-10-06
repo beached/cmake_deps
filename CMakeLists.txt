@@ -1,5 +1,7 @@
 cmake_minimum_required( VERSION 3.0.2 )
 
+set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
+
 project( glean_prj )
 
 find_package( Boost 1.62.0 COMPONENTS program_options iostreams filesystem REQUIRED )

@@ -30,12 +30,15 @@
 #include "daw/glean/logging.h"
 #include "daw/glean/utilities.h"
 
+extern "C" char const GIT_VERSION[];
+
 namespace daw::glean {
 	namespace {
 		boost::program_options::variables_map get_vm( int argc, char **argv ) {
 			auto desc = boost::program_options::options_description( "Options" );
 
 			desc.add_options( )( "help", "print option descriptions" )(
+			  "version", "print version information" )(
 			  "cache",
 			  boost::program_options::value<glean::fs::path>( )->default_value(
 			    glean::get_home( ) / ".glean_cache" ),
@@ -66,9 +69,14 @@ namespace daw::glean {
 				  boost::program_options::parse_command_line( argc, argv, desc ), vm );
 
 				if( vm.count( "help" ) ) {
+					log_message << "glean - git tag/commit: " << GIT_VERSION << '\n';
 					auto ss = std::stringstream( );
 					ss << desc;
 					log_message << "Command line options\n" << ss.str( ) << '\n';
+					exit( EXIT_SUCCESS );
+				}
+				if( vm.count( "version" ) ) {
+					log_message << GIT_VERSION << '\n';
 					exit( EXIT_SUCCESS );
 				}
 				boost::program_options::notify( vm );
@@ -138,35 +146,40 @@ namespace daw::glean {
 	::daw::glean::logger const &operator<<( ::daw::glean::logger const &os,
 	                                        build_types bt ) {
 		switch( bt ) {
+		case build_types::all:
+			return os << "all";
 		case build_types::release:
-			os << "release";
-			break;
+			return os << "release";
 		case build_types::debug:
-			os << "debug";
-			break;
+			return os << "debug";
 		}
-		return os;
 	}
 
 	std::ostream &operator<<( std::ostream &os, build_types bt ) {
 		switch( bt ) {
+		case build_types::all:
+			return os << "all";
 		case build_types::release:
-			os << "release";
-			break;
+			return os << "release";
 		case build_types::debug:
-			os << "debug";
-			break;
+			return os << "debug";
 		}
-		return os;
 	}
 
 	std::istream &operator>>( std::istream &is, build_types &bt ) {
 		std::string tmp{};
 		is >> tmp;
-		if( not tmp.empty( ) and ( ( tmp[0] == 'd' ) or ( tmp[0] == 'D' ) ) ) {
+		if( tmp.empty( ) ) {
+			throw std::runtime_error( "Empty build type" );
+		}
+		if( ( tmp[0] == 'd' ) or ( tmp[0] == 'D' ) ) {
 			bt = build_types::debug;
-		} else {
+		} else if( tmp[0] == 'a' or tmp[0] == 'A' ) {
+			bt = build_types::all;
+		} else if( tmp[0] == 'r' or tmp[0] == 'R' ) {
 			bt = build_types::release;
+		} else {
+			throw std::runtime_error( "Unknown build type" );
 		}
 		return is;
 	}
@@ -177,6 +190,8 @@ namespace daw::glean {
 			return "release";
 		case build_types::debug:
 			return "debug";
+		case build_types::all:
+			return "all";
 		}
 		std::abort( );
 	}

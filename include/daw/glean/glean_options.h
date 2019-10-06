@@ -30,7 +30,7 @@
 #include "utilities.h"
 
 namespace daw::glean {
-	enum class build_types : bool { release, debug };
+	enum class build_types : uint8_t { release, debug, all };
 	std::ostream &operator<<( std::ostream &os, build_types bt );
 	std::istream &operator>>( std::istream &is, build_types &bt );
 	std::string to_string( build_types bt );

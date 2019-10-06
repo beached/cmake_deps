@@ -104,7 +104,7 @@ namespace daw::glean {
 			return ::daw::visit_nt(
 			  m_value, [bt]( auto const &v ) { return v.install( bt ); } );
 		}
-	}; // namespace ::daw::glean
+	};
 
 	using build_types_t = basic_build_types<build_none, build_cmake>;
 } // namespace daw::glean

@@ -32,7 +32,7 @@
 
 namespace daw::glean {
 	namespace {
-		bool is_git_repos( fs::path const &repos ) {
+		[[nodiscard]] bool is_git_repos( fs::path const &repos ) {
 			return is_directory( repos / ".git" );
 		}
 
@@ -76,15 +76,20 @@ namespace daw::glean {
 	action_status download_git::download( glean_file_item const &dep,
 	                                      fs::path const &cache_folder ) const {
 		action_status result = action_status::failure;
-		/*
-		if( is_git_repos( m_local ) ) {
-		  result = git_repos_update( m_local );
+		auto repos = cache_folder / "source";
+		if( is_git_repos( repos ) ) {
+			log_message << "git update of '" << repos << "'\n";
+			result = git_repos_update( repos );
 		} else {
-		  result = git_repos_clone( m_remote, m_local );
+			log_message << "git clone of '" << dep.uri << "' into '" << repos
+			            << "'\n";
+			result = git_repos_clone( dep.uri, repos );
 		}
 		if( result == action_status::success ) {
-		  return git_repos_checkout( m_local, m_version );
-		}*/
+			log_message << "git checkout with '" << repos << "' to " << dep.version
+			            << '\n';
+			return git_repos_checkout( repos, dep.version );
+		}
 		return result;
 	}
 } // namespace daw::glean
