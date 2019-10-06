@@ -36,8 +36,8 @@ namespace daw::glean {
 			return is_directory( repos / ".git" );
 		}
 
-		action_status git_repos_checkout( fs::path const &repos,
-		                                  std::string const &version ) {
+		[[nodiscard]] action_status
+		git_repos_checkout( fs::path const &repos, std::string const &version ) {
 			auto const chdir = change_directory( repos );
 			auto result = git_runner( git_action_reset( ), repos, log_message );
 			if( result == action_status::success ) {
@@ -52,7 +52,7 @@ namespace daw::glean {
 			return result;
 		}
 
-		action_status git_repos_update( fs::path const &repos ) {
+		[[nodiscard]] action_status git_repos_update( fs::path const &repos ) {
 			auto const chdir = change_directory( repos );
 			// Clean out any changes
 			auto result = git_runner( git_action_reset( ), repos, log_message );
@@ -62,8 +62,8 @@ namespace daw::glean {
 			return result;
 		}
 
-		action_status git_repos_clone( std::string const &remote_repos,
-		                               fs::path repos ) {
+		[[nodiscard]] action_status
+		git_repos_clone( std::string const &remote_repos, fs::path repos ) {
 
 			auto git_action = git_action_clone( );
 			git_action.remote_uri = remote_repos;
@@ -85,7 +85,7 @@ namespace daw::glean {
 			            << "'\n";
 			result = git_repos_clone( dep.uri, repos );
 		}
-		if( result == action_status::success ) {
+		if( to_bool( result ) ) {
 			log_message << "git checkout with '" << repos << "' to " << dep.version
 			            << '\n';
 			return git_repos_checkout( repos, dep.version );

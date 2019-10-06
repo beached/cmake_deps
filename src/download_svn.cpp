@@ -32,16 +32,16 @@
 
 namespace daw::glean {
 	namespace {
-		bool is_svn_repos( fs::path const &repos ) {
+		[[nodiscard]] bool is_svn_repos( fs::path const &repos ) {
 			return is_directory( repos / ".svn" );
 		}
 
-		action_status svn_repos_update( fs::path repos ) {
+		[[nodiscard]] action_status svn_repos_update( fs::path repos ) {
 			return svn_runner( svn_action_update{}, std::move( repos ), log_message );
 		}
 
-		action_status svn_repos_checkout( std::string const &remote_repos,
-		                                  fs::path repos ) {
+		[[nodiscard]] action_status
+		svn_repos_checkout( std::string const &remote_repos, fs::path repos ) {
 
 			auto svn_action = svn_action_checkout( );
 			svn_action.remote_uri = remote_repos;
@@ -53,12 +53,20 @@ namespace daw::glean {
 
 	action_status download_svn::download( glean_file_item const &dep,
 	                                      fs::path const &cache_folder ) const {
-		/*
-		if( is_svn_repos( m_local ) ) {
-		  return svn_repos_update( m_local );
+		auto result = action_status::failure;
+		auto repos = cache_folder / "source";
+		if( is_svn_repos( repos ) ) {
+			log_message << "svn update of '" << repos << "'\n";
+			result = svn_repos_update( repos );
+		} else {
+			log_message << "svn clone of '" << dep.uri << "' into '" << repos
+			            << "'\n";
+			result = svn_repos_checkout( dep.uri, repos );
 		}
-		return svn_repos_checkout( m_remote, m_local );
-		 */
-		return action_status::success;
+		if( to_bool( result ) and not dep.version.empty( ) ) {
+			// Set repos to version
+			log_error << "version selection in svn not yet supported\n";
+		}
+		return result;
 	}
 } // namespace daw::glean

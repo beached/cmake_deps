@@ -30,7 +30,7 @@ namespace daw::glean {
 	struct download_git {
 		constexpr static daw::string_view type_id = "git";
 
-		action_status download( glean_file_item const &dep,
-		                        fs::path const &repos ) const;
+		[[nodiscard]] action_status download( glean_file_item const &dep,
+		                                      fs::path const &repos ) const;
 	};
 } // namespace daw::glean

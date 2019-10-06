@@ -36,7 +36,7 @@
 namespace daw::glean {
 	template<size_t pos = 0, typename Runner, typename Action,
 	         typename... Actions>
-	constexpr std::pair<size_t, action_status>
+	[[nodiscard]] constexpr std::pair<size_t, action_status>
 	run_many( Runner r, Action &&action, Actions &&... actions ) {
 		if( to_bool( r( std::forward<Action>( action ) ) ) ) {
 			if constexpr( sizeof...( Actions ) > 0 ) {

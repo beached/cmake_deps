@@ -23,7 +23,6 @@
 #include <cassert>
 #include <optional>
 #include <string>
-#include <unordered_set>
 
 #include <daw/daw_graph.h>
 #include <daw/daw_graph_algorithm.h>
@@ -47,7 +46,7 @@ namespace daw::glean {
 			constexpr find_dep_by_name_t( T &deps ) noexcept
 			  : m_deps( &deps ) {}
 
-			constexpr std::optional<daw::node_id_t>
+			[[nodiscard]] constexpr std::optional<daw::node_id_t>
 			operator( )( daw::string_view name ) const {
 				auto result = m_deps->find( [name]( auto const &cur_node ) {
 					return cur_node.value( ).name( ) == name;
@@ -76,8 +75,8 @@ namespace daw::glean {
 			}
 		}
 
-		fs::path cache_folder( glean_options const &opts,
-		                       glean_file_item const &dep ) {
+		[[nodiscard]] fs::path cache_folder( glean_options const &opts,
+		                                     glean_file_item const &dep ) {
 			auto const dep_hash =
 			  std::to_string( std::hash<glean_file_item>{}( dep ) );
 			return opts.glean_cache / dep.provides / dep_hash;

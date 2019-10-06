@@ -30,7 +30,7 @@ namespace daw::glean {
 	struct download_svn {
 		constexpr static daw::string_view type_id = "svn";
 
-		action_status download( glean_file_item const &dep,
+		[[nodiscard]] action_status download( glean_file_item const &dep,
 		                        fs::path const &source_folder ) const;
 	};
 } // namespace daw::glean

@@ -33,7 +33,7 @@
 #include "daw/glean/utilities.h"
 
 namespace {
-	daw::glean::glean_config setup_config( ) {
+	[[nodiscard]] daw::glean::glean_config setup_config( ) {
 		auto config = daw::glean::get_config( );
 		if( not exists( config.cache_folder ) ) {
 			create_directory( config.cache_folder );
