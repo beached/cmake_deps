@@ -174,8 +174,8 @@ namespace daw::glean {
 		auto const dep_cache_folder = cache_folder( opts, child_dep );
 		ensure_cache_folder_structure( dep_cache_folder );
 
-		if( download_node( child_dep, dep_cache_folder, known_deps, opts ) ==
-		      action_status::failure and
+		if( not to_bool(
+		      download_node( child_dep, dep_cache_folder, known_deps, opts ) ) and
 		    not child_dep.is_optional ) {
 			return action_status::failure;
 		}
@@ -288,10 +288,10 @@ namespace daw::glean {
 				  log_message << "\n-------------------------------------\n";
 				  log_message << "Processing - " << cur_dep.name( ) << '\n';
 				  log_message << "-------------------------------------\n\n";
-				  if( cur_dep.build( opts.build_type ) == action_status::failure ) {
+				  if( not to_bool( cur_dep.build( opts.build_type ) ) ) {
 					  // Do error stuff
 				  }
-				  if( cur_dep.install( opts.build_type ) == action_status::failure ) {
+				  if( not to_bool( cur_dep.install( opts.build_type ) ) ) {
 					  // Do error stuff
 				  }
 			  }

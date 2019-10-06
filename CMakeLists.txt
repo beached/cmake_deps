@@ -4,6 +4,10 @@ set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are req
 
 project( glean_prj )
 
+if( USE_STATIC_BOOST ) 
+	set( Boost_USE_STATIC_LIBS ON )
+endif( )
+
 find_package( Boost 1.62.0 COMPONENTS program_options iostreams filesystem REQUIRED )
 find_package( Threads REQUIRED )
 

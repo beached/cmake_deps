@@ -35,7 +35,7 @@ namespace daw::glean {
 	std::istream &operator>>( std::istream &is, build_types &bt );
 	std::string to_string( build_types bt );
 
-	enum class output_types : bool { process, cmake };
+	enum class output_types : uint8_t { process, cmake };
 	std::ostream &operator<<( std::ostream &os, output_types bt );
 	std::istream &operator>>( std::istream &is, output_types &bt );
 	std::string to_string( output_types bt );
