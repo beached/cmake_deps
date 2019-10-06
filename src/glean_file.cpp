@@ -160,10 +160,9 @@ namespace daw::glean {
 
 	void merge_nodes( dependency &existing_node, dependency &&new_node ) {}
 
-	::daw::node_id_t process_config_item( ::daw::graph_t<dependency> &known_deps,
-	                                      glean_options const &opts,
-	                                      glean_file_item const &child_item,
-	                                      ::daw::node_id_t parent_id );
+	::std::optional<::daw::node_id_t> process_config_item(
+	  ::daw::graph_t<dependency> &known_deps, glean_options const &opts,
+	  glean_file_item const &child_item, ::daw::node_id_t parent_id );
 
 	template<typename T>
 	[[nodiscard]] action_status process_dependency(
@@ -206,7 +205,7 @@ namespace daw::glean {
 		return action_status::success;
 	}
 
-	[[nodiscard]] ::daw::node_id_t process_config_item(
+	[[nodiscard]] ::std::optional<::daw::node_id_t> process_config_item(
 	  ::daw::graph_t<dependency> &known_deps, glean_options const &opts,
 	  glean_file_item const &child_item, ::daw::node_id_t parent_id ) {
 
@@ -265,8 +264,14 @@ namespace daw::glean {
 		for( glean_file_item const &dep : cfg_file.dependencies ) {
 			auto child_id =
 			  process_config_item( known_deps, opts, dep, root_node_id );
-
-			known_deps.add_directed_edge( root_node_id, child_id );
+			if( not child_id ) {
+				if( dep.is_optional ) {
+					continue;
+				}
+				log_error << "failure to download required dependency\n";
+				std::abort( );
+			}
+			known_deps.add_directed_edge( root_node_id, *child_id );
 		}
 		return known_deps;
 	}
