@@ -34,8 +34,9 @@
 
 namespace daw::glean {
 	template<typename GitAction, typename OutputIterator>
-	[[nodiscard]] action_status git_runner( GitAction &&git_action, fs::path work_tree,
-	                          OutputIterator &&out_it ) {
+	[[nodiscard]] action_status git_runner( GitAction &&git_action,
+	                                        fs::path work_tree,
+	                                        OutputIterator &&out_it ) {
 		auto args = git_action.build_args( std::move( work_tree ) );
 		log_message << "Running git";
 		for( auto arg : args ) {
@@ -44,29 +45,31 @@ namespace daw::glean {
 		log_message << "\n\n";
 
 		auto run_process = Process( std::forward<OutputIterator>( out_it ) );
-		if( run_process( "git", std::move( args ) ) == EXIT_SUCCESS ) {
-			return action_status::success;
-		}
-		return action_status::failure;
+		return to_action_status( run_process( "git", std::move( args ) ) ==
+		                         EXIT_SUCCESS );
 	}
 
 	struct git_action_version {
 		std::string version{};
-		[[nodiscard]] std::vector<std::string> build_args( fs::path const &work_tree ) const;
+		[[nodiscard]] std::vector<std::string>
+		build_args( fs::path const &work_tree ) const;
 	};
 
 	struct git_action_reset {
-		[[nodiscard]] std::vector<std::string> build_args( fs::path const &work_tree ) const;
+		[[nodiscard]] std::vector<std::string>
+		build_args( fs::path const &work_tree ) const;
 	};
 
 	struct git_action_pull {
-		[[nodiscard]] std::vector<std::string> build_args( fs::path const &work_tree ) const;
+		[[nodiscard]] std::vector<std::string>
+		build_args( fs::path const &work_tree ) const;
 	};
 
 	struct git_action_clone {
 		std::string remote_uri{};
 		bool recurse_submodules = true;
 
-		[[nodiscard]] std::vector<std::string> build_args( fs::path const &work_tree ) const;
+		[[nodiscard]] std::vector<std::string>
+		build_args( fs::path const &work_tree ) const;
 	};
 } // namespace daw::glean

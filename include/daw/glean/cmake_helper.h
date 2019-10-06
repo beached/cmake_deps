@@ -36,9 +36,10 @@
 
 namespace daw::glean {
 	template<typename CmakeAction, typename OutputIterator>
-	action_status cmake_runner( CmakeAction &&cmake_action, fs::path work_tree,
-	                            daw::glean::build_types bt,
-	                            OutputIterator &&out_it ) {
+	[[nodiscard]] action_status
+	cmake_runner( CmakeAction &&cmake_action, fs::path work_tree,
+	              daw::glean::build_types bt, OutputIterator &&out_it ) {
+
 		auto args = cmake_action.build_args( std::move( work_tree ), bt );
 		log_message << "Running cmake";
 		for( auto arg : args ) {
@@ -47,10 +48,8 @@ namespace daw::glean {
 		log_message << "\n\n";
 
 		auto run_process = Process( std::forward<OutputIterator>( out_it ) );
-		if( run_process( "cmake", std::move( args ) ) == EXIT_SUCCESS ) {
-			return action_status::success;
-		}
-		return action_status::failure;
+		return to_action_status( run_process( "cmake", std::move( args ) ) ==
+		                         EXIT_SUCCESS );
 	}
 
 	struct cmake_action_configure {
@@ -63,17 +62,17 @@ namespace daw::glean {
 		                        std::vector<std::string> custom,
 		                        bool hasglean ) noexcept;
 
-		std::vector<std::string> build_args( fs::path build_path,
-		                                     daw::glean::build_types bt ) const;
+		[[nodiscard]] std::vector<std::string>
+		build_args( fs::path build_path, daw::glean::build_types bt ) const;
 	};
 
 	struct cmake_action_build {
-		std::vector<std::string> build_args( fs::path build_path,
-		                                     daw::glean::build_types bt ) const;
+		[[nodiscard]] std::vector<std::string>
+		build_args( fs::path build_path, daw::glean::build_types bt ) const;
 	};
 
 	struct cmake_action_install {
-		std::vector<std::string> build_args( fs::path build_path,
-		                                     daw::glean::build_types bt ) const;
+		[[nodiscard]] std::vector<std::string>
+		build_args( fs::path build_path, daw::glean::build_types bt ) const;
 	};
 } // namespace daw::glean

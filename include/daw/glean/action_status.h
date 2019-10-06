@@ -23,5 +23,13 @@
 #pragma once
 
 namespace daw::glean {
-	enum class action_status : bool { failure, success };
-}
+	enum class action_status : bool { failure = false, success = true };
+
+	constexpr bool to_bool( action_status as ) noexcept {
+		return as == action_status::success;
+	}
+
+	constexpr action_status to_action_status( bool b ) noexcept {
+		return b ? action_status::success : action_status::failure;
+	}
+} // namespace daw::glean

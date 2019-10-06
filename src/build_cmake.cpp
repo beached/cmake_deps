@@ -38,7 +38,7 @@ namespace daw::glean {
 	         typename... Actions>
 	constexpr std::pair<size_t, action_status>
 	run_many( Runner r, Action &&action, Actions &&... actions ) {
-		if( r( std::forward<Action>( action ) ) == action_status::success ) {
+		if( to_bool( r( std::forward<Action>( action ) ) ) ) {
 			if constexpr( sizeof...( Actions ) > 0 ) {
 				return run_many<pos + 1>( std::move( r ),
 				                          std::forward<Actions>( actions )... );
@@ -74,11 +74,10 @@ namespace daw::glean {
 			args.push_back( "-DCMAKE_BUILD_TYPE=Release" );
 		}
 
-		if( cmake_runner( cmake_action_configure( m_cache_path / "source",
-		                                          m_install_prefix,
-		                                          std::move( args ), m_has_glean ),
-		                  m_cache_path / "build", bt,
-		                  log_message ) == action_status::failure ) {
+		if( not to_bool( cmake_runner(
+		      cmake_action_configure( m_cache_path / "source", m_install_prefix,
+		                              std::move( args ), m_has_glean ),
+		      m_cache_path / "build", bt, log_message ) ) ) {
 
 			return action_status::failure;
 		}

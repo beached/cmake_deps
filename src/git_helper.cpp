@@ -34,7 +34,7 @@ namespace daw::glean {
 
 	std::vector<std::string>
 	git_action_clone::build_args( fs::path const &work_tree ) const {
-		std::vector<std::string> result = {"clone"};
+		auto result = std::vector<std::string>{"clone"};
 		if( recurse_submodules ) {
 			result.emplace_back( "--recurse-submodules" );
 		}

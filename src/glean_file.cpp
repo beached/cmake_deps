@@ -119,8 +119,8 @@ namespace daw::glean {
 
 	[[nodiscard]] action_status downloader( glean_file_item const &child_dep,
 	                                        fs::path const &cache_path ) {
-		if( download_types_t( child_dep.download_type )
-		      .download( child_dep, cache_path ) == action_status::failure ) {
+		if( not to_bool( download_types_t( child_dep.download_type )
+		                   .download( child_dep, cache_path ) ) ) {
 
 			log_error << "Error downloading\n";
 			exit( EXIT_FAILURE );
@@ -222,7 +222,10 @@ namespace daw::glean {
 		}
 		auto const glean_cfg_file = cache_root / "source" / "glean.json";
 		if( is_empty( cache_root / "source" ) ) {
-			downloader( child_item, cache_root );
+			if( not to_bool( downloader( child_item, cache_root ) ) and
+			    not child_item.is_optional ) {
+				return {};
+			}
 		}
 		if( not exists( glean_cfg_file ) ) {
 			return id.node_id;

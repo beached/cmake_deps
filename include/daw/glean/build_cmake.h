@@ -41,9 +41,9 @@ namespace daw::glean {
 		build_cmake( fs::path const &cache_path, fs::path const &install_prefix,
 		             glean_options const &opts, bool has_glean ) noexcept;
 
-		action_status build( daw::glean::build_types bt,
+		[[nodiscard]] action_status build( daw::glean::build_types bt,
 		                     glean_file_item const &file_dep ) const;
-		action_status install( daw::glean::build_types bt ) const;
+		[[nodiscard]] action_status install( daw::glean::build_types bt ) const;
 	};
 
 } // namespace daw::glean
