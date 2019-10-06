@@ -153,6 +153,7 @@ namespace daw::glean {
 		case build_types::debug:
 			return os << "debug";
 		}
+		std::abort( );
 	}
 
 	std::ostream &operator<<( std::ostream &os, build_types bt ) {
@@ -164,6 +165,7 @@ namespace daw::glean {
 		case build_types::debug:
 			return os << "debug";
 		}
+		std::abort( );
 	}
 
 	std::istream &operator>>( std::istream &is, build_types &bt ) {
