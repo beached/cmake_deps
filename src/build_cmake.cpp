@@ -81,7 +81,7 @@ namespace daw::glean {
 
 			return action_status::failure;
 		}
-		return cmake_runner( cmake_action_build( ), m_cache_path / "build", bt,
+		return cmake_runner( cmake_action_build( m_opt->jobs ), m_cache_path / "build", bt,
 		                     log_message );
 	}
 

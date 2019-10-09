@@ -24,7 +24,11 @@
 #include <cstdlib>
 #include <sstream>
 
+#include <daw/daw_read_file.h>
+#include <daw/json/daw_json_link.h>
+
 #include "daw/glean/build_types.h"
+#include "daw/glean/dependency_options.h"
 #include "daw/glean/glean_config.h"
 #include "daw/glean/glean_options.h"
 #include "daw/glean/logging.h"
@@ -54,11 +58,16 @@ namespace daw::glean {
 			  "output_type",
 			  boost::program_options::value<::daw::glean::output_types>( )
 			    ->default_value( ::daw::glean::output_types::process ),
-			  "type of output" )(
+			  "type of output" )( "dep_opts_file",
+			                      boost::program_options::value<glean::fs::path>( ),
+			                      "provide a dependency options override file" )(
 			  "cmake_arg",
 			  boost::program_options::value<std::vector<std::string>>( )
 			    ->multitoken( ),
-			  "additional commandline arguments to pass to cmake(1 per cmake_arg)" )(
+			  "additional commandline arguments to pass to cmake(1 per "
+			  "cmake_arg)" )(
+			  "jobs", boost::program_options::value<uint32_t>( )->default_value( 2U ),
+			  "number of build jobs to run, if supported by build ssytem" )(
 			  "use_first_dependency",
 			  boost::program_options::value<bool>( )->default_value( false ),
 			  "use the first dependency that provides a resource" );
@@ -137,9 +146,20 @@ namespace daw::glean {
 		build_type = vm["build_type"].template as<daw::glean::build_types>( );
 		output_type = vm["output_type"].template as<daw::glean::output_types>( );
 		use_first = vm["use_first_dependency"].template as<bool>( );
-
+		jobs = vm["jobs"].template as<uint32_t>( );
 		if( not vm["cmake_arg"].empty( ) ) {
 			cmake_args = vm["cmake_arg"].template as<std::vector<std::string>>( );
+		}
+
+		if( not vm["dep_opts_file"].empty( ) ) {
+			auto fname = vm["dep_opts_file"].template as<fs::path>( ).c_str( );
+			auto str = daw::read_file( fname );
+			if( not str ) {
+				log_error << "Could not open dependency options file '" << fname
+				          << "'\n";
+				exit( EXIT_FAILURE );
+			}
+			dep_opts = daw::json::from_json<dependency_options>( str.value( ) );
 		}
 	}
 

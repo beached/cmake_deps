@@ -256,14 +256,29 @@ namespace daw::glean {
 
 		auto known_deps = daw::graph_t<dependency>( );
 
-		auto const cfg_file = daw::json::from_json<glean_config_file>(
+		glean_config_file cfg_file = daw::json::from_json<glean_config_file>(
 		  daw::read_file( config_file_path.c_str( ) ).value( ) );
 
 		auto const root_node_id = known_deps.add_node(
 		  cfg_file.provides,
 		  build_types_t( "none", "", opts.install_prefix, opts, false ) );
 
-		for( glean_file_item const &dep : cfg_file.dependencies ) {
+		for( glean_file_item &dep : cfg_file.dependencies ) {
+			if( auto dep_opt = opts.dep_opts.get( dep.provides ); dep_opt ) {
+				switch( dep_opt->merge_type ) {
+				case dependency_merge_type::append:
+					log_message << "Appending cmake options\n";
+					// only cmake args are supported
+					dep.cmake_args.insert( dep.cmake_args.end( ),
+					                       dep_opt->opt_value.begin( ),
+					                       dep_opt->opt_value.end( ) );
+					break;
+				case dependency_merge_type::replace:
+					log_message << "Replacing cmake options\n";
+					dep.cmake_args = dep_opt->opt_value;
+					break;
+				}
+			}
 			auto child_id =
 			  process_config_item( known_deps, opts, dep, root_node_id );
 			if( not child_id ) {
@@ -288,6 +303,7 @@ namespace daw::glean {
 				  log_message << "\n-------------------------------------\n";
 				  log_message << "Processing - " << cur_dep.name( ) << '\n';
 				  log_message << "-------------------------------------\n\n";
+
 				  if( not to_bool( cur_dep.build( opts.build_type ) ) ) {
 					  // Do error stuff
 				  }

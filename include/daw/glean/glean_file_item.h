@@ -118,8 +118,7 @@ namespace std {
 	template<>
 	struct hash<::daw::glean::glean_file_item> {
 		inline size_t operator( )( ::daw::glean::glean_file_item const &g ) const {
-			return ::std::hash<::std::string>{}( g.provides + g.download_type +
-			                                     g.uri );
+			return ::std::hash<::std::string>{}( g.provides + g.download_type );
 		}
 	};
 } // namespace std

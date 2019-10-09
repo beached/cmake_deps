@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "utilities.h"
+#include "dependency_options.h"
 
 namespace daw::glean {
 	enum class build_types : uint8_t { release, debug, all };
@@ -46,6 +47,8 @@ namespace daw::glean {
 		daw::glean::build_types build_type{};
 		daw::glean::output_types output_type{};
 		std::vector<std::string> cmake_args{};
+		uint32_t jobs = 2U;
+		dependency_options dep_opts{};
 		bool use_first = false;
 
 		glean_options( int argc, char **argv );

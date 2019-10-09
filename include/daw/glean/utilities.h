@@ -103,4 +103,14 @@ namespace daw::glean {
 			throw glean_exception( ss.str( ) );
 		}
 	}
+
+	template<typename CharT = char, typename... Strings>
+	[[nodiscard]] inline std::basic_string<CharT>
+	strcat( Strings &&... strs ) noexcept {
+		auto result = std::basic_string<CharT>( );
+		using std::size;
+		result.reserve( ( size( strs ) + ... ) );
+		( result += ... += std::forward<Strings>( strs ) );
+		return result;
+	}
 } // namespace daw::glean

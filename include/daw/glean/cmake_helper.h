@@ -67,6 +67,10 @@ namespace daw::glean {
 	};
 
 	struct cmake_action_build {
+		uint32_t jobs = 2;
+		constexpr cmake_action_build( ) noexcept = default;
+		constexpr cmake_action_build( uint32_t j ) noexcept
+		  : jobs( j ) {}
 		[[nodiscard]] std::vector<std::string>
 		build_args( fs::path build_path, daw::glean::build_types bt ) const;
 	};

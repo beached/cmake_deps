@@ -20,6 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <fmt/format.h>
 #include <string>
 #include <vector>
 
@@ -64,7 +65,9 @@ namespace daw::glean {
 	std::vector<std::string>
 	cmake_action_build::build_args( fs::path build_path,
 	                                daw::glean::build_types bt ) const {
-		return {"--build", ( build_path / to_string( bt ) ).string( )};
+
+		return {"--build", ( build_path / to_string( bt ) ).string( ),
+		        fmt::format( "-j {0}", jobs )};
 	}
 
 	std::vector<std::string>
