@@ -66,8 +66,8 @@ namespace daw::glean {
 	cmake_action_build::build_args( fs::path build_path,
 	                                daw::glean::build_types bt ) const {
 
-		return {"--build", ( build_path / to_string( bt ) ).string( ),
-		        fmt::format( "-j {0}", jobs )};
+		return {"--build", ( build_path / to_string( bt ) ).string( ), "--parallel",
+		        std::to_string( jobs )};
 	}
 
 	std::vector<std::string>
