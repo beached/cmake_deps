@@ -109,7 +109,8 @@ set(SOURCE_FILES
         ${SOURCE_FOLDER}/logging.cpp
         ${SOURCE_FOLDER}/svn_helper.cpp
         ${SOURCE_FOLDER}/glean_file.cpp
-        )
+        ${SOURCE_FOLDER}/temp_file.cpp
+)
 
 add_executable(glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp)
 #target_link_libraries( glean utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
