@@ -8,6 +8,7 @@ if (USE_STATIC_BOOST)
     set(Boost_USE_STATIC_LIBS ON)
 endif ()
 
+add_definitions( -DBOOST_ALL_NO_LIB ) 
 find_package( Boost 1.62.0 COMPONENTS program_options system iostreams filesystem REQUIRED)
 find_package(Threads REQUIRED)
 
