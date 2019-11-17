@@ -45,9 +45,9 @@ namespace daw::glean {
 		std::string m_name;
 		std::vector<item_t> m_alternatives{};
 		size_t m_index = 0;
-
 		item_t const &alt( ) const;
 		item_t &alt( );
+		bool m_has_downloaded = false; // hack for now
 
 	public:
 		dependency( std::string name, build_types_t const &build_type );
@@ -62,6 +62,13 @@ namespace daw::glean {
 		[[nodiscard]] bool has_file_dep( ) const noexcept;
 		[[nodiscard]] std::vector<item_t> &alternatives( ) noexcept;
 		[[nodiscard]] std::vector<item_t> const &alternatives( ) const noexcept;
-		void add_alternative( glean_file_item const & gfi );
+		void add_alternative( glean_file_item const &gfi );
+
+		[[nodiscard]] inline bool &has_downloaded( ) noexcept {
+			return m_has_downloaded;
+		}
+		[[nodiscard]] inline bool const &has_downloaded( ) const noexcept {
+			return m_has_downloaded;
+		}
 	};
 } // namespace daw::glean
