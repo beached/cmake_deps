@@ -8,7 +8,7 @@ if (USE_STATIC_BOOST)
     set(Boost_USE_STATIC_LIBS ON)
 endif ()
 
-find_package( Boost 1.62.0 COMPONENTS program_options system iostreams filesystem process REQUIRED)
+find_package( Boost 1.62.0 COMPONENTS program_options system iostreams filesystem REQUIRED)
 find_package(Threads REQUIRED)
 
 enable_testing()
