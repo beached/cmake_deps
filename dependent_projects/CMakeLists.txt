@@ -4,7 +4,7 @@ project( dependency_prj )
 
 find_package( Boost 1.62.0 COMPONENTS program_options system iostreams filesystem process REQUIRED)
 find_package( OpenSSL REQUIRED )
-find_package( CURL REQUIRED )
+# find_package( CURL REQUIRED )
 find_package( Threads REQUIRED )
 
 set( CMAKE_CXX_STANDARD 17 CACHE STRING "The C++ standard whose features are requested.")
