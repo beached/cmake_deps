@@ -115,9 +115,9 @@ set(SOURCE_FILES
 add_executable(glean ${HEADER_FILES} ${SOURCE_FILES} ${SOURCE_FOLDER}/glean.cpp)
 #target_link_libraries( glean utf_range temp_file ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} )
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	target_link_libraries(glean utf_range temp_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} fmtd)
+	target_link_libraries(glean utf_range ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} fmtd)
 else( )
-	target_link_libraries(glean utf_range temp_file ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} fmt)
+	target_link_libraries(glean utf_range ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} fmt)
 endif( )
 add_dependencies(glean dependency_stub)
 
