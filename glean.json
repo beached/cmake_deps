@@ -31,9 +31,7 @@
       "download_type": "git",
       "build_type": "cmake",
       "uri": "https://github.com/fmtlib/fmt.git",
-      "cmake_args": [
-        "-DFMT_TEST=off"
-      ]
+      "cmake_args": [ "-DFMT_TEST=off" ]
     }
 
 	]
