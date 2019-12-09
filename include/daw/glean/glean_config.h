@@ -1,4 +1,3 @@
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2016-2019 Darrell Wright
@@ -38,13 +37,18 @@ namespace daw::glean {
 		fs::path cmake_binary = "cmake";
 	}; // glean_config
 
-	static constexpr char const glean_config_cache_folder[] = "cache_folder";
-	static constexpr char const glean_config_cmake_binary[] = "cmake_binary";
+	namespace symbols_glean_config {
+		namespace {
+			static constexpr char const glean_config_cache_folder[] = "cache_folder";
+			static constexpr char const glean_config_cmake_binary[] = "cmake_binary";
+		} // namespace
+	}   // namespace symbols_glean_config
 
 	inline auto describe_json_class( glean_config ) {
 		using namespace daw::json;
-		return class_description_t<json_string<glean_config_cache_folder>,
-		                           json_string<glean_config_cmake_binary>>{};
+		return class_description_t<
+		  json_string<symbols_glean_config::glean_config_cache_folder>,
+		  json_string<symbols_glean_config::glean_config_cmake_binary>>{};
 	}
 
 	inline auto to_json_data( glean_config const &gc ) {

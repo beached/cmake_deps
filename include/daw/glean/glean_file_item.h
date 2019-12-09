@@ -65,15 +65,17 @@ namespace daw::glean {
 	};
 
 	namespace symbols_glean_file_item {
-		static constexpr char const provides[] = "provides";
-		static constexpr char const download_type[] = "download_type";
-		static constexpr char const build_type[] = "build_type";
-		static constexpr char const uri[] = "uri";
-		static constexpr char const version[] = "version";
-		static constexpr char const custom_options[] = "custom_options";
-		static constexpr char const cmake_args[] = "cmake_args";
-		static constexpr char const is_optional[] = "is_optional";
-	} // namespace symbols_glean_file_item
+		namespace {
+			static constexpr char const provides[] = "provides";
+			static constexpr char const download_type[] = "download_type";
+			static constexpr char const build_type[] = "build_type";
+			static constexpr char const uri[] = "uri";
+			static constexpr char const version[] = "version";
+			static constexpr char const custom_options[] = "custom_options";
+			static constexpr char const cmake_args[] = "cmake_args";
+			static constexpr char const is_optional[] = "is_optional";
+		} // namespace
+	}   // namespace symbols_glean_file_item
 
 	inline auto describe_json_class( glean_file_item ) {
 		using namespace daw::json;
@@ -86,7 +88,7 @@ namespace daw::glean {
 		  json_string_null<symbols_glean_file_item::version, std::string,
 		                   daw::construct_a_t<std::string>>,
 		  json_string_null<symbols_glean_file_item::custom_options, std::string,
-				daw::construct_a_t<std::string>>,
+		                   daw::construct_a_t<std::string>>,
 		  json_array_null<symbols_glean_file_item::cmake_args, std::string>,
 		  json_bool_null<symbols_glean_file_item::is_optional, bool>>{};
 	}
@@ -98,10 +100,12 @@ namespace daw::glean {
 	};
 
 	namespace symbols_glean_config_file {
-		static constexpr char const provides[] = "provides";
-		static constexpr char const build_type[] = "build_type";
-		static constexpr char const dependencies[] = "dependencies";
-	} // namespace symbols_glean_config_file
+		namespace {
+			static constexpr char const provides[] = "provides";
+			static constexpr char const build_type[] = "build_type";
+			static constexpr char const dependencies[] = "dependencies";
+		} // namespace
+	}   // namespace symbols_glean_config_file
 
 	inline auto describe_json_class( glean_config_file ) {
 		using namespace daw::json;

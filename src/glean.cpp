@@ -67,10 +67,10 @@ int main( int argc, char **argv ) {
 
 	switch( opts.output_type ) {
 	case daw::glean::output_types::process:
-		if( opts.build_type == ::daw::glean::build_types::all ) {
-			opts.build_type = ::daw::glean::build_types::debug;
+		if( opts.build_type == daw::glean::build_types::all ) {
+			opts.build_type = daw::glean::build_types::debug;
 			daw::glean::process_deps( std::move( deps ), opts );
-			opts.build_type = ::daw::glean::build_types::release;
+			opts.build_type = daw::glean::build_types::release;
 			daw::glean::process_deps( std::move( deps ), opts );
 		} else {
 			daw::glean::process_deps( std::move( deps ), opts );

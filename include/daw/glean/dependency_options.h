@@ -73,11 +73,13 @@ namespace daw {
 	};
 
 	namespace symbols_dependency_option {
-		static constexpr char const dep_name[] = "dep_name";
-		static constexpr char const opt_name[] = "opt_name";
-		static constexpr char const opt_value[] = "opt_value";
-		static constexpr char const merge_type[] = "merge_type";
-	} // namespace symbols_dependency_option
+		namespace {
+			static constexpr char const dep_name[] = "dep_name";
+			static constexpr char const opt_name[] = "opt_name";
+			static constexpr char const opt_value[] = "opt_value";
+			static constexpr char const merge_type[] = "merge_type";
+		} // namespace
+	}   // namespace symbols_dependency_option
 
 	inline auto describe_json_class( dependency_option ) {
 		using namespace daw::json;
@@ -111,8 +113,10 @@ namespace daw {
 	};
 
 	namespace symbols_dependency_options {
-		static constexpr char const values[] = "values";
-	}
+		namespace {
+			static constexpr char const values[] = "values";
+		}
+	} // namespace symbols_dependency_options
 
 	inline auto describe_json_class( dependency_options ) {
 		using namespace daw::json;
