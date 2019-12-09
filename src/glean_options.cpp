@@ -85,7 +85,9 @@ namespace daw::glean {
 					exit( EXIT_SUCCESS );
 				}
 				if( vm.count( "version" ) ) {
-					log_message << "glean by Darrell Wright\nhttps://github.com/beached/glean" << '\n';
+					log_message
+					  << "glean by Darrell Wright\nhttps://github.com/beached/glean"
+					  << '\n';
 					log_message << "build from revision: " << GIT_VERSION << '\n';
 					exit( EXIT_SUCCESS );
 				}

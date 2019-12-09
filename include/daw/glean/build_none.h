@@ -35,7 +35,8 @@ namespace daw::glean {
 		template<typename... Ignored>
 		constexpr build_none( Ignored &&... ) noexcept {}
 
-		constexpr action_status build( daw::glean::build_types, glean_file_item const & ) const {
+		constexpr action_status build( daw::glean::build_types,
+		                               glean_file_item const & ) const {
 			return action_status::success;
 		}
 

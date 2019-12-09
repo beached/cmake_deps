@@ -39,32 +39,35 @@ namespace daw::glean {
 
 		template<typename Cmd, typename... Args>
 		int operator( )( Cmd &&cmd, Args &&... args ) {
-			
-		/*
-			auto out = boost::process::ipstream( );
-			auto err = boost::process::ipstream( );
 
-			auto git_proc = boost::process::child(
-			  boost::process::search_path( cmd ), std::forward<Args>( args )...,
-			  boost::process::std_out > out, boost::process::std_err > err, boost::process::std_in < boost::process::null );
-				*/
+			/*
+			  auto out = boost::process::ipstream( );
+			  auto err = boost::process::ipstream( );
+
+			  auto git_proc = boost::process::child(
+			    boost::process::search_path( cmd ), std::forward<Args>( args )...,
+			    boost::process::std_out > out, boost::process::std_err > err,
+			  boost::process::std_in < boost::process::null );
+			    */
 			return boost::process::system( boost::process::search_path( cmd ),
-			                        std::forward<Args>( args )... );
-		/*
-			auto const process_pipe = [&]( auto &&p ) -> bool {
-				auto line = std::string( );
-				if( not p or not std::getline( p, line ) or line.empty( ) ) {
-					return false;
-				}
-				line += '\n';
-				m_out = std::copy( line.begin( ), line.end( ), m_out );
-				return true;
-			};
-			while( git_proc and ( process_pipe( err ) or process_pipe( out ) ) ) {}
+			                               std::forward<Args>( args )... );
+			/*
+			  auto const process_pipe = [&]( auto &&p ) -> bool {
+			    auto line = std::string( );
+			    if( not p or not std::getline( p, line ) or line.empty( ) ) {
+			      return false;
+			    }
+			    line += '\n';
+			    m_out = std::copy( line.begin( ), line.end( ), m_out );
+			    return true;
+			  };
+			  while( git_proc and ( process_pipe( err ) or process_pipe( out ) ) ) {}
 
-			git_proc.wait( );
-			return git_proc.exit_code( );
-			*/
+			  git_proc.wait( );
+			  return git_proc.exit_code( );
+			  */
 		}
 	};
+	template<typename OutputIterator>
+	Process( OutputIterator )->Process<OutputIterator>;
 } // namespace daw::glean

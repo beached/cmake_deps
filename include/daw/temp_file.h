@@ -103,7 +103,7 @@ namespace daw {
 	/// @brief Constructs a shareable temp file path that can be copied and moved.
 	/// It has the same
 	///			semantics as a shared_ptr and when the last copy goes out of scope the
-	///file, if 			it exists is deleted.
+	/// file, if 			it exists is deleted.
 	class shared_temp_file {
 		std::shared_ptr<unique_temp_file> m_path;
 

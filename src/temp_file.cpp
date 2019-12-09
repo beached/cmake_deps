@@ -189,7 +189,8 @@ namespace daw {
 		return get( *m_path );
 	}
 
-	boost::filesystem::path const *shared_temp_file::operator->( ) const noexcept {
+	boost::filesystem::path const *shared_temp_file::operator->( ) const
+	  noexcept {
 		return &get( *m_path );
 	}
 

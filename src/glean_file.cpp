@@ -58,6 +58,8 @@ namespace daw::glean {
 				return result.front( );
 			}
 		};
+		template<typename T>
+		find_dep_by_name_t( T )->find_dep_by_name_t<T>;
 
 		void validate_config_file( glean_config_file const &cfg_file,
 		                           fs::path const &cfg_file_path,

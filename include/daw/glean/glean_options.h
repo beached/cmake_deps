@@ -27,8 +27,8 @@
 #include <string>
 #include <vector>
 
-#include "utilities.h"
 #include "dependency_options.h"
+#include "utilities.h"
 
 namespace daw::glean {
 	enum class build_types : uint8_t { release, debug, all };

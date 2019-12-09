@@ -42,7 +42,7 @@ namespace daw::glean {
 		             glean_options const &opts, bool has_glean ) noexcept;
 
 		[[nodiscard]] action_status build( daw::glean::build_types bt,
-		                     glean_file_item const &file_dep ) const;
+		                                   glean_file_item const &file_dep ) const;
 		[[nodiscard]] action_status install( daw::glean::build_types bt ) const;
 	};
 

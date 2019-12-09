@@ -83,11 +83,12 @@ namespace daw::glean {
 		  json_string<symbols_glean_file_item::download_type>,
 		  json_string<symbols_glean_file_item::build_type>,
 		  json_string<symbols_glean_file_item::uri>,
-		  json_nullable<json_string<symbols_glean_file_item::version>>,
-		  json_nullable<json_string<symbols_glean_file_item::custom_options>>,
-		  json_nullable<json_array<symbols_glean_file_item::cmake_args,
-		                           std::vector<std::string>, json_string<no_name>>>,
-		  json_nullable<json_bool<symbols_glean_file_item::is_optional>>>{};
+		  json_string_null<symbols_glean_file_item::version, std::string,
+		                   daw::construct_a_t<std::string>>,
+		  json_string_null<symbols_glean_file_item::custom_options, std::string,
+				daw::construct_a_t<std::string>>,
+		  json_array_null<symbols_glean_file_item::cmake_args, std::string>,
+		  json_bool_null<symbols_glean_file_item::is_optional, bool>>{};
 	}
 
 	struct glean_config_file {
@@ -108,9 +109,7 @@ namespace daw::glean {
 		return class_description_t<
 		  json_string<symbols_glean_config_file::provides>,
 		  json_string<symbols_glean_config_file::build_type>,
-		  json_array<symbols_glean_config_file::dependencies,
-		             std::vector<glean_file_item>,
-		             json_class<no_name, glean_file_item>>>{};
+		  json_array<symbols_glean_config_file::dependencies, glean_file_item>>{};
 	}
 } // namespace daw::glean
 

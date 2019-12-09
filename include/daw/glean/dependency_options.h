@@ -84,8 +84,7 @@ namespace daw {
 		return class_description_t<
 		  json_string<symbols_dependency_option::dep_name>,
 		  json_custom<symbols_dependency_option::opt_name, opt_names>,
-		  json_array<symbols_dependency_option::opt_value, std::vector<std::string>,
-		             json_string<no_name>>,
+		  json_array<symbols_dependency_option::opt_value, std::string>,
 		  json_custom<symbols_dependency_option::merge_type,
 		              dependency_merge_type>>{};
 	}
@@ -117,9 +116,8 @@ namespace daw {
 
 	inline auto describe_json_class( dependency_options ) {
 		using namespace daw::json;
-		return class_description_t<json_array<
-		  symbols_dependency_options::values, std::vector<dependency_option>,
-		  json_class<no_name, dependency_option>>>{};
+		return class_description_t<
+		  json_array<symbols_dependency_options::values, dependency_option>>{};
 	}
 
 	inline auto to_json_data( dependency_options const &dep_opts ) {
