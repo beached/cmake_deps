@@ -96,7 +96,7 @@ namespace daw::glean {
 
 			struct result_t {
 				bool is_new{};
-				::daw::node_id_t node_id{};
+				daw::node_id_t node_id{};
 
 				operator bool( ) const noexcept {
 					return is_new;
@@ -138,7 +138,7 @@ namespace daw::glean {
 
 	[[nodiscard]] action_status
 	download_node( glean_file_item &child_dep, fs::path const &cache_folder,
-	               ::daw::graph_t<dependency> &known_deps,
+	               daw::graph_t<dependency> &known_deps,
 	               glean_options const &opts ) {
 
 		// Check if we have downloaded this resource already
@@ -164,10 +164,10 @@ namespace daw::glean {
 
 	void merge_nodes( dependency &existing_node, dependency &&new_node ) {}
 
-	::std::optional<::daw::node_id_t>
-	process_config_item( ::daw::graph_t<dependency> &known_deps,
+	std::optional<daw::node_id_t>
+	process_config_item( daw::graph_t<dependency> &known_deps,
 	                     glean_options const &opts, glean_file_item &child_item,
-	                     ::daw::node_id_t parent_id );
+	                     daw::node_id_t parent_id );
 
 	template<typename T>
 	[[nodiscard]] action_status
@@ -211,10 +211,10 @@ namespace daw::glean {
 		return action_status::success;
 	}
 
-	[[nodiscard]] ::std::optional<::daw::node_id_t>
-	process_config_item( ::daw::graph_t<dependency> &known_deps,
+	[[nodiscard]] std::optional<daw::node_id_t>
+	process_config_item( daw::graph_t<dependency> &known_deps,
 	                     glean_options const &opts, glean_file_item &child_item,
-	                     ::daw::node_id_t parent_id ) {
+	                     daw::node_id_t parent_id ) {
 
 		auto const cache_root = cache_folder( opts, child_item );
 		ensure_cache_folder_structure( cache_root );
@@ -238,8 +238,8 @@ namespace daw::glean {
 			return id.node_id;
 		}
 
-		auto glean_cfg_data = ::daw::json::from_json<glean_config_file>(
-		  ::daw::read_file( glean_cfg_file.c_str( ) ).value( ) );
+		auto glean_cfg_data = daw::json::from_json<glean_config_file>(
+		  daw::read_file( glean_cfg_file.c_str( ) ).value( ) );
 
 		validate_config_file( glean_cfg_data, glean_cfg_file, child_item.provides );
 
@@ -351,7 +351,7 @@ namespace daw::glean {
 
 		template<typename Edges>
 		[[nodiscard]] std::vector<std::string>
-		get_dependency_names( ::daw::graph_t<dependency> const &kd,
+		get_dependency_names( daw::graph_t<dependency> const &kd,
 		                      Edges const &edges ) {
 
 			auto const find_name = [&kd]( node_id_t id ) {

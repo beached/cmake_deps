@@ -77,6 +77,7 @@ int main( int argc, char **argv ) {
 		}
 		break;
 	case daw::glean::output_types::cmake:
+		// Output a CMake External project list with deps
 		daw::glean::cmake_deps( std::move( deps ) );
 		break;
 	default:

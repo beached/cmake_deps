@@ -52,12 +52,12 @@ namespace daw::glean {
 			    glean::fs::current_path( ) / ".glean" ),
 			  "prefix for install" )(
 			  "build_type",
-			  boost::program_options::value<::daw::glean::build_types>( )
-			    ->default_value( ::daw::glean::build_types::release ),
+			  boost::program_options::value<daw::glean::build_types>( )
+			    ->default_value( daw::glean::build_types::release ),
 			  "type of build(release, debug)" )(
 			  "output_type",
-			  boost::program_options::value<::daw::glean::output_types>( )
-			    ->default_value( ::daw::glean::output_types::process ),
+			  boost::program_options::value<daw::glean::output_types>( )
+			    ->default_value( daw::glean::output_types::process ),
 			  "type of output" )( "dep_opts_file",
 			                      boost::program_options::value<glean::fs::path>( ),
 			                      "provide a dependency options override file" )(
@@ -166,8 +166,8 @@ namespace daw::glean {
 		}
 	}
 
-	::daw::glean::logger const &operator<<( ::daw::glean::logger const &os,
-	                                        build_types bt ) {
+	daw::glean::logger const &operator<<( daw::glean::logger const &os,
+	                                      build_types bt ) {
 		switch( bt ) {
 		case build_types::all:
 			return os << "all";

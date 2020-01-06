@@ -56,12 +56,12 @@ namespace daw::glean {
 		return m_name;
 	}
 
-	action_status dependency::build( ::daw::glean::build_types bt ) const {
+	action_status dependency::build( daw::glean::build_types bt ) const {
 		assert( alt( ).file_dep );
 		return alt( ).build_type.build( bt, *( alt( ).file_dep ) );
 	}
 
-	action_status dependency::install( ::daw::glean::build_types bt ) const {
+	action_status dependency::install( daw::glean::build_types bt ) const {
 		return alt( ).build_type.install( bt );
 	}
 
@@ -87,6 +87,6 @@ namespace daw::glean {
 		// TODO fix build_none
 		auto bt = build_types_t( build_none( ) );
 		auto i = item_t{bt, gfi};
-		m_alternatives.push_back( ::daw::move( i ) );
+		m_alternatives.push_back( daw::move( i ) );
 	}
 } // namespace daw::glean

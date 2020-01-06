@@ -64,64 +64,65 @@ namespace daw::glean {
 		}
 	};
 
-	namespace symbols_glean_file_item {
-		namespace {
-			static constexpr char const provides[] = "provides";
-			static constexpr char const download_type[] = "download_type";
-			static constexpr char const build_type[] = "build_type";
-			static constexpr char const uri[] = "uri";
-			static constexpr char const version[] = "version";
-			static constexpr char const custom_options[] = "custom_options";
-			static constexpr char const cmake_args[] = "cmake_args";
-			static constexpr char const is_optional[] = "is_optional";
-		} // namespace
-	}   // namespace symbols_glean_file_item
-
-	inline auto describe_json_class( glean_file_item ) {
-		using namespace daw::json;
-
-		return class_description_t<
-		  json_string<symbols_glean_file_item::provides>,
-		  json_string<symbols_glean_file_item::download_type>,
-		  json_string<symbols_glean_file_item::build_type>,
-		  json_string<symbols_glean_file_item::uri>,
-		  json_string_null<symbols_glean_file_item::version, std::string,
-		                   daw::construct_a_t<std::string>>,
-		  json_string_null<symbols_glean_file_item::custom_options, std::string,
-		                   daw::construct_a_t<std::string>>,
-		  json_array_null<symbols_glean_file_item::cmake_args, std::string>,
-		  json_bool_null<symbols_glean_file_item::is_optional, bool>>{};
-	}
-
 	struct glean_config_file {
 		std::string provides{};
 		std::string build_type{};
 		std::vector<glean_file_item> dependencies{};
 	};
-
-	namespace symbols_glean_config_file {
-		namespace {
-			static constexpr char const provides[] = "provides";
-			static constexpr char const build_type[] = "build_type";
-			static constexpr char const dependencies[] = "dependencies";
-		} // namespace
-	}   // namespace symbols_glean_config_file
-
-	inline auto describe_json_class( glean_config_file ) {
-		using namespace daw::json;
-
-		return class_description_t<
-		  json_string<symbols_glean_config_file::provides>,
-		  json_string<symbols_glean_config_file::build_type>,
-		  json_array<symbols_glean_config_file::dependencies, glean_file_item>>{};
-	}
 } // namespace daw::glean
+
+template<>
+struct daw::json::json_data_contract<daw::glean::glean_file_item> {
+#ifdef __cpp_nontype_template_parameter_class
+	using type = json_member_list<
+	  json_string<"provides">, json_string<"download_type">,
+	  json_string<"build_type">, json_string<"uri">,
+	  json_string_null<"version", std::string, daw::construct_a_t<std::string>>,
+	  json_string_null<"custom_options", std::string,
+	                   daw::construct_a_t<std::string>>,
+	  json_array_null<"cmake_args", std::string>,
+	  json_bool_null<"is_optional", bool>>;
+#else
+	static inline constexpr char const provides[] = "provides";
+	static inline constexpr char const download_type[] = "download_type";
+	static inline constexpr char const build_type[] = "build_type";
+	static inline constexpr char const uri[] = "uri";
+	static inline constexpr char const version[] = "version";
+	static inline constexpr char const custom_options[] = "custom_options";
+	static inline constexpr char const cmake_args[] = "cmake_args";
+	static inline constexpr char const is_optional[] = "is_optional";
+
+	using type = json_member_list<
+	  json_string<provides>, json_string<download_type>, json_string<build_type>,
+	  json_string<uri>,
+	  json_string_null<version, std::string, daw::construct_a_t<std::string>>,
+	  json_string_null<custom_options, std::string,
+	                   daw::construct_a_t<std::string>>,
+	  json_array_null<cmake_args, std::string>,
+	  json_bool_null<is_optional, bool>>;
+#endif
+};
+template<>
+struct daw::json::json_data_contract<daw::glean::glean_config_file> {
+#ifdef __cpp_nontype_template_parameter_class
+	using type =
+	  json_member_list<json_string<"provides">, json_string<"build_type">,
+	                   json_array<"dependencies", daw::glean::glean_file_item>>;
+#else
+	static inline constexpr char const provides[] = "provides";
+	static inline constexpr char const build_type[] = "build_type";
+	static inline constexpr char const dependencies[] = "dependencies";
+	using type =
+	  json_member_list<json_string<provides>, json_string<build_type>,
+	                   json_array<dependencies, daw::glean::glean_file_item>>;
+#endif
+};
 
 namespace std {
 	template<>
-	struct hash<::daw::glean::glean_file_item> {
-		inline size_t operator( )( ::daw::glean::glean_file_item const &g ) const {
-			return ::std::hash<::std::string>{}( g.provides + g.download_type );
+	struct hash<daw::glean::glean_file_item> {
+		inline size_t operator( )( daw::glean::glean_file_item const &g ) const {
+			return std::hash<std::string>{}( g.provides + g.download_type );
 		}
 	};
 } // namespace std

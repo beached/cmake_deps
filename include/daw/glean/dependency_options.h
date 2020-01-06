@@ -72,30 +72,6 @@ namespace daw {
 		dependency_merge_type merge_type = dependency_merge_type::append;
 	};
 
-	namespace symbols_dependency_option {
-		namespace {
-			static constexpr char const dep_name[] = "dep_name";
-			static constexpr char const opt_name[] = "opt_name";
-			static constexpr char const opt_value[] = "opt_value";
-			static constexpr char const merge_type[] = "merge_type";
-		} // namespace
-	}   // namespace symbols_dependency_option
-
-	inline auto describe_json_class( dependency_option ) {
-		using namespace daw::json;
-		return class_description_t<
-		  json_string<symbols_dependency_option::dep_name>,
-		  json_custom<symbols_dependency_option::opt_name, opt_names>,
-		  json_array<symbols_dependency_option::opt_value, std::string>,
-		  json_custom<symbols_dependency_option::merge_type,
-		              dependency_merge_type>>{};
-	}
-
-	inline auto to_json_data( dependency_option const &dep_opt ) {
-		return std::make_tuple( dep_opt.opt_name, dep_opt.opt_name,
-		                        dep_opt.opt_value, dep_opt.merge_type );
-	}
-
 	struct dependency_options {
 		std::vector<dependency_option> values;
 
@@ -111,21 +87,41 @@ namespace daw {
 			return {};
 		}
 	};
+} // namespace daw
 
-	namespace symbols_dependency_options {
-		namespace {
-			static constexpr char const values[] = "values";
-		}
-	} // namespace symbols_dependency_options
-
-	inline auto describe_json_class( dependency_options ) {
-		using namespace daw::json;
-		return class_description_t<
-		  json_array<symbols_dependency_options::values, dependency_option>>{};
+template<>
+struct daw::json::json_data_contract<daw::dependency_option> {
+#ifdef __cpp_nontype_template_parameter_class
+	using type =
+	  json_member_list<json_string<"dep_name">,
+	                   json_custom<"opt_name", opt_names>,
+	                   json_array<"opt_value", std::string>,
+	                   json_custom<"merge_type", dependency_merge_type>>;
+#else
+	static inline constexpr char const dep_name[] = "dep_name";
+	static inline constexpr char const opt_name[] = "opt_name";
+	static inline constexpr char const opt_value[] = "opt_value";
+	static inline constexpr char const merge_type[] = "merge_type";
+	using type =
+	  json_member_list<json_string<dep_name>, json_custom<opt_name, opt_names>,
+	                   json_array<opt_value, std::string>,
+	                   json_custom<merge_type, dependency_merge_type>>;
+#endif
+	static inline auto to_json_data( dependency_option const &dep_opt ) {
+		return std::make_tuple( dep_opt.opt_name, dep_opt.opt_name,
+		                        dep_opt.opt_value, dep_opt.merge_type );
 	}
+};
 
-	inline auto to_json_data( dependency_options const &dep_opts ) {
+template<>
+struct daw::json::json_data_contract<daw::dependency_options> {
+#ifdef __cpp_nontype_template_parameter_class
+	using type = json_member_list<json_array<"values", dependency_option>>;
+#else
+	static inline constexpr char const values[] = "values";
+	using type = json_member_list<json_array<values, dependency_option>>;
+#endif
+	static inline auto to_json_data( dependency_options const &dep_opts ) {
 		return std::make_tuple( dep_opts.values );
 	}
-
-} // namespace daw
+};

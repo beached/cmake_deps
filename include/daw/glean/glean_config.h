@@ -37,25 +37,6 @@ namespace daw::glean {
 		fs::path cmake_binary = "cmake";
 	}; // glean_config
 
-	namespace symbols_glean_config {
-		namespace {
-			static constexpr char const glean_config_cache_folder[] = "cache_folder";
-			static constexpr char const glean_config_cmake_binary[] = "cmake_binary";
-		} // namespace
-	}   // namespace symbols_glean_config
-
-	inline auto describe_json_class( glean_config ) {
-		using namespace daw::json;
-		return class_description_t<
-		  json_string<symbols_glean_config::glean_config_cache_folder>,
-		  json_string<symbols_glean_config::glean_config_cmake_binary>>{};
-	}
-
-	inline auto to_json_data( glean_config const &gc ) {
-		return std::make_tuple( gc.cache_folder.string( ),
-		                        gc.cmake_binary.string( ) );
-	}
-
 	glean_config get_config( );
 
 	/// @brief Download a file to a temporary location
@@ -64,3 +45,22 @@ namespace daw::glean {
 	/// @post The file exists and will be deleted upon program termination
 	daw::unique_temp_file download_file( daw::string_view url );
 } // namespace daw::glean
+
+template<>
+struct daw::json::json_data_contract<daw::glean::glean_config> {
+#ifdef __cpp_nontype_template_parameter_class
+	using type = json_member_list<json_string<"glean_config_cache_folder">,
+	                              json_string<"glean_config_cmake_binary">>;
+#else
+	static inline constexpr char const glean_config_cache_folder[] =
+	  "cache_folder";
+	static inline constexpr char const glean_config_cmake_binary[] =
+	  "cmake_binary";
+	using type = json_member_list<json_string<glean_config_cache_folder>,
+	                              json_string<glean_config_cmake_binary>>;
+#endif
+	static inline auto to_json_data( daw::glean::glean_config const &gc ) {
+		return std::make_tuple( gc.cache_folder.string( ),
+		                        gc.cmake_binary.string( ) );
+	}
+};

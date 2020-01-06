@@ -56,8 +56,8 @@ namespace daw::glean {
 		            glean_file_item const &file_dep );
 
 		[[nodiscard]] std::string const &name( ) const noexcept;
-		[[nodiscard]] action_status build( ::daw::glean::build_types bt ) const;
-		[[nodiscard]] action_status install( ::daw::glean::build_types bt ) const;
+		[[nodiscard]] action_status build( daw::glean::build_types bt ) const;
+		[[nodiscard]] action_status install( daw::glean::build_types bt ) const;
 		[[nodiscard]] glean_file_item const &file_dep( ) const noexcept;
 		[[nodiscard]] bool has_file_dep( ) const noexcept;
 		[[nodiscard]] std::vector<item_t> &alternatives( ) noexcept;

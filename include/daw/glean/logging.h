@@ -66,8 +66,8 @@ namespace daw::glean {
 	logger const &operator<<( logger const &l, fs::path const &path );
 } // namespace daw::glean
 
-inline constexpr ::daw::glean::logger log_message =
-  ::daw::glean::logger( daw::glean::log_output_types::message );
+inline constexpr daw::glean::logger log_message =
+  daw::glean::logger( daw::glean::log_output_types::message );
 
-inline constexpr ::daw::glean::logger log_error =
-  ::daw::glean::logger( daw::glean::log_output_types::error );
+inline constexpr daw::glean::logger log_error =
+  daw::glean::logger( daw::glean::log_output_types::error );

@@ -40,22 +40,21 @@ namespace daw::glean {
 
 		template<typename T>
 		static inline std::variant<BuildTypes...>
-		construct_bt( ::daw::string_view type, fs::path const &cache_path,
+		construct_bt( daw::string_view type, fs::path const &cache_path,
 		              fs::path const &install_prefix, glean_options const &opts,
 		              bool has_glean ) {
 			assert( T::type_id == type );
-			return ::daw::construct_a<T>( cache_path, install_prefix, opts,
-			                              has_glean );
+			return daw::construct_a<T>( cache_path, install_prefix, opts, has_glean );
 		}
 
 		template<typename T, typename Ts, typename... Ts2>
 		static inline std::variant<BuildTypes...>
-		construct_bt( ::daw::string_view type, fs::path const &cache_path,
+		construct_bt( daw::string_view type, fs::path const &cache_path,
 		              fs::path const &install_prefix, glean_options const &opts,
 		              bool has_glean ) {
 			if( T::type_id == type ) {
-				return ::daw::construct_a<T>( cache_path, install_prefix, opts,
-				                              has_glean );
+				return daw::construct_a<T>( cache_path, install_prefix, opts,
+				                            has_glean );
 			} else {
 				return construct_bt<Ts, Ts2...>( type, cache_path, install_prefix, opts,
 				                                 has_glean );
@@ -64,45 +63,43 @@ namespace daw::glean {
 
 	public:
 		template<typename BuildType,
-		         ::daw::enable_when_t<::daw::traits::is_one_of_v<
-		           ::daw::remove_cvref_t<BuildType>, BuildTypes...>> = nullptr>
+		         daw::enable_when_t<daw::traits::is_one_of_v<
+		           daw::remove_cvref_t<BuildType>, BuildTypes...>> = nullptr>
 		constexpr basic_build_types( BuildType &&dep )
 		  : m_value( std::forward<BuildType>( dep ) ) {}
 
-		static_assert( ( ::daw::glean::impl::can_construct_build_type_v<
+		static_assert( ( daw::glean::impl::can_construct_build_type_v<
 		                   BuildTypes, fs::path const &, fs::path const &,
 		                   glean_options const &, bool> and
 		                 ... ),
 		               "All build types must support construction" );
-		inline basic_build_types( ::daw::string_view type,
-		                          fs::path const &cache_path,
+		inline basic_build_types( daw::string_view type, fs::path const &cache_path,
 		                          fs::path const &install_prefix,
 		                          glean_options const &opts, bool has_glean )
 		  : m_value( construct_bt<BuildTypes...>( type, cache_path, install_prefix,
 		                                          opts, has_glean ) ) {}
 
 		static_assert(
-		  ( ::daw::glean::impl::has_build_method_v<
-		      BuildTypes, ::daw::glean::build_types, glean_file_item const &> and
+		  ( daw::glean::impl::has_build_method_v<
+		      BuildTypes, daw::glean::build_types, glean_file_item const &> and
 		    ... ),
 		  "All build types must support build method" );
 		[[nodiscard]] constexpr action_status
-		build( ::daw::glean::build_types bt,
-		       glean_file_item const &file_dep ) const {
+		build( daw::glean::build_types bt, glean_file_item const &file_dep ) const {
 
-			return ::daw::visit_nt(
+			return daw::visit_nt(
 			  m_value, [&]( auto const &v ) { return v.build( bt, file_dep ); } );
 		}
 
-		static_assert( ( ::daw::glean::impl::has_install_method_v<
-		                   BuildTypes, ::daw::glean::build_types> and
+		static_assert( ( daw::glean::impl::has_install_method_v<
+		                   BuildTypes, daw::glean::build_types> and
 		                 ... ),
 		               "All install types must support install method" );
 		[[nodiscard]] constexpr action_status
-		install( ::daw::glean::build_types bt ) const {
+		install( daw::glean::build_types bt ) const {
 
-			return ::daw::visit_nt(
-			  m_value, [bt]( auto const &v ) { return v.install( bt ); } );
+			return daw::visit_nt( m_value,
+			                      [bt]( auto const &v ) { return v.install( bt ); } );
 		}
 	};
 
